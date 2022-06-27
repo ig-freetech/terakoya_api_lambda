@@ -1,0 +1,11 @@
+{
+  "name": "terakoya-api-py3.9",
+  "dockerComposeFile": "../docker-compose.yml",
+  "service": "py3.9",
+  "workspaceFolder": "/functions",
+  "settings": {
+    "editor.formatOnSave": true,
+    "python.autoComplete.extraPaths": ["/functions/python/"]
+  },
+  "extensions": ["esbenp.prettier-vscode", "ms-python.python"]
+}

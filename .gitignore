@@ -1,0 +1,6 @@
+python
+*.zip
+
+# config
+Backup-codes-npoterakoya2021.txt
+gcp_service_account_key_terakoya-dev.json

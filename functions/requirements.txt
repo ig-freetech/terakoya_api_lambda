@@ -1,0 +1,5 @@
+requests
+dataclasses-json
+gspread
+oauth2client
+pytz
