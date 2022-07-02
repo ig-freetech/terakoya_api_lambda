@@ -21,6 +21,9 @@ RUN yum update -y && \
     make altinstall && \
     rm -f /opt/Python-3.9.12.tgz && \
     python3.9 -m pip install --upgrade pip
+# 開発用ライブラリのインストール
+RUN pip install autopep8 
+    
 COPY ./functions /functions
 WORKDIR /functions
 # WARNING: なぜかパッケージがインストールされない。イメージ作成時にはマウントディレクトリにパッケージをインストールできない？ ひとまず初回だけコンテナ側で下記コマンドを打って対応

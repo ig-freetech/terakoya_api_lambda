@@ -4,8 +4,11 @@
   "service": "py3.9",
   "workspaceFolder": "/functions",
   "settings": {
+    "python.autoComplete.extraPaths": ["/functions/python/"],
     "editor.formatOnSave": true,
-    "python.autoComplete.extraPaths": ["/functions/python/"]
+    "python.formatting.provider": "autopep8",
+    "python.formatting.autopep8Args": ["--max-line-length", "120"],
+    "python.analysis.typeCheckingMode": "basic"
   },
-  "extensions": ["esbenp.prettier-vscode", "ms-python.python"]
+  "extensions": ["ms-python.python"]
 }
