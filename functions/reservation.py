@@ -137,7 +137,7 @@ def send_complete_mail(record: Record):
     close_gmail_server()
 
 
-def main(event, context):
+def lambda_handler(event, context):
     try:
         record = get_record_from_response_body(event["body"])
         print("record is " + str(record.__dict__))
