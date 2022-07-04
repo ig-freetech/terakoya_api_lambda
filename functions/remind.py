@@ -73,7 +73,7 @@ class StudentInfo:
 
 def get_student_info_list() -> List[StudentInfo]:
     future_system_records = get_system_future_records()
-    print("FUTURE_SYSTEM_RECORDS is below:")
+    print("future_system_records is below:")
     print("\n".join(map(lambda x: str(x), future_system_records)))
     filtered_student_info_list = [res_student_info for res_student_info in future_system_records if
                                   res_student_info["リマインドメール送信済み"] != "済"]
