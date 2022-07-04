@@ -1,10 +1,14 @@
+import os
+import sys
+from datetime import datetime
+from typing import List, Dict
+
+ROOT_DIR_PATH = os.path.dirname(__file__)
+sys.path.append(ROOT_DIR_PATH)
+
 from utils.dt import convert_to_datetime, calc_two_dates_diff_days, CURRENT_DATETIME
 from utils.spreadsheet import get_system_future_records, find_cell_address, update_cell
 from utils import mail
-from datetime import datetime
-import requests
-from typing import List, Dict
-
 
 SHEET_NAME = "system"
 SHEET_URL = f"https://sheets.googleapis.com/v4/spreadsheets/1TFjUeVX36bSsGVoyRtFO1CJX8uVc52wAx6O2pvSbdUk/values/{SHEET_NAME}?key=AIzaSyCvhazrcQ92ov-kBa8HEZvkYYUO6rp2f6I"
@@ -70,50 +74,52 @@ class StudentInfo:
 
 
 def get_student_info_list() -> List[StudentInfo]:
-    headers = {"content-type": "application/json"}
-    response = requests.get(SHEET_URL, headers=headers)
-    data = response.json()
-    values = data['values']
-    resStudentInfoList: List[List[str]] = values[1:]  # カラム行を除いた2行目から取得
+    print("FUTURE_SYSTEM_RECORDS is below:")
+    print("\n".join(map(lambda x: str(x), FUTURE_SYSTEM_RECORDS)))
+    filtered_student_info_list = [res_student_info for res_student_info in FUTURE_SYSTEM_RECORDS if
+                                  res_student_info["リマインドメール送信済み"] != "済"]
+    print("filtered_student_info_list is below:")
+    print("\n".join(map(lambda x: str(x), filtered_student_info_list)))
 
-    studentInfoList = []
-    for filteredStudentInfo in [resStudentInfo for resStudentInfo in resStudentInfoList if len(resStudentInfo) != REMIND_MAIL_ALREADY_SENT_COLUMN_NUMBER]:
-        studentInfo = StudentInfo()
-        studentInfo.name = filteredStudentInfo[0]
-        studentInfo.original_reserved_date = filteredStudentInfo[2]
-        studentInfo.reserved_datetime = convert_to_datetime(
-            filteredStudentInfo[2])
-        studentInfo.email = filteredStudentInfo[1]
-        studentInfo.terakoya_type = filteredStudentInfo[3]
-        studentInfo.place = filteredStudentInfo[4]
-        studentInfoList.append(studentInfo)
+    student_info_list = []
+    for filtered_student_info in filtered_student_info_list:
+        student_info = StudentInfo()
+        student_info.name = filtered_student_info["名前"]
+        student_info.original_reserved_date = filtered_student_info["参加日"]
+        student_info.reserved_datetime = convert_to_datetime(
+            filtered_student_info["参加日"])
+        student_info.email = filtered_student_info["メールアドレス"]
+        student_info.terakoya_type = filtered_student_info["参加希望"]
+        student_info.place = filtered_student_info["拠点"]
+        student_info_list.append(student_info)
+        print("student_info is " + str(student_info.__dict__))
 
-    return studentInfoList
+    return student_info_list
 
 
-def update_already_remind_mail_column(studentInfo: StudentInfo):
-    search_words = [studentInfo.email, studentInfo.original_reserved_date,
-                    studentInfo.terakoya_type, studentInfo.place]
+def update_already_remind_mail_column(student_info: StudentInfo):
+    search_words = [student_info.email, student_info.original_reserved_date,
+                    student_info.terakoya_type, student_info.place]
     cell_address = find_cell_address(
         search_words=search_words, column_name=ALREADY_REMIND_MAIL_COLUMN_NAME)
     update_cell(cell_address=cell_address, value=ALREADY_REMIND_MAIL_VALUE)
 
 
-def send_remind_mail_list(studentInfoList: List[StudentInfo]):
+def send_remind_mail_list(student_info_list: List[StudentInfo]):
     mail.connect_gmail_server()
-    for studentInfo in studentInfoList:
-        if(should_send_email(studentInfo.reserved_datetime)):
+    for student_info in student_info_list:
+        if(should_send_email(student_info.reserved_datetime)):
             subject = 'ご参加当日のお知らせ'  # 件名
             body_main = f'''
-                <p>{studentInfo.name}様</p>
+                <p>{student_info.name}様</p>
                 <p>カフェ塾テラコヤへの参加予約ありがとうございました。</p>
                 <p>ご予約の当日となりましたので、お知らせ申し上げます。</p>
-                <p>本日は、{studentInfo.place}にお越し下さい。</p>
+                <p>本日は、{student_info.place}にお越し下さい。</p>
             '''  # 本文
-            img_file_name = SUNSHINE_MAP_IMG_FILE_NAME if studentInfo.place == "サンシャインシティ" else None
-            mail.send_email(mail_address_to=studentInfo.email,
-                            subject=subject, body_main=body_main, body_footer=PLACE_DICT[studentInfo.place], img_file_name=img_file_name)
-            update_already_remind_mail_column(studentInfo=studentInfo)
+            img_file_name = SUNSHINE_MAP_IMG_FILE_NAME if student_info.place == "サンシャインシティ" else None
+            mail.send_email(mail_address_to=student_info.email,
+                            subject=subject, body_main=body_main, body_footer=PLACE_DICT[student_info.place], img_file_name=img_file_name)
+            update_already_remind_mail_column(student_info=student_info)
         else:
             continue
     mail.close_gmail_server()
@@ -121,16 +127,18 @@ def send_remind_mail_list(studentInfoList: List[StudentInfo]):
 
 def should_send_email(reserved_datetime: datetime):
     diff_days = calc_two_dates_diff_days(reserved_datetime, CURRENT_DATETIME)
+    print("diff_days is " + str(diff_days))
     return diff_days == 0  # 日時差分が1日以内ならばメール送信の必要あり
+    # return -2 < diff_days < 2  # 日時差分が前後2日以内 (test)
 
 
 def main():
     try:
-        studentInfoList = get_student_info_list()
-        send_remind_mail_list(studentInfoList)
+        student_info_list = get_student_info_list()
+        send_remind_mail_list(student_info_list)
         print("Finished Sending Remind E-mails.")
     except Exception as e:
-        print(e)
+        print("Error Happend: " + str(e))
 
 
 def lambda_handler(event, context):

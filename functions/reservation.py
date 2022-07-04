@@ -1,12 +1,18 @@
-from utils.mail import connect_gmail_server, close_gmail_server, send_email
-from utils.spreadsheet import append_row_to_sheet, get_system_future_records
-from utils.dt import CURRENT_DATETIME
+import os
+import sys
 import json
 from typing import List, Dict
 
+ROOT_DIR_PATH = os.path.dirname(__file__)
+sys.path.append(ROOT_DIR_PATH)
+
+from utils.dt import CURRENT_DATETIME
+from utils.spreadsheet import append_row_to_sheet, get_system_future_records
+from utils.mail import connect_gmail_server, close_gmail_server, send_email
+
 TERAKOYA_TYPE_PLACE_DICT: Dict[str, str] = {
-    "カフェ塾テラコヤ（池袋）": "",
-    "オンラインテラコヤ（多摩）": "キャリア・マム",
+    "カフェ塾テラコヤ(池袋)": "",
+    "オンラインテラコヤ(多摩)": "キャリア・マム",
     "テラコヤ中等部(池袋)": "サンシャインシティ",
     "テラコヤ中等部(渋谷)": "キカガク"
 }
@@ -14,6 +20,8 @@ TERAKOYA_TYPE_PLACE_DICT: Dict[str, str] = {
 COMPLETE_MAIL_SUBJECT = "参加予約完了"
 
 FUTURE_SYSTEM_RECORDS = get_system_future_records()
+
+MAIN_SHEET_TIMESTAMP_FORMAT = f"%Y/%m/%d %H:%M:%S"
 
 
 class Record:
@@ -82,7 +90,7 @@ def record_to_system(record: Record):
 
 
 def record_to_main(record: Record):
-    dt_jst = CURRENT_DATETIME.strftime(f"%Y/%m/%d %H:%M:%S")
+    dt_jst = CURRENT_DATETIME.strftime(MAIN_SHEET_TIMESTAMP_FORMAT)
     append_row_to_sheet(sheet_type="main", row=[
         dt_jst,
         record.name,
@@ -139,19 +147,19 @@ def main(event, context):
         send_complete_mail(record)
         print("Finished Reservation Registration.")
     except Exception as e:
-        print(e)
+        print("Error Happend: " + str(e))
 
 
 def test():
     # body = '{"grade":"中学1年生","arriveTime":"17:00前","courseChoice":"","studySubject":"キャリア説明会","studyMethod":"黙々と静かに勉強したい","howToKnowTerakoya":"Instagram","terakoyaType":"テラコヤ中等部(池袋)","schoolName":"","futureFree":"","likeFree":"","name":"池田元気","email":"i.g.freetech2021@gmail.com","attendanceDate":["7/2 (土)","7/9 (土)","7/16 (土)"],"terakoyaExperience":"過去に参加したことがある","studySubjectDetail":"","remarks":""}'
-    body = '{"grade":"中学1年生","arriveTime":"17:00前","courseChoice":"","studySubject":"キャリア説明会","studyMethod":"黙々と静かに勉強したい","howToKnowTerakoya":"Instagram","terakoyaType":"オンラインテラコヤ(多摩)","schoolName":"","futureFree":"","likeFree":"","name":"池田元気","email":"i.g.freetech2021@gmail.com","attendanceDate":["7/2 (土)","7/9 (土)","7/16 (土)"],"terakoyaExperience":"過去に参加したことがある","studySubjectDetail":"","remarks":"菅原さんと一緒がいい"}'
+    body = '{"grade":"中学1年生","arriveTime":"17:00前","courseChoice":"","studySubject":"キャリア説明会","studyMethod":"黙々と静かに勉強したい","howToKnowTerakoya":"Instagram","terakoyaType":"オンラインテラコヤ(多摩)","schoolName":"","futureFree":"","likeFree":"","name":"池田元気","email":"i.g.freetech2021@gmail.com","attendanceDate":["7/2 (土)","7/9 (土)","7/23 (土)"],"terakoyaExperience":"過去に参加したことがある","studySubjectDetail":"","remarks":"菅原さんと一緒がいい"}'
     record = get_record_from_response_body(body)
     print("rec is " + str(record.__dict__))
     record_to_system(record)
     record_to_main(record)
     send_complete_mail(record)
+    print('end')
 
 
 if __name__ == "__main__":
     test()
-    print('end')

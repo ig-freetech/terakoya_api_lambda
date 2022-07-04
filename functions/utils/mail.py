@@ -11,7 +11,6 @@ from email.policy import SMTPUTF8
 ROOT_DIR_PATH = os.path.dirname(os.path.dirname(__file__))
 sys.path.append(ROOT_DIR_PATH)
 
-
 ASSETS_DIR_PATH = os.path.join(ROOT_DIR_PATH, "assets")
 
 TERAKOYA_GMAIL_ACCOUNT_INFO_FPATH = os.path.join(
