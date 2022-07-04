@@ -4,7 +4,7 @@ import copy
 import gspread
 from gspread.worksheet import Worksheet
 from oauth2client.service_account import ServiceAccountCredentials
-from typing import List, Dict, Literal
+from typing import List, Dict, Literal, Union
 from utils.dt import CURRENT_DATETIME, convert_to_datetime
 
 ROOT_DIR_PATH = os.path.dirname(os.path.dirname(__file__))
@@ -35,8 +35,12 @@ COLUMN_INDEX_DICT: Dict[str, str] = {
     "拠点": "E",
     "リマインドメール送信済み": "F"
 }
-COLUMN_NAME_TYPES = Literal["名前", "メールアドレス",
-                            "参加日", "参加希望", "拠点", "リマインドメール送信済み"]
+SYSTEM_COLUMN_NAME_TYPES = Literal["名前", "メールアドレス",
+                                   "参加日", "参加希望", "拠点", "リマインドメール送信済み"]
+MAIN_COLUMN_NAME_TYPES = Literal["タイムスタンプ", "名前", "参加希望", "何時頃来れそうですか？（活動時間17時〜20時）", "学年",
+                                 "参加希望日", "テラコヤへのご参加は？", "勉強したい科目", "その科目の内容をできるだけ詳しく教えてください",
+                                 "希望する勉強の仕方", "今在籍している学校", "文理選択", "将来の夢、志望大学（自由記述）", "好きなもの、こと",
+                                 "テラコヤを知ったキッカケ", "メールアドレス(予約確認メールを送らせて頂きます※機能調整中です）", "備考"]
 
 SHEET_DICT: Dict[str, Worksheet] = {
     "system": system_sheet,
@@ -49,14 +53,21 @@ def append_row_to_sheet(sheet_type: SHEET_TYPES, row: List[str]):
     SHEET_DICT[sheet_type].append_row(row)
 
 
-def get_system_future_records() -> List[dict[COLUMN_NAME_TYPES, str]]:
+def get_system_future_records() -> List[dict[SYSTEM_COLUMN_NAME_TYPES, str]]:
     all_records = system_sheet.get_all_records()
     filterd_records = [rec for rec in all_records if convert_to_datetime(
         rec["参加日"]) > CURRENT_DATETIME]
     return filterd_records
 
 
-def find_cell_address(search_words: List[str], column_name: COLUMN_NAME_TYPES) -> str:
+def get_main_future_records() -> List[dict[Union[Literal["参加希望日", "メールアドレス", "参加希望"], str], str]]:
+    all_records = main_sheet.get_all_records()
+    filterd_records = [rec for rec in all_records if map(
+        lambda x: convert_to_datetime(x) > CURRENT_DATETIME, rec["参加希望日"].split(","))]
+    return filterd_records
+
+
+def find_cell_address(search_words: List[str], column_name: SYSTEM_COLUMN_NAME_TYPES) -> str:
     candidate_row_numbers: List[int] = []
     for idx, search_word in enumerate(search_words):
         cells = system_sheet.findall(search_word)

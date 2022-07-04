@@ -7,7 +7,7 @@ ROOT_DIR_PATH = os.path.dirname(__file__)
 sys.path.append(ROOT_DIR_PATH)
 
 from utils.dt import CURRENT_DATETIME
-from utils.spreadsheet import append_row_to_sheet, get_system_future_records
+from utils.spreadsheet import append_row_to_sheet, get_system_future_records, get_main_future_records
 from utils.mail import connect_gmail_server, close_gmail_server, send_email
 
 TERAKOYA_TYPE_PLACE_DICT: Dict[str, str] = {
@@ -73,11 +73,25 @@ def exists_record(record: Record, attendance_date: str):
     return len(searched_records) > 0
 
 
+def exists_main_record(record: Record):
+    future_main_records = get_main_future_records()
+    # for rec in future_main_records:
+    #     main_attend_date_list = rec["参加希望日"].split(",")
+    #     symmetric_difference = set(main_attend_date_list) ^ set(record.attendance_date_list)
+    #     symmetric_difference_list = list(symmetric_difference)
+    searched_records = [rec for rec in future_main_records
+                        if len(list(set(rec["参加希望日"].split(",")) ^ set(record.attendance_date_list))) == 0
+                        and rec["メールアドレス"] == record.email
+                        and rec["参加希望"] == record.terakoya_type
+                        ]
+    return len(searched_records) > 0
+
+
 def record_to_system(record: Record):
     for attendance_date in record.attendance_date_list:
         if(exists_record(record=record, attendance_date=attendance_date)):
             print(
-                f"{record.email},{attendance_date},{record.terakoya_type} is already registered.")
+                f"{record.email},{attendance_date},{record.terakoya_type} is already registered in System Sheet.")
             continue
         append_row_to_sheet(sheet_type="system", row=[
             record.name,
@@ -90,6 +104,10 @@ def record_to_system(record: Record):
 
 def record_to_main(record: Record):
     dt_jst = CURRENT_DATETIME.strftime(MAIN_SHEET_TIMESTAMP_FORMAT)
+    if(exists_main_record(record=record)):
+        print(
+            f"{record.email},{record.attendance_date_list.__str__()},{record.terakoya_type} is already registered in Main Sheet.")
+        return
     append_row_to_sheet(sheet_type="main", row=[
         dt_jst,
         record.name,
@@ -105,8 +123,6 @@ def record_to_main(record: Record):
         record.course_choice,
         record.future_free,
         record.like_free,
-        "",
-        "",
         record.how_to_know_terakoya,
         record.email,
         record.remarks
@@ -152,7 +168,8 @@ def lambda_handler(event, context):
 
 def test():
     # body = '{"grade":"中学1年生","arriveTime":"17:00前","courseChoice":"","studySubject":"キャリア説明会","studyMethod":"黙々と静かに勉強したい","howToKnowTerakoya":"Instagram","terakoyaType":"テラコヤ中等部(池袋)","schoolName":"","futureFree":"","likeFree":"","name":"池田元気","email":"i.g.freetech2021@gmail.com","attendanceDate":["7/2 (土)","7/9 (土)","7/16 (土)"],"terakoyaExperience":"過去に参加したことがある","studySubjectDetail":"","remarks":""}'
-    body = '{"grade":"中学1年生","arriveTime":"17:00前","courseChoice":"","studySubject":"キャリア説明会","studyMethod":"黙々と静かに勉強したい","howToKnowTerakoya":"Instagram","terakoyaType":"オンラインテラコヤ(多摩)","schoolName":"","futureFree":"","likeFree":"","name":"池田元気","email":"i.g.freetech2021@gmail.com","attendanceDate":["7/2 (土)","7/9 (土)","7/23 (土)"],"terakoyaExperience":"過去に参加したことがある","studySubjectDetail":"","remarks":"菅原さんと一緒がいい"}'
+    # body = '{"grade":"中学1年生","arriveTime":"17:00前","courseChoice":"","studySubject":"キャリア説明会","studyMethod":"黙々と静かに勉強したい","howToKnowTerakoya":"Instagram","terakoyaType":"カフェ塾テラコヤ(池袋)","schoolName":"","futureFree":"","likeFree":"","name":"池田元気","email":"i.g.freetech2021@gmail.com","attendanceDate":["7/9 (土)","7/2 (土)","7/23 (土)"],"terakoyaExperience":"過去に参加したことがある","studySubjectDetail":"","remarks":"菅原さんと一緒がいい"}'
+    body = '{"grade":"中学1年生","arriveTime":"17:00前","courseChoice":"","studySubject":"キャリア説明会","studyMethod":"黙々と静かに勉強したい","howToKnowTerakoya":"Instagram","terakoyaType":"カフェ塾テラコヤ(池袋)","schoolName":"","futureFree":"","likeFree":"","name":"池田元気","email":"i.g.freetech2021@gmail.com","attendanceDate":["7/2 (土)","7/9 (土)","7/23 (土)"],"terakoyaExperience":"過去に参加したことがある","studySubjectDetail":"","remarks":"菅原さんと一緒がいい"}'
     record = get_record_from_response_body(body)
     print("rec is " + str(record.__dict__))
     record_to_system(record)
