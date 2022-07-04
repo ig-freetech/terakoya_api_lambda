@@ -106,7 +106,7 @@ def record_to_main(record: Record):
     dt_jst = CURRENT_DATETIME.strftime(MAIN_SHEET_TIMESTAMP_FORMAT)
     if(exists_main_record(record=record)):
         print(
-            f"{record.email},{record.attendance_date_list.__str__()},{record.terakoya_type} is already registered in Main Sheet.")
+            f"{record.email},{record.attendance_date_list},{record.terakoya_type} is already registered in Main Sheet.")
         return
     append_row_to_sheet(sheet_type="main", row=[
         dt_jst,

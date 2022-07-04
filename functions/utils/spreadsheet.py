@@ -62,17 +62,17 @@ def get_system_future_records() -> List[dict[SYSTEM_COLUMN_NAME_TYPES, str]]:
 
 def get_main_future_records() -> List[dict[Union[Literal["参加希望日", "メールアドレス", "参加希望"], str], str]]:
     all_records = main_sheet.get_all_records()
-    filterd_records = [rec for rec in all_records if map(
-        lambda x: convert_to_datetime(x) > CURRENT_DATETIME, rec["参加希望日"].split(","))]
+    filterd_records = [rec for rec in all_records if len(
+        [x for x in rec["参加希望日"].split(",") if convert_to_datetime(x) > CURRENT_DATETIME]) > 0]
     return filterd_records
 
 
 def find_cell_address(search_words: List[str], column_name: SYSTEM_COLUMN_NAME_TYPES) -> str:
     candidate_row_numbers: List[int] = []
-    for idx, search_word in enumerate(search_words):
+    for search_word in search_words:
         cells = system_sheet.findall(search_word)
         row_numbers = [cell.row for cell in cells]
-        if idx == 0:
+        if len(candidate_row_numbers) == 0:
             candidate_row_numbers = row_numbers
         else:
             candidate_row_numbers = list(set(
