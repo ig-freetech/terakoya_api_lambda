@@ -8,7 +8,7 @@ sys.path.append(ROOT_DIR_PATH)
 
 from utils.dt import convert_to_datetime, calc_two_dates_diff_days, CURRENT_DATETIME
 from utils.spreadsheet import get_system_future_records, find_cell_address, update_cell
-from utils import mail
+from utils.mail import connect_gmail_server, close_gmail_server, send_email
 
 SHEET_NAME = "system"
 SHEET_URL = f"https://sheets.googleapis.com/v4/spreadsheets/1TFjUeVX36bSsGVoyRtFO1CJX8uVc52wAx6O2pvSbdUk/values/{SHEET_NAME}?key=AIzaSyCvhazrcQ92ov-kBa8HEZvkYYUO6rp2f6I"
@@ -105,9 +105,11 @@ def update_already_remind_mail_column(student_info: StudentInfo):
 
 
 def send_remind_mail_list(student_info_list: List[StudentInfo]):
-    mail.connect_gmail_server()
+    connect_gmail_server()
     for student_info in student_info_list:
         if(should_send_email(student_info.reserved_datetime)):
+            if(student_info.terakoya_type == "カフェ塾テラコヤ(池袋)" and student_info.place == ''):
+                continue
             subject = 'ご参加当日のお知らせ'  # 件名
             body_main = f'''
                 <p>{student_info.name}様</p>
@@ -116,12 +118,12 @@ def send_remind_mail_list(student_info_list: List[StudentInfo]):
                 <p>本日は、{student_info.place}にお越し下さい。</p>
             '''  # 本文
             img_file_name = SUNSHINE_MAP_IMG_FILE_NAME if student_info.place == "サンシャインシティ" else None
-            mail.send_email(mail_address_to=student_info.email,
-                            subject=subject, body_main=body_main, body_footer=PLACE_DICT[student_info.place], img_file_name=img_file_name)
+            send_email(mail_address_to=student_info.email,
+                       subject=subject, body_main=body_main, body_footer=PLACE_DICT[student_info.place], img_file_name=img_file_name)
             update_already_remind_mail_column(student_info=student_info)
         else:
             continue
-    mail.close_gmail_server()
+    close_gmail_server()
 
 
 def should_send_email(reserved_datetime: datetime):
@@ -137,7 +139,8 @@ def main():
         send_remind_mail_list(student_info_list)
         print("Finished Sending Remind E-mails.")
     except Exception as e:
-        print("Error Happend: " + str(e))
+        print("Error Happend:\n")
+        print(e)
 
 
 def lambda_handler(event, context):

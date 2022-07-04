@@ -1,3 +1,4 @@
+from time import sleep
 from typing import Union
 from utils.file import get_dic_from_json
 import os
@@ -20,8 +21,10 @@ gmail_account = account_info["mail"]
 gmail_password = account_info["pw"]
 
 gmail_smtp_host = "smtp.gmail.com"  # GmailのSMTPサーバのホスト名は smtp.gmail.com となっている
-gmail_smtp_ssl_port = 465  # GmailのSMTPサーバのSSLのポート番号は465となっている（TLSの場合は587）
+# gmail_smtp_port = 587  # GmailのSMTPサーバのTLSのポート番号は587
+gmail_smtp_ssl_port = 465  # GmailのSMTPサーバのSSLのポート番号は465
 # SMTPサーバホスト名とSSLポート番号を指定してサーバオブジェクト生成
+# gmail_smtp_server = smtplib.SMTP(gmail_smtp_host, gmail_smtp_port)
 gmail_smtp_server = smtplib.SMTP_SSL(gmail_smtp_host, gmail_smtp_ssl_port)
 
 TERAKOYA_GROUP_MAIL_ADDRESS = "info@npoterakoya.org"
@@ -44,7 +47,22 @@ MAIL_BODY_CONTACT = """
 
 
 def connect_gmail_server():
-    gmail_smtp_server.login(gmail_account, gmail_password)  # Gmailにログインして接続
+    # gmail_smtp_server.connect(gmail_smtp_host, gmail_smtp_port)
+    # gmail_smtp_server.ehlo()
+    # gmail_smtp_server.starttls()  # 暗号化通信開始
+    # gmail_smtp_server.ehlo()
+    # gmail_smtp_server.login(gmail_account, gmail_password)
+    reply = gmail_smtp_server.ehlo()
+    smtp_status_code = reply[0]
+    if(smtp_status_code == 250):
+        print("gmail_smtp_server is connected.")
+    else:
+        while(smtp_status_code != 250):
+            print("Try to re-connect to mail server.")
+            sleep(3000)
+            reply = gmail_smtp_server.ehlo()
+            smtp_status_code = reply[0]
+        print("gmail_smtp_server is connected.")
 
 
 def close_gmail_server():
@@ -78,9 +96,12 @@ def send_email(mail_address_to: str, subject: str, body_main: str, body_footer: 
     msg["From"] = gmail_account  # 送り元メールアドレスを設定
     # 生徒へのメール送信をテラコヤ運営メンバーのメールグループアドレスにも送信して通知
     msg["Cc"] = TERAKOYA_GROUP_MAIL_ADDRESS
+
+    gmail_smtp_server.login(gmail_account, gmail_password)
     gmail_smtp_server.send_message(msg)  # メールを送信
     print("Sent a email")
 
 
 if __name__ == "__main__":
+    connect_gmail_server()
     print("test")

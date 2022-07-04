@@ -146,7 +146,8 @@ def lambda_handler(event, context):
         send_complete_mail(record)
         print("Finished Reservation Registration.")
     except Exception as e:
-        print("Error Happend: " + str(e))
+        print("Error Happend:\n")
+        print(e)
 
 
 def test():

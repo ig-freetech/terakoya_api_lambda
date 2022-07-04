@@ -12,3 +12,8 @@
 
 `s3://ig-general/lambda/functions.zip`
 `s3://ig-general/lambda/python.zip`
+
+# ハンドラ設定
+
+`functions/reservation.lambda_handler`
+`functions/remind.lambda_handler`
