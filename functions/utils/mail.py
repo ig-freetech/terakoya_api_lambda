@@ -47,6 +47,7 @@ MAIL_BODY_CONTACT = """
 
 
 def connect_gmail_server():
+    print("Connecting gmail_smtp_server...")
     # gmail_smtp_server.connect(gmail_smtp_host, gmail_smtp_port)
     # gmail_smtp_server.ehlo()
     # gmail_smtp_server.starttls()  # 暗号化通信開始
