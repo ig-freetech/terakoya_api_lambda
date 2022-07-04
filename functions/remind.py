@@ -58,8 +58,6 @@ PLACE_DICT: Dict[str, str] = {
 
 REMIND_MAIL_ALREADY_SENT_COLUMN_NUMBER = 6
 
-FUTURE_SYSTEM_RECORDS = get_system_future_records()
-
 ALREADY_REMIND_MAIL_COLUMN_NAME = "リマインドメール送信済み"
 ALREADY_REMIND_MAIL_VALUE = "済"
 
@@ -74,9 +72,10 @@ class StudentInfo:
 
 
 def get_student_info_list() -> List[StudentInfo]:
+    future_system_records = get_system_future_records()
     print("FUTURE_SYSTEM_RECORDS is below:")
-    print("\n".join(map(lambda x: str(x), FUTURE_SYSTEM_RECORDS)))
-    filtered_student_info_list = [res_student_info for res_student_info in FUTURE_SYSTEM_RECORDS if
+    print("\n".join(map(lambda x: str(x), future_system_records)))
+    filtered_student_info_list = [res_student_info for res_student_info in future_system_records if
                                   res_student_info["リマインドメール送信済み"] != "済"]
     print("filtered_student_info_list is below:")
     print("\n".join(map(lambda x: str(x), filtered_student_info_list)))

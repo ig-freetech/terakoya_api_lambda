@@ -19,8 +19,6 @@ TERAKOYA_TYPE_PLACE_DICT: Dict[str, str] = {
 
 COMPLETE_MAIL_SUBJECT = "参加予約完了"
 
-FUTURE_SYSTEM_RECORDS = get_system_future_records()
-
 MAIN_SHEET_TIMESTAMP_FORMAT = f"%Y/%m/%d %H:%M:%S"
 
 
@@ -66,7 +64,8 @@ def get_record_from_response_body(event_body) -> Record:
 
 
 def exists_record(record: Record, attendance_date: str):
-    searched_records = [rec for rec in FUTURE_SYSTEM_RECORDS
+    future_system_records = get_system_future_records()
+    searched_records = [rec for rec in future_system_records
                         if rec["参加日"] == attendance_date
                         and rec["メールアドレス"] == record.email
                         and rec["参加希望"] == record.terakoya_type
