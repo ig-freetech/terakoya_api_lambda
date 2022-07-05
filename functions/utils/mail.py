@@ -53,17 +53,17 @@ def connect_gmail_server():
     # gmail_smtp_server.starttls()  # 暗号化通信開始
     # gmail_smtp_server.ehlo()
     # gmail_smtp_server.login(gmail_account, gmail_password)
-    reply = gmail_smtp_server.ehlo()
-    smtp_status_code = reply[0]
-    if(smtp_status_code == 250):
-        print("gmail_smtp_server is connected.")
-    else:
-        while(smtp_status_code != 250):
-            print("Try to re-connect to mail server.")
-            sleep(3000)
-            reply = gmail_smtp_server.ehlo()
-            smtp_status_code = reply[0]
-        print("gmail_smtp_server is connected.")
+    # reply = gmail_smtp_server.ehlo()
+    # smtp_status_code = reply[0]
+    # if(smtp_status_code == 250):
+    #     print("gmail_smtp_server is connected.")
+    # else:
+    #     while(smtp_status_code != 250):
+    #         print("Try to re-connect to mail server.")
+    #         sleep(3000)
+    #         reply = gmail_smtp_server.ehlo()
+    #         smtp_status_code = reply[0]
+    #     print("gmail_smtp_server is connected.")
 
 
 def close_gmail_server():
