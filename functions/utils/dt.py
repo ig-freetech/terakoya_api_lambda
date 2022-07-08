@@ -27,7 +27,8 @@ def calc_two_dates_diff_days(standard_dt: datetime, compare_dt: datetime):
 
 
 def test():
-    converted_dt = convert_to_datetime("7/2 (土)")
+    converted_dt = convert_to_datetime("07/02 (土)")
+    converted_dt_1 = convert_to_datetime("7/2 (土)")
     compared_dt = datetime(CURRENT_DATETIME.year, 7, 2, 18, tzinfo=JST)
     diff_days = calc_two_dates_diff_days(converted_dt, compared_dt)
     print(diff_days)

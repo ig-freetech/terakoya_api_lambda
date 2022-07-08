@@ -8,7 +8,7 @@ sys.path.append(ROOT_DIR_PATH)
 
 from utils.dt import CURRENT_DATETIME
 from utils.spreadsheet import append_row_to_sheet, get_system_future_records, get_main_future_records
-from utils.mail import connect_gmail_server, close_gmail_server, send_email
+from utils.mail import close_gmail_server, send_email
 
 TERAKOYA_TYPE_PLACE_DICT: Dict[str, str] = {
     "カフェ塾テラコヤ(池袋)": "",
@@ -75,11 +75,8 @@ def exists_record(record: Record, attendance_date: str):
 
 def exists_main_record(record: Record):
     future_main_records = get_main_future_records()
-    # for rec in future_main_records:
-    #     main_attend_date_list = rec["参加希望日"].split(",")
-    #     symmetric_difference = set(main_attend_date_list) ^ set(record.attendance_date_list)
-    #     symmetric_difference_list = list(symmetric_difference)
     searched_records = [rec for rec in future_main_records
+                        # 対称差集合(どちらか片方だけに属する)の要素数が０ - 参加希望日が全く同じ場合
                         if len(list(set(rec["参加希望日"].split(",")) ^ set(record.attendance_date_list))) == 0
                         and rec["メールアドレス"] == record.email
                         and rec["参加希望"] == record.terakoya_type
@@ -146,7 +143,6 @@ def make_mail_body(record: Record) -> str:
 
 
 def send_complete_mail(record: Record):
-    connect_gmail_server()
     body = make_mail_body(record)
     send_email(mail_address_to=record.email,
                subject=COMPLETE_MAIL_SUBJECT, body_main=body)

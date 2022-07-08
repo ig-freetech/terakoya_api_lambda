@@ -45,27 +45,6 @@ MAIL_BODY_CONTACT = """
     <br/>
 """
 
-
-def connect_gmail_server():
-    print("Connecting gmail_smtp_server...")
-    # gmail_smtp_server.connect(gmail_smtp_host, gmail_smtp_port)
-    # gmail_smtp_server.ehlo()
-    # gmail_smtp_server.starttls()  # 暗号化通信開始
-    # gmail_smtp_server.ehlo()
-    # gmail_smtp_server.login(gmail_account, gmail_password)
-    # reply = gmail_smtp_server.ehlo()
-    # smtp_status_code = reply[0]
-    # if(smtp_status_code == 250):
-    #     print("gmail_smtp_server is connected.")
-    # else:
-    #     while(smtp_status_code != 250):
-    #         print("Try to re-connect to mail server.")
-    #         sleep(3000)
-    #         reply = gmail_smtp_server.ehlo()
-    #         smtp_status_code = reply[0]
-    #     print("gmail_smtp_server is connected.")
-
-
 def close_gmail_server():
     gmail_smtp_server.quit()  # サーバから切断
 
@@ -75,6 +54,15 @@ def get_mime_img(img_file_name: str) -> MIMEImage:
     with open(os.path.join(ASSETS_DIR_PATH, img_file_name), "rb") as f:
         mime_image = MIMEImage(f.read(), name=img_file_name)
     return mime_image
+
+def send_msg(msg: MIMEMultipart):
+    print("Try to send a message")
+    try:
+        gmail_smtp_server.send_message(msg)
+    except Exception as e:
+        print(e)
+        sleep(3000)
+        send_msg(msg)
 
 
 def send_email(mail_address_to: str, subject: str, body_main: str, body_footer: str = "", img_file_name: Union[str, None] = None):
@@ -99,10 +87,10 @@ def send_email(mail_address_to: str, subject: str, body_main: str, body_footer: 
     msg["Cc"] = TERAKOYA_GROUP_MAIL_ADDRESS
 
     gmail_smtp_server.login(gmail_account, gmail_password)
-    gmail_smtp_server.send_message(msg)  # メールを送信
+    send_msg(msg)
+      # メールを送信
     print("Sent a email")
 
 
 if __name__ == "__main__":
-    connect_gmail_server()
     print("test")
