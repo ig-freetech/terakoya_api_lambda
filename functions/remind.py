@@ -73,11 +73,12 @@ class StudentInfo:
 
 def get_student_info_list() -> List[StudentInfo]:
     future_system_records = get_system_future_records()
-    print("future_system_records is below:")
+    print(f"(Post-dating records counts: {len(future_system_records)}) Post-dating records are below:")
     print("\n".join(map(lambda x: str(x), future_system_records)))
     filtered_student_info_list = [res_student_info for res_student_info in future_system_records if
                                   res_student_info["リマインドメール送信済み"] != "済"]
-    print("filtered_student_info_list is below:")
+    print(
+        f"(Post-dating unsent e-mail records counts: {len(filtered_student_info_list)}) Post-dating unsent e-mail records are below:")
     print("\n".join(map(lambda x: str(x), filtered_student_info_list)))
 
     student_info_list = []
@@ -91,7 +92,6 @@ def get_student_info_list() -> List[StudentInfo]:
         student_info.terakoya_type = filtered_student_info["参加希望"]
         student_info.place = filtered_student_info["拠点"]
         student_info_list.append(student_info)
-        print("student_info is " + str(student_info.__dict__))
 
     return student_info_list
 
@@ -106,8 +106,11 @@ def update_already_remind_mail_column(student_info: StudentInfo):
 
 def send_remind_mail_list(student_info_list: List[StudentInfo]):
     for student_info in student_info_list:
+        print("(Check whether to send a e-mail) StudentInfo: " + str(student_info.__dict__))
         if(should_send_email(student_info.reserved_datetime)):
+            print("Should send a e-mail.")
             if(student_info.terakoya_type == "カフェ塾テラコヤ(池袋)" and student_info.place == ''):
+                print(f"Place in Ikebukuro is not filled.")
                 continue
             subject = 'ご参加当日のお知らせ'  # 件名
             body_main = f'''
@@ -128,7 +131,7 @@ def send_remind_mail_list(student_info_list: List[StudentInfo]):
 
 def should_send_email(reserved_datetime: datetime):
     diff_days = calc_two_dates_diff_days(reserved_datetime, CURRENT_DATETIME)
-    print("diff_days is " + str(diff_days))
+    print(f"Dates difference is {str(diff_days)} day(s).")
     return diff_days == 0  # 日時差分が1日以内ならばメール送信の必要あり
     # return -2 < diff_days < 2  # 日時差分が前後2日以内 (test)
 
@@ -137,10 +140,9 @@ def main():
     try:
         student_info_list = get_student_info_list()
         send_remind_mail_list(student_info_list)
-        print("Finished Sending Remind E-mails.")
+        print("Finished sending remind e-mails.")
     except Exception as e:
-        print("Error Happend:\n")
-        print(e)
+        print("Error happend. Error message: " + str(e))
 
 
 def lambda_handler(event, context):

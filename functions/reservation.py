@@ -88,7 +88,7 @@ def record_to_system(record: Record):
     for attendance_date in record.attendance_date_list:
         if(exists_record(record=record, attendance_date=attendance_date)):
             print(
-                f"{record.email},{attendance_date},{record.terakoya_type} is already registered in System Sheet.")
+                f"Record: {record.email},{attendance_date},{record.terakoya_type} is already registered in System Sheet.")
             continue
         append_row_to_sheet(sheet_type="system", row=[
             record.name,
@@ -103,7 +103,7 @@ def record_to_main(record: Record):
     dt_jst = CURRENT_DATETIME.strftime(MAIN_SHEET_TIMESTAMP_FORMAT)
     if(exists_main_record(record=record)):
         print(
-            f"{record.email},{record.attendance_date_list},{record.terakoya_type} is already registered in Main Sheet.")
+            f"Record: {record.email},{record.attendance_date_list},{record.terakoya_type} is already registered in Main Sheet.")
         return
     append_row_to_sheet(sheet_type="main", row=[
         dt_jst,
@@ -152,14 +152,13 @@ def send_complete_mail(record: Record):
 def lambda_handler(event, context):
     try:
         record = get_record_from_response_body(event["body"])
-        print("record is " + str(record.__dict__))
+        print("Record: " + str(record.__dict__))
         record_to_system(record)
         record_to_main(record)
         send_complete_mail(record)
-        print("Finished Reservation Registration.")
+        print("Finished reservation registration.")
     except Exception as e:
-        print("Error Happend:\n")
-        print(e)
+        print("Error happend. Error message: " + str(e))
 
 
 def test():
