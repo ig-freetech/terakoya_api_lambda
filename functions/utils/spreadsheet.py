@@ -5,10 +5,11 @@ import gspread
 from gspread.worksheet import Worksheet
 from oauth2client.service_account import ServiceAccountCredentials
 from typing import List, Dict, Literal, Union
-from utils.dt import CURRENT_DATETIME, convert_to_datetime
 
 ROOT_DIR_PATH = os.path.dirname(os.path.dirname(__file__))
 sys.path.append(ROOT_DIR_PATH)
+
+from utils.dt import CURRENT_DATETIME, convert_to_datetime
 
 KEY_FILE_NAME = "gcp_service_account_key_terakoya-dev.json"
 KEY_FILE_PATH = os.path.join(ROOT_DIR_PATH, "config", KEY_FILE_NAME)
@@ -40,7 +41,7 @@ SYSTEM_COLUMN_NAME_TYPES = Literal["名前", "メールアドレス",
 MAIN_COLUMN_NAME_TYPES = Literal["タイムスタンプ", "名前", "参加希望", "何時頃来れそうですか？（活動時間17時〜20時）", "学年",
                                  "参加希望日", "テラコヤへのご参加は？", "勉強したい科目", "その科目の内容をできるだけ詳しく教えてください",
                                  "希望する勉強の仕方", "今在籍している学校", "文理選択", "将来の夢、志望大学（自由記述）", "好きなもの、こと",
-                                 "テラコヤを知ったキッカケ", "メールアドレス(予約確認メールを送らせて頂きます※機能調整中です）", "備考"]
+                                 "テラコヤを知ったキッカケ", "メールアドレス", "備考"]
 
 SHEET_DICT: Dict[str, Worksheet] = {
     "system": system_sheet,

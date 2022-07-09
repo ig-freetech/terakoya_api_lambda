@@ -1,6 +1,5 @@
 from time import sleep
 from typing import Union
-from utils.file import get_dic_from_json
 import os
 import sys
 import smtplib
@@ -11,6 +10,8 @@ from email.policy import SMTPUTF8
 
 ROOT_DIR_PATH = os.path.dirname(os.path.dirname(__file__))
 sys.path.append(ROOT_DIR_PATH)
+
+from utils.file import get_dic_from_json
 
 ASSETS_DIR_PATH = os.path.join(ROOT_DIR_PATH, "assets")
 
@@ -45,6 +46,7 @@ MAIL_BODY_CONTACT = """
     <br/>
 """
 
+
 def close_gmail_server():
     gmail_smtp_server.quit()  # サーバから切断
 
@@ -54,6 +56,7 @@ def get_mime_img(img_file_name: str) -> MIMEImage:
     with open(os.path.join(ASSETS_DIR_PATH, img_file_name), "rb") as f:
         mime_image = MIMEImage(f.read(), name=img_file_name)
     return mime_image
+
 
 def send_msg(msg: MIMEMultipart):
     print("Try to send a message")
@@ -88,7 +91,7 @@ def send_email(mail_address_to: str, subject: str, body_main: str, body_footer: 
 
     gmail_smtp_server.login(gmail_account, gmail_password)
     send_msg(msg)
-      # メールを送信
+    # メールを送信
     print("Sent a email")
 
 
