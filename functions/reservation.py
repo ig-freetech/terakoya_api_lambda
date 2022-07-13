@@ -31,7 +31,7 @@ class Record:
     grade: str = ""
     terakoya_experience: str = ""
     study_subject: str = ""
-    study_subject_details: str = ""
+    study_subject_detail: str = ""
     study_method: str = ""
     school_name: str = ""
     course_choice: str = ""
@@ -52,7 +52,7 @@ def get_record_from_response_body(event_body) -> Record:
     record.grade = body_dic["grade"]
     record.terakoya_experience = body_dic["terakoyaExperience"]
     record.study_subject = body_dic["studySubject"]
-    record.study_subject_details = body_dic["studySubjectDetail"]
+    record.study_subject_detail = body_dic["studySubjectDetail"]
     record.study_method = body_dic["studyMethod"]
     record.school_name = body_dic["schoolName"]
     record.course_choice = body_dic["courseChoice"]
@@ -114,7 +114,7 @@ def record_to_main(record: Record):
         ",".join(record.attendance_date_list),
         record.terakoya_experience,
         record.study_subject,
-        record.study_subject_details,
+        record.study_subject_detail,
         record.study_method,
         record.school_name,
         record.course_choice,
@@ -162,9 +162,7 @@ def lambda_handler(event, context):
 
 
 def test():
-    # body = '{"grade":"中学1年生","arriveTime":"17:00前","courseChoice":"","studySubject":"キャリア説明会","studyMethod":"黙々と静かに勉強したい","howToKnowTerakoya":"Instagram","terakoyaType":"テラコヤ中等部(池袋)","schoolName":"","futureFree":"","likeFree":"","name":"池田元気","email":"i.g.freetech2021@gmail.com","attendanceDate":["7/2 (土)","7/9 (土)","7/16 (土)"],"terakoyaExperience":"過去に参加したことがある","studySubjectDetail":"","remarks":""}'
-    # body = '{"grade":"中学1年生","arriveTime":"17:00前","courseChoice":"","studySubject":"キャリア説明会","studyMethod":"黙々と静かに勉強したい","howToKnowTerakoya":"Instagram","terakoyaType":"カフェ塾テラコヤ(池袋)","schoolName":"","futureFree":"","likeFree":"","name":"池田元気","email":"i.g.freetech2021@gmail.com","attendanceDate":["7/9 (土)","7/2 (土)","7/23 (土)"],"terakoyaExperience":"過去に参加したことがある","studySubjectDetail":"","remarks":"菅原さんと一緒がいい"}'
-    body = '{"grade":"中学1年生","arriveTime":"17:00前","courseChoice":"","studySubject":"キャリア説明会","studyMethod":"黙々と静かに勉強したい","howToKnowTerakoya":"Instagram","terakoyaType":"カフェ塾テラコヤ(池袋)","schoolName":"","futureFree":"","likeFree":"","name":"池田元気","email":"i.g.freetech2021@gmail.com","attendanceDate":["7/2 (土)","7/9 (土)","7/23 (土)"],"terakoyaExperience":"過去に参加したことがある","studySubjectDetail":"","remarks":"菅原さんと一緒がいい"}'
+    body = '{"name": "I.G", "email": "i.g.freetech2021@gmail.com", "terakoyaType": "テラコヤ中等部(池袋)", "attendanceDate": ["07/19 (火)", "07/26 (火)", "08/02 (火)"], "arriveTime": "17:00前", "grade": "その他", "terakoyaExperience": "過去に参加したことがある", "studySubject": "社会", "studySubjectDetail": "", "studyMethod": "その他", "schoolName": "", "courseChoice": "", "futureFree": "", "likeFree": "", "howToKnowTerakoya": "知人の紹介", "remarks": "一応、スタッフとして入ってます笑。"}'
     record = get_record_from_response_body(body)
     print("rec is " + str(record.__dict__))
     record_to_system(record)

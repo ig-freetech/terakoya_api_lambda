@@ -55,8 +55,8 @@ def append_row_to_sheet(sheet_type: SHEET_TYPES, row: List[str]):
 
 
 def get_system_future_records() -> List[dict[SYSTEM_COLUMN_NAME_TYPES, str]]:
-    all_records = system_sheet.get_all_records()
-    filterd_records = [rec for rec in all_records if convert_to_datetime(
+    all_records = system_sheet.get_all_records()  # フィルターを掛けると範囲内の行は空セルであっても全てレコードとして見なされ取得されてしまう
+    filterd_records = [rec for rec in all_records if rec["メールアドレス"] != '' and convert_to_datetime(
         rec["参加日"]) > CURRENT_DATETIME]
     return filterd_records
 
