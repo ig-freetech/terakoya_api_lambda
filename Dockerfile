@@ -10,7 +10,7 @@
 # WORKDIR /functions
 # CMD /bin/bash
 
-# HACK: Lambdaコンテナのベースイメージが latest を使っているならばこちらも合わせて lastest にする (要調査)
+# HACK: Lambdaコンテナのベースイメージが 2022 を使っていたので合わせる
 FROM amazonlinux:2022
 RUN yum update -y && \
     yum install -y gcc wget zip tar gzip make openssl-devel bzip2-devel libffi-devel zlib-devel sqlite-devel && \
@@ -24,9 +24,9 @@ RUN yum update -y && \
 # 開発用ライブラリのインストール
 RUN pip install autopep8 
     
-COPY ./functions /functions
+COPY ./functions /functions/
 WORKDIR /functions
 # WARNING: なぜかパッケージがインストールされない。イメージ作成時にはマウントディレクトリにパッケージをインストールできない？ ひとまず初回だけコンテナ側で下記コマンドを打って対応
 # RUN pip install -r requirements.txt -t ./python
 ENV PYTHONPATH $PYTHONPATH:/functions/python
-CMD /bin/bash
+CMD ["/bin/bash"]

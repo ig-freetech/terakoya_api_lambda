@@ -1,99 +1,128 @@
-from time import sleep
-from typing import Union
 import os
 import sys
-import smtplib
+from time import sleep
+from abc import ABCMeta, abstractmethod
+
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from email.mime.image import MIMEImage
 from email.policy import SMTPUTF8
+import smtplib
+import boto3
+from botocore.exceptions import ClientError
 
 ROOT_DIR_PATH = os.path.dirname(os.path.dirname(__file__))
 sys.path.append(ROOT_DIR_PATH)
 
-from utils.file import get_dic_from_json
-
-ASSETS_DIR_PATH = os.path.join(ROOT_DIR_PATH, "assets")
-
-TERAKOYA_GMAIL_ACCOUNT_INFO_FPATH = os.path.join(
-    ROOT_DIR_PATH, "config", "terakoya_gmail_account_info.json")
-account_info = get_dic_from_json(TERAKOYA_GMAIL_ACCOUNT_INFO_FPATH)
-gmail_account = account_info["mail"]
-gmail_password = account_info["pw"]
-
-gmail_smtp_host = "smtp.gmail.com"  # GmailのSMTPサーバのホスト名は smtp.gmail.com となっている
-# gmail_smtp_port = 587  # GmailのSMTPサーバのTLSのポート番号は587
-gmail_smtp_ssl_port = 465  # GmailのSMTPサーバのSSLのポート番号は465
-# SMTPサーバホスト名とSSLポート番号を指定してサーバオブジェクト生成
-# gmail_smtp_server = smtplib.SMTP(gmail_smtp_host, gmail_smtp_port)
-gmail_smtp_server = smtplib.SMTP_SSL(gmail_smtp_host, gmail_smtp_ssl_port)
-
-TERAKOYA_GROUP_MAIL_ADDRESS = "info@npoterakoya.org"
-
-MAIL_SUBJECT_COMMON = "【カフェ塾テラコヤ】"
-
-MAIL_BODY_CONTACT = """
-    <p>お会いできますことを心よりお待ちしております。</p>
-    <p>塾長 前田</p>
-    <br/>
-    <p>このメールは送信専用メールアドレスから配信しています。</p>
-    <p>返信頂いてもご回答できませんのでご了承ください。</p>
-    <p>※予約キャンセルの場合やその他ご不明点等ありましたら、下記連絡先 または 公式LINE からご連絡下さい。</p>
-    <p>＝＝＝＝＝＝＝連絡先＝＝＝＝＝＝＝＝</p>
-    <p>電話番号：090-6543-0718</p>
-    <p>メールアドレス：info@npoterakoya.org</p>
-    <p>＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝</p>
-    <br/>
-"""
+from config.mail_config import TERAKOYA_GMAIL_ADDRESS, TERAKOYA_GMAIL_PASSWORD
+from config.aws_config import AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, AWS_DEFAULT_REGION, SES_TEST_ADDRESS_1, SES_TEST_ADDRESS_2
 
 
-def close_gmail_server():
-    gmail_smtp_server.quit()  # サーバから切断
+class IMail(metaclass=ABCMeta):
+    def __init__(self, mail_from: str) -> None:
+        self.msg: MIMEMultipart
+        self.__mail_to = mail_from
+
+    @abstractmethod
+    def send(self, mail_to: str, subject: str, body: str, mail_cc: str = "", img_fpath: str = "") -> None:
+        raise NotImplementedError()
+
+    def write_to_mime(self, mail_to: str, subject: str, body: str, mail_cc: str = "", img_fpath: str = ""):
+        self.msg = MIMEMultipart()
+        html_body = f"""
+            <html lang="ja">
+                <head>
+                    <meta http-equiv="Content-Language" content="ja">
+                    <meta charset="UTF-8">
+                    <title>{subject}</title>
+                </head>
+                <body>
+                    <br/>
+                    {body}
+                    <br/>
+                </body>
+            </html>
+        """
+        self.msg.attach(MIMEText(html_body, "html", policy=SMTPUTF8))
+        self.msg["Subject"] = subject
+        self.msg["To"] = mail_to
+        self.msg["From"] = self.__mail_to
+        self.msg["Cc"] = mail_cc
+
+        if (not (os.path.isfile(img_fpath))):
+            return
+        with open(img_fpath, "rb") as f:
+            self.msg.attach(MIMEImage(f.read(), name=os.path.basename(img_fpath)))
 
 
-def get_mime_img(img_file_name: str) -> MIMEImage:
-    mime_image: MIMEImage
-    with open(os.path.join(ASSETS_DIR_PATH, img_file_name), "rb") as f:
-        mime_image = MIMEImage(f.read(), name=img_file_name)
-    return mime_image
+GMAIL_SMTP_HOST_NAME = "smtp.gmail.com"
+GMAIL_SMTP_SSL_DEFAULT_PORT = 465
+
+GMAIL_ACCOUNT = "" if TERAKOYA_GMAIL_ADDRESS is None else TERAKOYA_GMAIL_ADDRESS
+GMAIL_PASSWORD = "" if TERAKOYA_GMAIL_PASSWORD is None else TERAKOYA_GMAIL_PASSWORD
 
 
-def send_msg(msg: MIMEMultipart):
-    print("Try to send a message")
-    try:
-        gmail_smtp_server.send_message(msg)
-    except Exception as e:
-        print(e)
-        sleep(3000)
-        send_msg(msg)
+class SmtpMail(IMail):
+    def __init__(self, mail_from: str) -> None:
+        super().__init__(mail_from)
+
+    def send(self, mail_to: str, subject: str, body: str, mail_cc: str = "", img_fpath: str = "") -> None:
+        self.write_to_mime(mail_to, subject, body, mail_cc, img_fpath)
+        self.__send_via_smtp()
+
+    def __send_via_smtp(self):
+        print("Try to send an e-mail...")
+        # create a smtp server object to specity the host name (Gmail) and port (SSL)
+        gmail_smtp_server = smtplib.SMTP_SSL(GMAIL_SMTP_HOST_NAME, GMAIL_SMTP_SSL_DEFAULT_PORT)
+        try:
+            gmail_smtp_server.login(GMAIL_ACCOUNT, GMAIL_PASSWORD)
+            gmail_smtp_server.send_message(self.msg)
+        except Exception as e:
+            print(e)  # log an error message
+            sleep(3000)  # wait for timeout(s) of Lambda
+            self.__send_via_smtp()  # recursive
+        print("Email sent!")
+        gmail_smtp_server.quit()
 
 
-def send_email(mail_address_to: str, subject: str, body_main: str, body_footer: str = "", img_file_name: Union[str, None] = None):
-    msg = MIMEMultipart()
-    body = f"""
-        <div>
-            <br/>
-            {body_main}
-            {MAIL_BODY_CONTACT}
-            {body_footer}
-        </div>
-    """
-    body_mime_text = MIMEText(body, "html", policy=SMTPUTF8)
-    msg.attach(body_mime_text)
-    if(img_file_name):
-        mime_img = get_mime_img(img_file_name)
-        msg.attach(mime_img)  # 画像ファイル添付
-    msg["Subject"] = MAIL_SUBJECT_COMMON + subject  # 件名を設定
-    msg["To"] = mail_address_to  # 送り先メールアドレスを設定
-    msg["From"] = gmail_account  # 送り元メールアドレスを設定
-    # 生徒へのメール送信をテラコヤ運営メンバーのメールグループアドレスにも送信して通知
-    msg["Cc"] = TERAKOYA_GROUP_MAIL_ADDRESS
+class SesMail(IMail):
+    __client = boto3.client(
+        'ses',
+        aws_access_key_id=AWS_ACCESS_KEY_ID,
+        aws_secret_access_key=AWS_SECRET_ACCESS_KEY,
+        region_name=AWS_DEFAULT_REGION
+    )
 
-    gmail_smtp_server.login(gmail_account, gmail_password)
-    send_msg(msg)
-    # メールを送信
-    print("Sent a email")
+    def __init__(self, mail_from: str) -> None:
+        super().__init__(mail_from)
+
+    def send(self, mail_to: str, subject: str, body: str, mail_cc: str = "", img_fpath: str = "") -> None:
+        self.write_to_mime(mail_to, subject, body, mail_cc, img_fpath)
+        try:
+            response = self.__client.send_raw_email(
+                RawMessage={
+                    "Data": self.msg.as_string(),
+                },
+                Destinations=[],
+            )
+        except ClientError as e:
+            print(e.response['Error']['Message'])
+        else:
+            print(f"Email sent! Message ID: {response['MessageId']}")
 
 
 if __name__ == "__main__":
-    print("test")
+    mail_from = GMAIL_ACCOUNT
+    mail_to = "" if SES_TEST_ADDRESS_1 is None else SES_TEST_ADDRESS_1
+    subject = "【テスト】"
+    body = f"""
+        <br/>
+        <p>メール送信テストです。</p>
+        <br/>
+    """
+    mail_cc = "" if SES_TEST_ADDRESS_2 is None else SES_TEST_ADDRESS_2
+    img_fpath = os.path.join(ROOT_DIR_PATH, "assets", "sunshine-map.jpg")
+    # ses_mail = SesMail(mail_from)
+    # ses_mail.send(mail_to, subject, body, mail_cc, img_fpath)
+    # smtp_mail = SmtpMail(mail_from)
+    # smtp_mail.send(mail_to, subject, body, mail_cc, img_fpath)

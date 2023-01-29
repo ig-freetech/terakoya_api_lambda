@@ -1,4 +1,11 @@
+# Cache
 __pycache__
+.pytest_cache
+.DS_Store
+# Directory packages are installed in
 python
-config
+# Config
+.env
+_gcp_service_account_key.json
+
 *.zip
