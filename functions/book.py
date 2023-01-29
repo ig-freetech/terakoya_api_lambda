@@ -89,10 +89,11 @@ class BookingSpreadsheet(IBooking):
     NOTE: change main and system's sheet name to another one to test
     """
     __spread_sheet = Spreadsheet(TERAKOYA_SPREADSHEET_URL)
-    # __main_sheet = __spread_sheet.get_worksheet("参加予約_system")
-    # __system_sheet = __spread_sheet.get_worksheet("system")
-    __main_sheet = __spread_sheet.get_worksheet("main_test")
-    __system_sheet = __spread_sheet.get_worksheet("system_test")
+    # for test
+    # __main_sheet = __spread_sheet.get_worksheet("main_test")
+    # __system_sheet = __spread_sheet.get_worksheet("system_test")
+    __main_sheet = __spread_sheet.get_worksheet("参加予約_system")
+    __system_sheet = __spread_sheet.get_worksheet("system")
 
     def __record_to_main(self):
         dt_jst = current_jst_datetime.strftime(MAIN_SHEET_TIMESTAMP_FORMAT)
@@ -164,7 +165,7 @@ class BookingSpreadsheet(IBooking):
 
 def lambda_handler(event, context):
     try:
-        booking_spreadsheet = BookingSpreadsheet(event)
+        booking_spreadsheet = BookingSpreadsheet(event["body"])
         booking_spreadsheet.book()
     except Exception as e:
         print(f"Error happend. Error message: {str(e)}")
