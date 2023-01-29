@@ -150,7 +150,7 @@ def main_spreadsheet(sheet_name: str = "system"):
     NOTE: possible to spcity another sheet_name for test
     """
     system_sheet = Spreadsheet(TERAKOYA_SPREADSHEET_URL).get_worksheet(sheet_name)
-    records_after_today = [rec for rec in system_sheet.get_all_records() if rec["メールアドレス"] != "" and convert_to_datetime(
+    records_after_today = [rec for rec in system_sheet.get_all_records() if convert_to_datetime(
         rec["参加日"]) > current_jst_datetime and rec["リマインドメール送信済み"] != "済"]
     for record in records_after_today:
         print(f"Record: {str(dict(record))}")

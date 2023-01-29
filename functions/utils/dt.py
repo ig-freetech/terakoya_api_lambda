@@ -19,19 +19,3 @@ def convert_to_datetime(date_str: str) -> datetime:
     reservedDateTime = datetime(year=current_jst_datetime.year, month=month,
                                 day=day, hour=TERAKOYA_START_HOUR, tzinfo=JST)
     return reservedDateTime
-
-
-def test():
-    converted_dt = convert_to_datetime("07/02 (土)")
-    converted_dt_1 = convert_to_datetime("7/2 (土)")
-    compared_dt = datetime(current_jst_datetime.year, 7, 2, 18, tzinfo=JST)
-    diff_days = (converted_dt - compared_dt).days
-    print(diff_days)
-
-
-def pytest():
-    return 'SS'
-
-
-if __name__ == "__main__":
-    test()

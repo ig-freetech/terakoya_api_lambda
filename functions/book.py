@@ -172,6 +172,6 @@ def lambda_handler(event, context):
 
 
 if __name__ == "__main__":
-    event_body = '{"name": "Test(I.G)", "email": "i.g.freetech2021@gmail.com", "terakoyaType": "テラコヤ中等部(池袋)", "attendanceDateList": ["01/31 (火)", "02/07 (火)", "01/30 (月)"], "arriveTime": "17:00前", "grade": "その他", "terakoyaExperience": "過去に参加したことがある", "studySubject": "社会", "studySubjectDetail": "", "studyMethod": "その他", "schoolName": "", "courseChoice": "", "futureFree": "", "likeFree": "", "howToKnowTerakoya": "知人の紹介", "remarks": "一応、スタッフとして入ってます笑。"}'
+    event_body = '{"name": "Test(I.G)", "email": "i.g.freetech2021@gmail.com", "terakoyaType": "カフェ塾テラコヤ(池袋)", "attendanceDateList": ["01/31 (火)", "02/07 (火)", "01/30 (月)"], "arriveTime": "17:00前", "grade": "その他", "terakoyaExperience": "過去に参加したことがある", "studySubject": "社会", "studySubjectDetail": "勉強したい科目の詳細", "studyMethod": "その他", "schoolName": "XX学校", "courseChoice": "文系", "futureFree": "将来の夢・目標", "likeFree": "好きなこと・もの", "howToKnowTerakoya": "知人の紹介", "remarks": "備考"}'
     booking_spreadsheet = BookingSpreadsheet(event_body)
     booking_spreadsheet.book()
