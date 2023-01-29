@@ -146,7 +146,7 @@ class BookingSpreadsheet(IBooking):
         return len(same_records) > 0
 
     def __exists_record_in_system(self, attendance_date: str):
-        records_after_today = [rec for rec in self.__system_sheet.get_all_records() if rec["メールアドレス"] != '' and convert_to_datetime(
+        records_after_today = [rec for rec in self.__system_sheet.get_all_records() if convert_to_datetime(
             rec["参加日"]) > current_jst_datetime]
         searched_records = [rec for rec in records_after_today
                             if rec["参加日"] == attendance_date
