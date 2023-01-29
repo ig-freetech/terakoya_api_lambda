@@ -13,7 +13,12 @@
       "--ignore",
       "E402"
     ],
-    "python.analysis.typeCheckingMode": "basic"
+    "python.analysis.typeCheckingMode": "basic",
+    "files.exclude": {
+      "**/.DS_Store": true,
+      "**/.pytest_cache": true,
+      "**/__pycache__": true
+    }
   },
   "extensions": ["ms-python.python"]
 }
