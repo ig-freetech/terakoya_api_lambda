@@ -7,7 +7,7 @@ ROOT_DIR_PATH = os.path.dirname(__file__)
 sys.path.append(ROOT_DIR_PATH)
 
 from utils.mail import SesMail
-from utils.dt import current_jst_datetime, convert_to_datetime
+from utils.dt import DT
 from utils.spreadsheet import Spreadsheet
 
 from config.mail_config import TERAKOYA_GMAIL_ADDRESS, TERAKOYA_GROUP_MAIL_ADDRESS
@@ -47,19 +47,19 @@ class IBooking(metaclass=ABCMeta):
         request_body = json.loads(event_body)
         self.name = request_body["name"]
         self.email = request_body["email"]
-        self.terakoya_type = request_body["terakoyaType"]
-        self.attendance_date_list = request_body["attendanceDateList"]
-        self.arrive_time = request_body["arriveTime"]
+        self.terakoya_type = request_body["terakoya_type"]
+        self.attendance_date_list = request_body["attendance_date_list"]
+        self.arrival_time = request_body["arrival_time"]
         self.grade = request_body["grade"]
-        self.terakoya_experience = request_body["terakoyaExperience"]
-        self.study_subject = request_body["studySubject"]
-        self.study_subject_detail = request_body["studySubjectDetail"]
-        self.study_method = request_body["studyMethod"]
-        self.school_name = request_body["schoolName"]
-        self.course_choice = request_body["courseChoice"]
-        self.future_free = request_body["futureFree"]
-        self.like_free = request_body["likeFree"]
-        self.how_to_know_terakoya = request_body["howToKnowTerakoya"]
+        self.terakoya_experience = request_body["terakoya_experience"]
+        self.study_subject = request_body["study_subject"]
+        self.study_subject_detail = request_body["study_subject_detail"]
+        self.study_way = request_body["study_way"]
+        self.school_name = request_body["school_name"]
+        self.course_choice = request_body["course_choice"]
+        self.future_free = request_body["future_free"]
+        self.like_thing_free = request_body["like_thing_free"]
+        self.how_to_know_terakoya = request_body["how_to_know_terakoya"]
         self.remarks = request_body["remarks"]
 
     def send_confirmation_email(self) -> None:
@@ -71,7 +71,7 @@ class IBooking(metaclass=ABCMeta):
             <br/>
             <p>参加区分: {self.terakoya_type}</p>
             <p>参加希望日: {",".join(self.attendance_date_list)}</p>
-            <p>来れそうな時間帯: {self.arrive_time}</p>
+            <p>来れそうな時間帯: {self.arrival_time}</p>
             <p>テラコヤへの参加経験: {self.terakoya_experience}</p>
             <p>備考: {self.remarks}</p>
             <br/>
@@ -96,7 +96,7 @@ class BookingSpreadsheet(IBooking):
     __system_sheet = __spread_sheet.get_worksheet("system")
 
     def __record_to_main(self):
-        dt_jst = current_jst_datetime.strftime(MAIN_SHEET_TIMESTAMP_FORMAT)
+        dt_jst = DT.CURRENT_JST_DATETIME.strftime(MAIN_SHEET_TIMESTAMP_FORMAT)
         print(f"Record: {self.email},{self.attendance_date_list},{self.terakoya_type}")
         if (self.__exists_record_in_main()):
             print("Already registered in Main")
@@ -105,17 +105,17 @@ class BookingSpreadsheet(IBooking):
             dt_jst,
             self.name,
             self.terakoya_type,
-            self.arrive_time,
+            self.arrival_time,
             self.grade,
             ",".join(self.attendance_date_list),
             self.terakoya_experience,
             self.study_subject,
             self.study_subject_detail,
-            self.study_method,
+            self.study_way,
             self.school_name,
             self.course_choice,
             self.future_free,
-            self.like_free,
+            self.like_thing_free,
             self.how_to_know_terakoya,
             self.email,
             self.remarks
@@ -137,7 +137,7 @@ class BookingSpreadsheet(IBooking):
 
     def __exists_record_in_main(self):
         records_after_today = [rec for rec in self.__main_sheet.get_all_records() if len(
-            [x for x in rec["参加希望日"].split(",") if convert_to_datetime(x) > current_jst_datetime]) > 0]
+            [x for x in rec["参加希望日"].split(",") if DT.convert_slashdate_to_datetime(x) > DT.CURRENT_JST_DATETIME]) > 0]
         same_records = [rec for rec in records_after_today
                         if len(list(set(rec["参加希望日"].split(",")) ^ set(self.attendance_date_list))) == 0
                         and rec["メールアドレス"] == self.email
@@ -146,8 +146,8 @@ class BookingSpreadsheet(IBooking):
         return len(same_records) > 0
 
     def __exists_record_in_system(self, attendance_date: str):
-        records_after_today = [rec for rec in self.__system_sheet.get_all_records() if convert_to_datetime(
-            rec["参加日"]) > current_jst_datetime]
+        records_after_today = [rec for rec in self.__system_sheet.get_all_records() if DT.convert_slashdate_to_datetime(
+            rec["参加日"]) > DT.CURRENT_JST_DATETIME]
         searched_records = [rec for rec in records_after_today
                             if rec["参加日"] == attendance_date
                             and rec["メールアドレス"] == self.email
