@@ -3,5 +3,4 @@ gspread
 oauth2client
 boto3
 boto3-stubs
-pytest
 python-dotenv

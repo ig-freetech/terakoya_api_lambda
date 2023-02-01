@@ -7,10 +7,12 @@ from typing import List
 ROOT_DIR_PATH = os.path.dirname(__file__)
 sys.path.append(ROOT_DIR_PATH)
 
+from domains.dynamodb import BookingDynamoDB
+
+from api.booking import TERAKOYA_TYPE, PLACE
+
 from utils.mail import SesMail
 from utils.spreadsheet import Spreadsheet
-from domains.dynamodb import BookingDynamo
-from api.booking import TERAKOYA_TYPE, PLACE
 from utils.dt import DT
 
 from config.google_config import TERAKOYA_SPREADSHEET_URL
@@ -113,10 +115,8 @@ SYSTEM_SHEET_COLUMN_ALPHABET_DICT = {
 }
 
 
+# TODO: Delete　this after the way using DynamoDB starts
 class RemindSpreadsheet(Remind):
-    def __init__(self, name: str, place: str, email: str, booking_date: str, terakoya_type: str) -> None:
-        super().__init__(name, place, email, booking_date, terakoya_type)
-
     def update_is_reminded(self, worksheet: Worksheet):
         match_row_numbers = self.__find_match_row_numbers(worksheet)
         cell_address = SYSTEM_SHEET_COLUMN_ALPHABET_DICT["リマインドメール送信済み"] + str(match_row_numbers[0])  # ex: B5
@@ -170,18 +170,19 @@ def main_spreadsheet(sheet_name: str = "system"):
             continue
 
 
-PLACE_MAP = {
-    0: "",  # 未設定状態
-    1: "サンシャインシティ",
-    2: "良品計画本社",
-    3: "DIORAMA CAFE",
-    4: "キャリア・マム",
-    5: "キカガク"
-}
-
-
 def main_dynamodb():
-    bk_item_list = BookingDynamo.get_item_list_for_remind()
+    # Map定義
+    # https://terakoya20220112.slack.com/archives/C02V0PHDGP2/p1675009220056179
+    PLACE_MAP = {
+        0: "",  # 未設定状態
+        1: "サンシャインシティ",
+        2: "良品計画本社",
+        3: "DIORAMA CAFE",
+        4: "キャリア・マム",
+        5: "キカガク"
+    }
+
+    bk_item_list = BookingDynamoDB.get_item_list_for_remind()
     for bk_item in bk_item_list:
         print(f"Booking Item: {str(bk_item.__dict__)}")
         try:
@@ -189,10 +190,9 @@ def main_dynamodb():
                 print("Impossible to send a email because of no place filled in Ikebukuro")
                 continue
             Remind(bk_item.name, PLACE_MAP[bk_item.place], bk_item.email).send_remind_mail()
-            BookingDynamo.update_is_reminded(bk_item.sk)
+            BookingDynamoDB.update_is_reminded(bk_item.sk)
         except Exception as e:
             print(f"Error happend. Error message: {str(e)}")
-            continue
 
 
 def lambda_handler(event, context):

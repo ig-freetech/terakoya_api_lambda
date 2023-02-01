@@ -91,8 +91,8 @@ class STUDY_SUBJECT(Enum):
     """NULL"""
 
 
-class STUDY_WAY(Enum):
-    """勉強スタイル (study_way)"""
+class STUDY_STYLE(Enum):
+    """勉強スタイル (study_style)"""
     SILENT = 1
     """黙々と静かに勉強したい"""
     QUESTION = 2

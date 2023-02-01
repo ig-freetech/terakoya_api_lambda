@@ -23,8 +23,8 @@ class DT:
     def CURRENT_JST_ISO_8601_ONLY_DATE(cls) -> str:
         return cls.CURRENT_JST_DATETIME.strftime(f"%Y-%m-%d")
 
-    @classmethod
-    def convert_slashdate_to_datetime(cls, date: str) -> datetime:
+    @staticmethod
+    def convert_slashdate_to_datetime(date: str) -> datetime:
         # ['MM', 'DD'] の形で抽出
         regDate = re.search(r'\d+/\d+', date)
         if (regDate == None):
@@ -38,6 +38,10 @@ class DT:
             hour=TERAKOYA_START_TIME,  # To send a remind mail at an hour before Terakoya starts
             tzinfo=JST
         )
+
+    @staticmethod
+    def convert_iso_to_slushdate(iso_date: str):
+        return datetime.fromisoformat(iso_date).strftime(f"%m/%d")
 
 
 if __name__ == "__main__":

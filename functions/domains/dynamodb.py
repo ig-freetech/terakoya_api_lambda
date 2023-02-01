@@ -1,16 +1,18 @@
 import os
 import sys
 from typing import cast
+from datetime import datetime
 import boto3
 from boto3.dynamodb.conditions import Key, Attr
 
 ROOT_DIR_PATH = os.path.dirname(os.path.dirname(__file__))
 sys.path.append(ROOT_DIR_PATH)
 
-from config.aws_config import AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, AWS_DEFAULT_REGION
 from utils.dt import DT
 
-from api.booking import TERAKOYA_TYPE, TERAKOYA_EXPERIENCE, GRADE, ARRIVAL_TIME, STUDY_WAY, STUDY_SUBJECT, COURSE_CHOICE, HOW_TO_KNOW_TERAKOYA, PLACE
+from api.booking import TERAKOYA_TYPE, TERAKOYA_EXPERIENCE, GRADE, ARRIVAL_TIME, STUDY_STYLE, STUDY_SUBJECT, COURSE_CHOICE, HOW_TO_KNOW_TERAKOYA, PLACE
+
+from config.aws_config import AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, AWS_DEFAULT_REGION
 
 
 class BookingItem:
@@ -26,7 +28,7 @@ class BookingItem:
         terakoya_experience: int,
         study_subject: int,
         study_subject_detail: str,
-        study_way: int,
+        study_style: int,
         school_name: str,
         course_choice: int,
         future_free: str,
@@ -46,7 +48,7 @@ class BookingItem:
         self.terakoya_experience = terakoya_experience
         self.study_subject = study_subject
         self.study_subject_detail = study_subject_detail
-        self.study_way = study_way
+        self.study_style = study_style
         self.school_name = school_name
         self.course_choice = course_choice
         self.future_free = future_free
@@ -56,7 +58,7 @@ class BookingItem:
         self.is_reminded = is_reminded
 
 
-class BookingDynamo:
+class BookingDynamoDB:
     __table = boto3.resource(
         "dynamodb",
         aws_access_key_id=AWS_ACCESS_KEY_ID,
@@ -65,7 +67,10 @@ class BookingDynamo:
     ).Table("booking")
 
     @classmethod
-    def register(cls, item: BookingItem):
+    def insert_item(cls, item: BookingItem, timestamp: int = int(datetime.now().timestamp())):
+        """
+        timestamp: to set the same timestamp between several items
+        """
         cls.__table.put_item(Item={
             "date": item.date,
             "sk": item.sk,
@@ -79,13 +84,14 @@ class BookingDynamo:
             "terakoya_experience": item.terakoya_experience,
             "study_subject": item.study_subject,
             "study_subject_detail": item.study_subject_detail,
-            "study_way": item.study_way,
+            "study_style": item.study_style,
             "school_name": item.school_name,
             "course_choice": item.course_choice,
             "future_free": item.future_free,
             "like_thing_free": item.like_thing_free,
             "how_to_know_terakoya": item.how_to_know_terakoya,
-            "remarks": item.remarks
+            "remarks": item.remarks,
+            "timestamp": timestamp
         })
 
     @classmethod
@@ -123,7 +129,7 @@ class BookingDynamo:
             cast(int, item.get("terakoya_experience", TERAKOYA_EXPERIENCE.NULL)),
             cast(int, item.get("study_subject", STUDY_SUBJECT.NULL)),
             cast(str, item.get("study_subject_detail", "")),
-            cast(int, item.get("study_way", STUDY_WAY.NULL)),
+            cast(int, item.get("study_style", STUDY_STYLE.NULL)),
             cast(str, item.get("school_name", "")),
             cast(int, item.get("course_choice", COURSE_CHOICE.LIBERAL_ARTS)),
             cast(str, item.get("future_free", "")),
@@ -155,11 +161,11 @@ if __name__ == "__main__":
             school_name="School",
             study_subject=STUDY_SUBJECT.AO_ENTRANCE.value,
             study_subject_detail="Study Detail",
-            study_way=STUDY_WAY.CONSULT.value,
+            study_style=STUDY_STYLE.CONSULT.value,
             terakoya_experience=TERAKOYA_EXPERIENCE.DONE.value,
             terakoya_type=TERAKOYA_TYPE.HIGH_IKE.value,
         )
-        BookingDynamo.register(test_item_1)
+        BookingDynamoDB.insert_item(test_item_1)
 
     # Test case 2
     date_list = ["2023-01-31", "2023-02-28"]
@@ -181,11 +187,11 @@ if __name__ == "__main__":
             school_name="School2",
             study_subject=STUDY_SUBJECT.ENG.value,
             study_subject_detail="Study Detail2",
-            study_way=STUDY_WAY.TALKING.value,
+            study_style=STUDY_STYLE.TALKING.value,
             terakoya_experience=TERAKOYA_EXPERIENCE.FIRST_TIME.value,
             terakoya_type=TERAKOYA_TYPE.ONLINE_TAMA.value,
         )
-        BookingDynamo.register(test_item_2)
+        BookingDynamoDB.insert_item(test_item_2)
     # BookingDynamo.update_is_reminded(test_item_2.sk)
-    bk_item_list = BookingDynamo.get_item_list_for_remind()
+    bk_item_list = BookingDynamoDB.get_item_list_for_remind()
     pass
