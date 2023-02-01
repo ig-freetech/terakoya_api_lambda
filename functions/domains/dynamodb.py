@@ -2,6 +2,7 @@ import os
 import sys
 from typing import cast
 from datetime import datetime
+import hashlib
 import boto3
 from boto3.dynamodb.conditions import Key, Attr
 
@@ -71,6 +72,7 @@ class BookingDynamoDB:
         """
         timestamp: to set the same timestamp between several items
         """
+        primary_key = f"#{item.date}{item.sk}"
         cls.__table.put_item(Item={
             "date": item.date,
             "sk": item.sk,
@@ -91,7 +93,8 @@ class BookingDynamoDB:
             "like_thing_free": item.like_thing_free,
             "how_to_know_terakoya": item.how_to_know_terakoya,
             "remarks": item.remarks,
-            "timestamp": timestamp
+            "timestamp": timestamp,
+            "uid": hashlib.md5(primary_key.encode()).hexdigest()
         })
 
     @classmethod
