@@ -32,9 +32,6 @@ MAIL_BODY_CONTACT = """
 """
 
 
-MAIN_SHEET_TIMESTAMP_FORMAT = f"%Y/%m/%d %H:%M:%S"
-
-
 class IBooking(metaclass=ABCMeta):
     ses_client = SesMail(TERAKOYA_GMAIL_FROM)
 
@@ -85,7 +82,8 @@ class BookingViaSpreadsheet(IBooking):
         "テラコヤ中等部(渋谷)": "キカガク"
     }
 
-    def __record_to_main(self):
+    def __record_to_main(self) -> None:
+        MAIN_SHEET_TIMESTAMP_FORMAT = f"%Y/%m/%d %H:%M:%S"
         dt_jst = DT.CURRENT_JST_DATETIME.strftime(MAIN_SHEET_TIMESTAMP_FORMAT)
         print(f"Record: {self.email},{self.attendance_date_list},{self.terakoya_type}")
         if (self.__exists_record_in_main()):
@@ -111,7 +109,7 @@ class BookingViaSpreadsheet(IBooking):
             self.remarks
         ])
 
-    def __record_to_system(self):
+    def __record_to_system(self) -> None:
         for attendance_date in self.attendance_date_list:
             print(f"Record: {self.email},{attendance_date},{self.terakoya_type}")
             if (self.__exists_record_in_system(attendance_date)):
@@ -125,7 +123,7 @@ class BookingViaSpreadsheet(IBooking):
                 self.TERAKOYA_TYPE_PLACE_DICT[self.terakoya_type]
             ])
 
-    def __exists_record_in_main(self):
+    def __exists_record_in_main(self) -> bool:
         records_after_today = [rec for rec in self.__main_sheet.get_all_records() if len(
             [x for x in rec["参加希望日"].split(",") if DT.convert_slashdate_to_datetime(x) > DT.CURRENT_JST_DATETIME]) > 0]
         same_records = [rec for rec in records_after_today
@@ -135,7 +133,7 @@ class BookingViaSpreadsheet(IBooking):
                         ]
         return len(same_records) > 0
 
-    def __exists_record_in_system(self, attendance_date: str):
+    def __exists_record_in_system(self, attendance_date: str) -> bool:
         records_after_today = [rec for rec in self.__system_sheet.get_all_records() if DT.convert_slashdate_to_datetime(
             rec["参加日"]) > DT.CURRENT_JST_DATETIME]
         searched_records = [rec for rec in records_after_today

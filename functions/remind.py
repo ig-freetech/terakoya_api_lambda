@@ -1,8 +1,8 @@
 import os
 import sys
 import copy
-from gspread import Worksheet
 from typing import List
+from gspread import Worksheet
 
 ROOT_DIR_PATH = os.path.dirname(__file__)
 sys.path.append(ROOT_DIR_PATH)
@@ -88,7 +88,7 @@ class Remind():
         self.booking_date = booking_date
         self.terakoya_type = terakoya_type
 
-    def send_remind_mail(self):
+    def send_remind_mail(self) -> None:
         subject = '【カフェ塾テラコヤ】ご参加当日のお知らせ'
         body = f"""
             <p>{self.name}様</p>
@@ -117,7 +117,7 @@ SYSTEM_SHEET_COLUMN_ALPHABET_DICT = {
 
 # TODO: Delete　this after the way using DynamoDB starts
 class RemindSpreadsheet(Remind):
-    def update_is_reminded(self, worksheet: Worksheet):
+    def update_is_reminded(self, worksheet: Worksheet) -> None:
         match_row_numbers = self.__find_match_row_numbers(worksheet)
         cell_address = SYSTEM_SHEET_COLUMN_ALPHABET_DICT["リマインドメール送信済み"] + str(match_row_numbers[0])  # ex: B5
         worksheet.update_acell(cell_address, "済")
@@ -138,7 +138,7 @@ class RemindSpreadsheet(Remind):
                     copy.copy(match_row_numbers)) & set(row_numbers))
         return match_row_numbers
 
-    def should_send_email(self):
+    def should_send_email(self) -> bool:
         """
         whether date diff is within a day (24h)
         return -2 < diff_days < 2 : whether it's from 2 days before to 2 days after
@@ -146,7 +146,7 @@ class RemindSpreadsheet(Remind):
         return (DT.convert_slashdate_to_datetime(self.booking_date) - DT.CURRENT_JST_DATETIME).days == 0
 
 
-def main_spreadsheet(sheet_name: str = "system"):
+def main_spreadsheet(sheet_name: str = "system") -> None:
     """
     NOTE: possible to spcity another sheet_name for test
     """
@@ -170,7 +170,7 @@ def main_spreadsheet(sheet_name: str = "system"):
             continue
 
 
-def main_dynamodb():
+def main_dynamodb() -> None:
     # Map定義
     # https://terakoya20220112.slack.com/archives/C02V0PHDGP2/p1675009220056179
     PLACE_MAP = {
@@ -205,5 +205,5 @@ def lambda_handler(event, context):
 
 if __name__ == '__main__':
     # main_spreadsheet("system_test")
-    main_dynamodb()
+    # main_dynamodb()
     pass

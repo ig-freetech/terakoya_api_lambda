@@ -5,5 +5,5 @@ services:
     build: .
     volumes:
       - ./functions:/functions
-      - ./sqlite3/terakoya.sqlite3:/functions/terakoya.sqlite3
+      # - ./sqlite3/terakoya.sqlite3:/functions/terakoya.sqlite3
     command: /bin/sh -c "while sleep 1000; do :; done"
