@@ -21,8 +21,8 @@ RUN yum update -y && \
     make altinstall && \
     rm -f /opt/Python-3.9.12.tgz && \
     python3.9 -m pip install --upgrade pip
-# 開発用ライブラリのインストール
-RUN pip install autopep8 
+# ソースコードでは使用しないが開発環境では必要なライブラリのインストール
+RUN pip install autopep8 pytest
     
 COPY ./functions /functions/
 WORKDIR /functions

@@ -14,11 +14,12 @@
       "E402"
     ],
     "python.analysis.typeCheckingMode": "basic",
+    "python.languageServer": "Pylance",
     "files.exclude": {
       "**/.DS_Store": true,
       "**/.pytest_cache": true,
       "**/__pycache__": true
     }
   },
-  "extensions": ["ms-python.python"]
+  "extensions": ["ms-python.python", "boto3typed.boto3-ide"]
 }

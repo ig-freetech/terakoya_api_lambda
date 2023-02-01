@@ -87,7 +87,7 @@ class SmtpMail(IMail):
 
 class SesMail(IMail):
     __client = boto3.client(
-        'ses',
+        "ses",
         aws_access_key_id=AWS_ACCESS_KEY_ID,
         aws_secret_access_key=AWS_SECRET_ACCESS_KEY,
         region_name=AWS_DEFAULT_REGION
@@ -99,6 +99,7 @@ class SesMail(IMail):
     def send(self, mail_to: str, subject: str, body: str, mail_cc: str = "", img_fpath: str = "") -> None:
         self.write_to_mime(mail_to, subject, body, mail_cc, img_fpath)
         try:
+            # https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/ses.html#SES.Client.send_raw_email
             response = self.__client.send_raw_email(
                 RawMessage={
                     "Data": self.msg.as_string(),
@@ -106,7 +107,7 @@ class SesMail(IMail):
                 Destinations=[],
             )
         except ClientError as e:
-            print(e.response['Error']['Message'])
+            print(str(dict(e.response)))
         else:
             print(f"Email sent! Message ID: {response['MessageId']}")
 
@@ -122,7 +123,7 @@ if __name__ == "__main__":
     """
     mail_cc = "" if SES_TEST_ADDRESS_2 is None else SES_TEST_ADDRESS_2
     img_fpath = os.path.join(ROOT_DIR_PATH, "assets", "sunshine-map.jpg")
-    # ses_mail = SesMail(mail_from)
-    # ses_mail.send(mail_to, subject, body, mail_cc, img_fpath)
+    ses_mail = SesMail(mail_from)
+    ses_mail.send(mail_to, subject, body, mail_cc, img_fpath)
     # smtp_mail = SmtpMail(mail_from)
     # smtp_mail.send(mail_to, subject, body, mail_cc, img_fpath)
