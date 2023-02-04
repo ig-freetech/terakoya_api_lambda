@@ -95,7 +95,7 @@ class STUDY_STYLE(Enum):
     """勉強スタイル (study_style)"""
     SILENT = 1
     """黙々と静かに勉強したい"""
-    QUESTION = 2
+    ASK = 2
     """分からない点があったらスタッフに質問したい"""
     TALKING = 3
     """友達と話しながら楽しく勉強したい"""
@@ -117,6 +117,8 @@ class COURSE_CHOICE(Enum):
     """文系"""
     SCIENCE = 3
     """理系"""
+    OTHER = 0
+    """その他"""
     NULL = 999
     """NULL"""
 
