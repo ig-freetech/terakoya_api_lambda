@@ -7,7 +7,7 @@ from gspread import Worksheet
 ROOT_DIR_PATH = os.path.dirname(__file__)
 sys.path.append(ROOT_DIR_PATH)
 
-from domains.dynamodb import BookingDynamoDB
+from domain.dynamodb import BookingDynamoDB
 
 from api.booking import TERAKOYA_TYPE, PLACE
 

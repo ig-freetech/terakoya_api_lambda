@@ -6,7 +6,7 @@ from abc import ABCMeta, abstractmethod
 ROOT_DIR_PATH = os.path.dirname(__file__)
 sys.path.append(ROOT_DIR_PATH)
 
-from domains.dynamodb import BookingDynamoDB, BookingItem
+from domain.dynamodb import BookingDynamoDB, BookingItem
 
 from utils.mail import SesMail
 from utils.dt import DT
@@ -191,7 +191,7 @@ class BookingViaDynamoDB(IBooking):
         0: 'その他'
     }
     TERAKOYA_TYPE_TO_PLACE_MAP = {
-        0: 0,  # その他 -> TBD
+        0: 999,  # その他 -> NULL
         1: 0,  # カフェ塾テラコヤ(池袋) -> TBD
         2: 4,  # オンラインテラコヤ(多摩) -> キャリア・マム
         3: 1,  # テラコヤ中等部(池袋) -> サンシャインシティ
