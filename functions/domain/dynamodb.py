@@ -31,6 +31,7 @@ class BookingItem:
         study_subject_detail: str,
         study_style: int,
         school_name: str,
+        first_choice_school: str,
         course_choice: int,
         future_free: str,
         like_thing_free: str,
@@ -51,6 +52,7 @@ class BookingItem:
         self.study_subject_detail = study_subject_detail
         self.study_style = study_style
         self.school_name = school_name
+        self.first_choice_school = first_choice_school
         self.course_choice = course_choice
         self.future_free = future_free
         self.like_thing_free = like_thing_free
@@ -88,6 +90,7 @@ class BookingDynamoDB:
             "study_subject_detail": item.study_subject_detail,
             "study_style": item.study_style,
             "school_name": item.school_name,
+            "first_choice_school": item.first_choice_school,
             "course_choice": item.course_choice,
             "future_free": item.future_free,
             "like_thing_free": item.like_thing_free,
@@ -134,6 +137,7 @@ class BookingDynamoDB:
             cast(str, item.get("study_subject_detail", "")),
             cast(int, item.get("study_style", STUDY_STYLE.NULL)),
             cast(str, item.get("school_name", "")),
+            cast(str, item.get("first_choice_school", "")),
             cast(int, item.get("course_choice", COURSE_CHOICE.LIBERAL_ARTS)),
             cast(str, item.get("future_free", "")),
             cast(str, item.get("like_thing_free", "")),
@@ -162,6 +166,7 @@ if __name__ == "__main__":
             place=PLACE.TBD.value,
             remarks="Remarks",
             school_name="School",
+            first_choice_school="My First Choice School 1",
             study_subject=STUDY_SUBJECT.AO_ENTRANCE.value,
             study_subject_detail="Study Detail",
             study_style=STUDY_STYLE.CONSULT.value,
@@ -188,6 +193,7 @@ if __name__ == "__main__":
             place=PLACE.CAREER_MOM.value,
             remarks="Remarks2",
             school_name="School2",
+            first_choice_school="My First Choice School 2",
             study_subject=STUDY_SUBJECT.ENG.value,
             study_subject_detail="Study Detail2",
             study_style=STUDY_STYLE.TALKING.value,
