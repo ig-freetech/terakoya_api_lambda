@@ -48,6 +48,7 @@ class IBooking(metaclass=ABCMeta):
         self.study_subject_detail = request_body["study_subject_detail"]
         self.study_style = request_body["study_style"]
         self.school_name = request_body["school_name"]
+        self.first_choice_school = request_body["first_choice_school"]
         self.course_choice = request_body["course_choice"]
         self.future_free = request_body["future_free"]
         self.like_thing_free = request_body["like_thing_free"]
@@ -213,6 +214,7 @@ class BookingViaDynamoDB(IBooking):
             self.study_subject_detail,
             self.study_style,
             self.school_name,
+            self.first_choice_school,
             self.course_choice,
             self.future_free,
             self.like_thing_free,
@@ -256,13 +258,13 @@ def lambda_handler(event, context):
 
 if __name__ == "__main__":
     spreadsheet_event_body = '{"name": "Test(I.G)", "email": "i.g.freetech2021@gmail.com", "terakoya_type": "カフェ塾テラコヤ(池袋)", "attendance_date_list": ["01/31 (火)", "02/07 (火)", "01/30 (月)"], "arrival_time": "17:00前", "grade": "その他", "terakoya_experience": "過去に参加したことがある", "study_subject": "社会", "study_subject_detail": "勉強したい科目の詳細", "study_style": "その他", "school_name": "XX学校", "course_choice": "文系", "future_free": "将来の夢・目標", "like_thing_free": "好きなこと・もの", "how_to_know_terakoya": "知人の紹介", "remarks": "備考"}'
-    BookingViaSpreadsheet(spreadsheet_event_body).book()
+    # BookingViaSpreadsheet(spreadsheet_event_body).book()
     dynamodb_event_body = '''
     {
         "name": "Test",
         "email": "laughingman2045.sac@gmail.com",
         "terakoya_type": 0,
-        "attendance_date_list": ["2023-01-31", "2023-02-07", "2023-02-14"],
+        "attendance_date_list": ["2023-02-21", "2023-02-28", "2023-02-14"],
         "arrival_time": 0,
         "grade": 11,
         "terakoya_experience": 1,
@@ -270,6 +272,7 @@ if __name__ == "__main__":
         "study_subject_detail": "勉強したい内容について詳しく(自由記入)",
         "study_style": 3,
         "school_name": "学校名(自由記入)",
+        "first_choice_school": "志望校名(自由記入)",
         "course_choice": 0,
         "future_free": "将来の夢など(自由記入)",
         "like_thing_free": "好きなこと(自由記入)",

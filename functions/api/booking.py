@@ -135,6 +135,8 @@ class HOW_TO_KNOW_TERAKOYA(Enum):
     """Twitter"""
     INTRODUCE = 5
     """知人の紹介"""
+    LEAFLET = 5
+    """ポスター、ビラ"""
     OTHER = 0
     """その他"""
     NULL = 999
