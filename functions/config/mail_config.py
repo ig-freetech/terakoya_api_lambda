@@ -1,4 +1,5 @@
 import os
+# TODO: Comment out the following line in Lambda console after deployment
 from dotenv import load_dotenv
 load_dotenv()
 
