@@ -3,6 +3,8 @@ import os
 from dotenv import load_dotenv
 load_dotenv()
 
+# https://docs.aws.amazon.com/ja_jp/lambda/latest/dg/configuration-envvars.html
+
 AWS_ACCESS_KEY_ID = os.getenv("ACCESS_KEY")
 AWS_SECRET_ACCESS_KEY = os.getenv("SECRET_ACCESS_KEY")
 AWS_DEFAULT_REGION = os.getenv("DEFAULT_REGION")
