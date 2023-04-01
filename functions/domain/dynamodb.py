@@ -13,7 +13,7 @@ from utils.dt import DT
 
 from api.booking import TERAKOYA_TYPE, TERAKOYA_EXPERIENCE, GRADE, ARRIVAL_TIME, STUDY_STYLE, STUDY_SUBJECT, COURSE_CHOICE, HOW_TO_KNOW_TERAKOYA, PLACE
 
-from config.aws_config import AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, AWS_DEFAULT_REGION
+from config.aws_config import AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, AWS_DEFAULT_REGION, DYNAMO_DB_BOOKING_TABLE
 
 
 class BookingItem:
@@ -67,7 +67,7 @@ class BookingDynamoDB:
         aws_access_key_id=AWS_ACCESS_KEY_ID,
         aws_secret_access_key=AWS_SECRET_ACCESS_KEY,
         region_name=AWS_DEFAULT_REGION
-    ).Table("booking")
+    ).Table(DYNAMO_DB_BOOKING_TABLE)
 
     @classmethod
     def insert_item(cls, item: BookingItem, timestamp: int = int(datetime.now().timestamp())):
