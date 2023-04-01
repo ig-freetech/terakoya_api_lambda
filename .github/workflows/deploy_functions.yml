@@ -23,6 +23,7 @@ jobs:
         run: |
           zip -r functions_dev.zip ./functions -x '*python*'
           aws s3 cp ./functions_dev.zip s3://${{ secrets.AWS_S3_TERAKOYA_BUCKET_NAME }}/lambda/booking/
+          aws lambda update-function-code --function-name terakoya-dev-book-attendance --s3-bucket terakoya-bucket --s3-key lambda/booking/functions_dev.zip
 
       - name: Deploy to Prod
         if: contains(toJSON(github.ref), 'master')
