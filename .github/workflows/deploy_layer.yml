@@ -27,14 +27,14 @@ jobs:
         run: |
           zip -r layer_dev.zip ./functions/python
           aws s3 cp ./layer_dev.zip s3://${{ secrets.AWS_S3_TERAKOYA_BUCKET_NAME }}/lambda/booking/
-          aws lambda publish-layer-version --layer-name terakoya-dev-layer-booking --content S3Bucket=terakoya-bucket,S3Key=lambda/booking/layer_dev.zip --compatible-runtimes python3.9 --compatible-architectures x86_64 arm64
+          aws lambda publish-layer-version --layer-name terakoya-booking-dev-layer --content S3Bucket=terakoya-bucket,S3Key=lambda/booking/layer_dev.zip --compatible-runtimes python3.9 --compatible-architectures x86_64 arm64
 
       - name: Deploy to Prod
         if: contains(toJSON(github.ref), 'master')
         run: |
           zip -r layer_prod.zip ./functions/python
           aws s3 cp ./layer_prod.zip s3://${{ secrets.AWS_S3_TERAKOYA_BUCKET_NAME }}/lambda/
-          aws lambda publish-layer-version --layer-name terakoya-prod-layer-booking --content S3Bucket=terakoya-bucket,S3Key=lambda/booking/layer_prod.zip --compatible-runtimes python3.9 --compatible-architectures x86_64 arm64
+          aws lambda publish-layer-version --layer-name terakoya-booking-prod-layer --content S3Bucket=terakoya-bucket,S3Key=lambda/booking/layer_prod.zip --compatible-runtimes python3.9 --compatible-architectures x86_64 arm64
 
       # TODO: Manually set a new version of layer deployed above in settings of each Lambda functions
       # or execute the same number of commands as Lambda Functions like below
