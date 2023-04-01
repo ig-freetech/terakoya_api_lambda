@@ -1,0 +1,43 @@
+name: Deploy Layer
+
+on:
+  push:
+    branches:
+      - develop
+      - master
+    # Run actions only when changes happens in python dir
+    # https://blog.35d.jp/2020-09-29-github-actions-path
+    paths:
+      - ./functions/python/**
+
+env:
+  AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+  AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+  AWS_DEFAULT_REGION: ap-northeast-1
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@master
+
+      - name: Deploy to Dev
+        if: contains(toJSON(github.ref), 'develop')
+        run: |
+          zip -r layer_dev.zip ./functions/python
+          aws s3 cp ./layer_dev.zip s3://${{ secrets.AWS_S3_TERAKOYA_BUCKET_NAME }}/lambda/booking/
+          aws lambda publish-layer-version --layer-name terakoya-dev-layer-booking --content S3Bucket=terakoya-bucket,S3Key=lambda/booking/layer_dev.zip --compatible-runtimes python3.9 --compatible-architectures x86_64 arm64
+
+      - name: Deploy to Prod
+        if: contains(toJSON(github.ref), 'master')
+        run: |
+          zip -r layer_prod.zip ./functions/python
+          aws s3 cp ./layer_prod.zip s3://${{ secrets.AWS_S3_TERAKOYA_BUCKET_NAME }}/lambda/
+          aws lambda publish-layer-version --layer-name terakoya-prod-layer-booking --content S3Bucket=terakoya-bucket,S3Key=lambda/booking/layer_prod.zip --compatible-runtimes python3.9 --compatible-architectures x86_64 arm64
+
+      #TODO: Manually set a new version of layer deployed above in settings of each Lambda functions
+      # or execute the same number of commands as Lambda Functions like below
+      # aws lambda update-function-configuration --function-name <func_name> --layers <layer1_arn>:<layer1_version> <layer2_arn>:<layer2_version> ...
+      # aws lambda update-function-configuration --function-name <func_name> --layers <layer1_arn>:<layer1_version> <layer2_arn>:<layer2_version> ...
+      # ...
