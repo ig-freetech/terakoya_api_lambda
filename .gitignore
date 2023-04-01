@@ -10,3 +10,5 @@ python
 _gcp_service_account_key.json
 
 *.zip
+
+MEMO.md
