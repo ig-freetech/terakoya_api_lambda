@@ -1,8 +1,5 @@
 import os
 import sys
-import copy
-from typing import List
-from gspread import Worksheet
 
 ROOT_DIR_PATH = os.path.dirname(__file__)
 sys.path.append(ROOT_DIR_PATH)
@@ -12,10 +9,7 @@ from domain.dynamodb import BookingDynamoDB
 from api.booking import TERAKOYA_TYPE, PLACE
 
 from utils.mail import SesMail
-from utils.spreadsheet import Spreadsheet
-from utils.dt import DT
 
-from config.google_config import TERAKOYA_SPREADSHEET_URL
 from config.mail_config import TERAKOYA_GMAIL_ADDRESS, TERAKOYA_GROUP_MAIL_ADDRESS
 
 TERAKOYA_GMAIL_FROM = "" if TERAKOYA_GMAIL_ADDRESS is None else TERAKOYA_GMAIL_ADDRESS
@@ -105,71 +99,6 @@ class Remind():
         self.__ses_client.send(self.email, subject, body, TERAKOYA_GROUP_MAIL_CC, img_fpath)
 
 
-SYSTEM_SHEET_COLUMN_ALPHABET_DICT = {
-    "名前": "A",
-    "メールアドレス": "B",
-    "参加日": "C",
-    "参加希望": "D",
-    "拠点": "E",
-    "リマインドメール送信済み": "F"
-}
-
-
-# TODO: Delete　this after the way using DynamoDB starts
-class RemindSpreadsheet(Remind):
-    def update_is_reminded(self, worksheet: Worksheet) -> None:
-        match_row_numbers = self.__find_match_row_numbers(worksheet)
-        cell_address = SYSTEM_SHEET_COLUMN_ALPHABET_DICT["リマインドメール送信済み"] + str(match_row_numbers[0])  # ex: B5
-        worksheet.update_acell(cell_address, "済")
-
-    def __find_match_row_numbers(self, worksheet: Worksheet) -> List[int]:
-        search_keywords = [self.email, self.booking_date,
-                           self.terakoya_type, self.place]
-        match_row_numbers: List[int] = []
-        for search_word in search_keywords:
-            cells = worksheet.findall(search_word)
-            # get a list of the cell's row numbers
-            row_numbers: List[int] = [cell.row for cell in cells]
-            if len(match_row_numbers) == 0:
-                match_row_numbers = row_numbers
-            else:
-                # get a intersection of row numbers common to two lists
-                match_row_numbers = list(set(
-                    copy.copy(match_row_numbers)) & set(row_numbers))
-        return match_row_numbers
-
-    def should_send_email(self) -> bool:
-        """
-        whether date diff is within a day (24h)
-        return -2 < diff_days < 2 : whether it's from 2 days before to 2 days after
-        """
-        return (DT.convert_slashdate_to_datetime(self.booking_date) - DT.CURRENT_JST_DATETIME).days == 0
-
-
-def main_spreadsheet(sheet_name: str = "system") -> None:
-    """
-    NOTE: possible to spcity another sheet_name for test
-    """
-    system_sheet = Spreadsheet(TERAKOYA_SPREADSHEET_URL).get_worksheet(sheet_name)
-    records_after_today = [rec for rec in system_sheet.get_all_records() if DT.convert_slashdate_to_datetime(
-        rec["参加日"]) > DT.CURRENT_JST_DATETIME and rec["リマインドメール送信済み"] != "済"]
-    for record in records_after_today:
-        print(f"Record: {str(dict(record))}")
-        try:
-            remind_spreadsheet = RemindSpreadsheet(
-                record["名前"], record["拠点"], record["メールアドレス"], record["参加日"], record["参加希望"])
-            if (not (remind_spreadsheet.should_send_email())):
-                print("No need to send a email")
-                continue
-            if (remind_spreadsheet.terakoya_type == "カフェ塾テラコヤ(池袋)" and remind_spreadsheet.place == ""):
-                print("Impossible to send a email because of no place filled in Ikebukuro")
-                continue
-            remind_spreadsheet.send_remind_mail()
-            remind_spreadsheet.update_is_reminded(system_sheet)
-        except:
-            continue
-
-
 def main_dynamodb() -> None:
     # Map定義
     # https://terakoya20220112.slack.com/archives/C02V0PHDGP2/p1675009220056179
@@ -197,13 +126,11 @@ def main_dynamodb() -> None:
 
 def lambda_handler(event, context):
     try:
-        # main_spreadsheet()
         main_dynamodb()
     except Exception as e:
         print(f"Error happend. Error message: {str(e)}")
 
 
 if __name__ == '__main__':
-    # main_spreadsheet("system_test")
     # main_dynamodb()
     pass
