@@ -1,4 +1,3 @@
-
 import json
 
 
@@ -7,20 +6,22 @@ class Account():
         request_body = json.loads(event["body"])
         self.email = request_body["email"]
         self.password = request_body["password"]
-
-    def isValidUser(self) -> bool:
-        return self.email == 'terakoyaf69e5@test.stopgap' and self.password == 'AIzaSyDlP_gO0lse_wEZxmMBUbPtjLf5xgcL5Qk'
+        self.is_valid_user = self.email == 'terakoyaf69e5@admin.stopgap' and self.password == 'admin2021terakoya'
 
 
 def lambda_handler(event, context):
     try:
         user = Account(event)
-        if (user.isValidUser):
+        if (user.is_valid_user):
             return {
-                "statusCode": 200,
-                "message": "Success"
+                'resultType': 1,
+                'message': 'Success'
             }
         else:
             raise Exception("Failed login")
     except Exception as e:
         print(f"Error happend. Error message: {str(e)}")
+        return {
+            'resultType': 0,
+            'message': 'Failed'
+        }
