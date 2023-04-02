@@ -144,6 +144,10 @@ class BookingViaDynamoDB(IBooking):
 def lambda_handler(event, context):
     try:
         BookingViaDynamoDB(event["body"]).book()
+        return {
+            "statusCode": 200,
+            "message": "Success"
+        }
     except Exception as e:
         print(f"Error happend. Error message: {str(e)}")
 
