@@ -39,9 +39,8 @@ class BookingItem:
         remarks: str,
         is_reminded: int = 0,
     ) -> None:
-        self.date_unix_time = DT.convert_iso_to_timestamp(date)
-        self.sk = f"#{email}#{terakoya_type}#{place}"
         self.date = date
+        self.sk = f"#{email}#{terakoya_type}#{place}"
         self.email = email
         self.terakoya_type = terakoya_type
         self.place = place
@@ -60,6 +59,7 @@ class BookingItem:
         self.how_to_know_terakoya = how_to_know_terakoya
         self.remarks = remarks
         self.is_reminded = is_reminded
+        self.date_unix_time = DT.convert_iso_to_timestamp(date)
 
 
 class BookingDynamoDB:
@@ -77,10 +77,8 @@ class BookingDynamoDB:
         """
         primary_key = f"#{item.date}{item.sk}"
         cls.__table.put_item(Item={
-            # https://www.blog.danishi.net/2019/08/09/post-2091/
-            "date_unix_time": DT.convert_iso_to_timestamp(item.date),
-            "sk": item.sk,
             "date": item.date,
+            "sk": item.sk,
             "email": item.email,
             "terakoya_type": item.terakoya_type,
             "place": item.place,
@@ -101,13 +99,15 @@ class BookingDynamoDB:
             "remarks": item.remarks,
             "timestamp": timestamp,
             "uid": hashlib.md5(primary_key.encode()).hexdigest(),
+            # https://www.blog.danishi.net/2019/08/09/post-2091/
+            "date_unix_time": DT.convert_iso_to_timestamp(item.date),
         })
 
     @classmethod
     def update_is_reminded(cls, sk: str):
         cls.__table.update_item(
             Key={
-                "date_unix_time": DT.convert_iso_to_timestamp(DT.CURRENT_JST_ISO_8601_ONLY_DATE),
+                "date": DT.CURRENT_JST_ISO_8601_ONLY_DATE,
                 "sk": sk
             },
             ConditionExpression="#is_reminded <> :is_reminded_true",
@@ -120,20 +120,24 @@ class BookingDynamoDB:
             })
 
     @classmethod
-    def get_item_list_after_today(cls):
+    def get_item_list(cls, target_date: str):
+        # PK can only accept the "=" operator
+        # https://dynobase.dev/dynamodb-errors/dynamodb-query-key-condition-not-supported/
+        # Key condition types
+        # https://docs.aws.amazon.com/ja_jp/amazondynamodb/latest/developerguide/LegacyConditionalParameters.KeyConditions.html
         items = cls.__table.query(
-            KeyConditionExpression=Key("date_unix_time").gte(int(DT.CURRENT_JST_DATETIME.timestamp())),
+            KeyConditionExpression=Key("date").eq(target_date),
         ).get("Items", [])
         return items
 
-    @classmethod
+    @ classmethod
     def get_item_list_for_remind(cls):
         IS_NOT_REMINDED = 0
         # Limit of query
         # https://zoe6120.com/2019/02/20/503/
         items = cls.__table.query(
-            KeyConditionExpression=Key("date_unix_time").eq(
-                DT.convert_iso_to_timestamp(DT.CURRENT_JST_ISO_8601_ONLY_DATE)),
+            KeyConditionExpression=Key("date").eq(
+                DT.CURRENT_JST_ISO_8601_ONLY_DATE),
             FilterExpression=Attr("is_reminded").eq(IS_NOT_REMINDED)
         ).get("Items", [])
 

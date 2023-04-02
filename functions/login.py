@@ -14,7 +14,7 @@ def lambda_handler(event, context):
         user = Account(event)
         if (user.is_valid_user):
             return {
-                'resultType': 1,
+                'result_type': 1,
                 'message': 'Success'
             }
         else:
@@ -22,6 +22,6 @@ def lambda_handler(event, context):
     except Exception as e:
         print(f"Error happend. Error message: {str(e)}")
         return {
-            'resultType': 0,
+            'result_type': 0,
             'message': 'Failed'
         }
