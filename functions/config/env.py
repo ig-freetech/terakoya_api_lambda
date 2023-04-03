@@ -1,7 +1,7 @@
 import os
 # TODO: Comment out the following line in Lambda console after deployment
-from dotenv import load_dotenv
-load_dotenv()
+# from dotenv import load_dotenv
+# load_dotenv()
 
 # https://docs.aws.amazon.com/ja_jp/lambda/latest/dg/configuration-envvars.html
 
@@ -15,3 +15,7 @@ SES_TEST_ADDRESS_2 = os.getenv("SES_TEST_ADDRESS_2")
 
 # Dynamo DB
 DYNAMO_DB_BOOKING_TABLE = os.getenv("DYNAMO_DB_BOOKING_TABLE")
+
+# Terakoya Mail
+TERAKOYA_GMAIL_ADDRESS = os.getenv("TERAKOYA_GMAIL_ADDRESS")
+TERAKOYA_GROUP_MAIL_ADDRESS = os.getenv("TERAKOYA_GROUP_MAIL_ADDRESS")

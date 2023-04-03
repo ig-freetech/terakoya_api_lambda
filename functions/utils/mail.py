@@ -1,21 +1,18 @@
 import os
 import sys
-from time import sleep
 from abc import ABCMeta, abstractmethod
 
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from email.mime.image import MIMEImage
 from email.policy import SMTPUTF8
-import smtplib
 import boto3
 from botocore.exceptions import ClientError
 
 ROOT_DIR_PATH = os.path.dirname(os.path.dirname(__file__))
 sys.path.append(ROOT_DIR_PATH)
 
-from config.mail_config import TERAKOYA_GMAIL_ADDRESS
-from config.aws_config import AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, AWS_DEFAULT_REGION, SES_TEST_ADDRESS_1, SES_TEST_ADDRESS_2
+from config.env import AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, AWS_DEFAULT_REGION, SES_TEST_ADDRESS_1, SES_TEST_ADDRESS_2, TERAKOYA_GMAIL_ADDRESS
 
 
 class IMail(metaclass=ABCMeta):
