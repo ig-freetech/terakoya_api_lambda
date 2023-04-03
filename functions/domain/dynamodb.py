@@ -40,7 +40,7 @@ class BookingItem:
         is_reminded: int = 0,
     ) -> None:
         self.date = date
-        self.sk = f"#{email}#{terakoya_type}#{place}"
+        self.sk = f"#{email}#{terakoya_type}"
         self.email = email
         self.terakoya_type = terakoya_type
         self.place = place
@@ -120,6 +120,21 @@ class BookingDynamoDB:
             })
 
     @classmethod
+    def update_place(cls, date: str, sk: str, place: int):
+        cls.__table.update_item(
+            Key={
+                "date": date,
+                "sk": sk
+            },
+            UpdateExpression="set #place = :new_place",
+            ExpressionAttributeNames={
+                "#place": "place"
+            },
+            ExpressionAttributeValues={
+                ":new_place": place
+            })
+
+    @classmethod
     def get_item_list(cls, target_date: str):
         # PK can only accept the "=" operator
         # https://dynobase.dev/dynamodb-errors/dynamodb-query-key-condition-not-supported/
@@ -145,7 +160,7 @@ class BookingDynamoDB:
             cast(str, item["date"]),  # PK
             cast(str, item["email"]),  # SK
             cast(int, item["terakoya_type"]),  # SK
-            cast(int, item["place"]),  # SK
+            cast(int, item.get("place", PLACE.NULL)),
             cast(str, item.get("name", "")),
             cast(int, item.get("grade", GRADE.NULL)),
             cast(int, item.get("arrival_time", ARRIVAL_TIME.NULL)),
