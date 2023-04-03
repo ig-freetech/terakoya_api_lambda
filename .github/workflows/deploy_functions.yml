@@ -25,6 +25,9 @@ jobs:
           aws s3 cp ./functions_dev.zip s3://${{ secrets.AWS_S3_TERAKOYA_BUCKET_NAME }}/lambda/booking/
           aws lambda update-function-code --function-name terakoya-booking-dev-book --s3-bucket terakoya-bucket --s3-key lambda/booking/functions_dev.zip
           aws lambda update-function-code --function-name terakoya-booking-dev-remind --s3-bucket terakoya-bucket --s3-key lambda/booking/functions_dev.zip
+          aws lambda update-function-code --function-name terakoya-booking-dev-login --s3-bucket terakoya-bucket --s3-key lambda/booking/functions_dev.zip
+          aws lambda update-function-code --function-name terakoya-booking-dev-book-list --s3-bucket terakoya-bucket --s3-key lambda/booking/functions_dev.zip
+          aws lambda update-function-code --function-name terakoya-booking-dev-book-edit-place --s3-bucket terakoya-bucket --s3-key lambda/booking/functions_dev.zip
 
       - name: Deploy to Prod
         if: contains(toJSON(github.ref), 'master')
@@ -33,6 +36,9 @@ jobs:
           aws s3 cp ./functions_prod.zip s3://${{ secrets.AWS_S3_TERAKOYA_BUCKET_NAME }}/lambda/booking/
           aws lambda update-function-code --function-name terakoya-booking-prod-book --s3-bucket terakoya-bucket --s3-key lambda/booking/functions_prod.zip
           aws lambda update-function-code --function-name terakoya-booking-prod-remind --s3-bucket terakoya-bucket --s3-key lambda/booking/functions_prod.zip
+          aws lambda update-function-code --function-name terakoya-booking-prod-login --s3-bucket terakoya-bucket --s3-key lambda/booking/functions_prod.zip
+          aws lambda update-function-code --function-name terakoya-booking-prod-book-list --s3-bucket terakoya-bucket --s3-key lambda/booking/functions_prod.zip
+          aws lambda update-function-code --function-name terakoya-booking-prod-book-edit-place --s3-bucket terakoya-bucket --s3-key lambda/booking/functions_prod.zip
 
       #TODO: Manually set a new source code deployed above in settings of each Lambda functions
       # or execute the same number of commands as Lambda Functions like below
