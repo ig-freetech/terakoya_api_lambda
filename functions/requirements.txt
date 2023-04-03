@@ -1,6 +1,4 @@
 dataclasses-json
-gspread
-oauth2client
 boto3
 boto3-stubs
 python-dotenv

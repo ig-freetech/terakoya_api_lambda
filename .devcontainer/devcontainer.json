@@ -24,7 +24,11 @@
           "tmp": true
         }
       },
-      "extensions": ["ms-python.python", "boto3typed.boto3-ide"]
+      "extensions": [
+        "ms-python.python",
+        "boto3typed.boto3-ide",
+        "github.copilot"
+      ]
     }
   }
 }

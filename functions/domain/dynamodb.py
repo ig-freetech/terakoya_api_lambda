@@ -13,7 +13,7 @@ from utils.dt import DT
 
 from api.booking import TERAKOYA_TYPE, TERAKOYA_EXPERIENCE, GRADE, ARRIVAL_TIME, STUDY_STYLE, STUDY_SUBJECT, COURSE_CHOICE, HOW_TO_KNOW_TERAKOYA, PLACE
 
-from config.aws_config import AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, AWS_DEFAULT_REGION
+from config.env import AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, AWS_DEFAULT_REGION, DYNAMO_DB_BOOKING_TABLE
 
 
 class BookingItem:
@@ -40,7 +40,7 @@ class BookingItem:
         is_reminded: int = 0,
     ) -> None:
         self.date = date
-        self.sk = f"#{email}#{terakoya_type}#{place}"
+        self.sk = f"#{email}#{terakoya_type}"
         self.email = email
         self.terakoya_type = terakoya_type
         self.place = place
@@ -59,6 +59,7 @@ class BookingItem:
         self.how_to_know_terakoya = how_to_know_terakoya
         self.remarks = remarks
         self.is_reminded = is_reminded
+        self.date_unix_time = DT.convert_iso_to_timestamp(date)
 
 
 class BookingDynamoDB:
@@ -67,7 +68,7 @@ class BookingDynamoDB:
         aws_access_key_id=AWS_ACCESS_KEY_ID,
         aws_secret_access_key=AWS_SECRET_ACCESS_KEY,
         region_name=AWS_DEFAULT_REGION
-    ).Table("booking")
+    ).Table(DYNAMO_DB_BOOKING_TABLE)
 
     @classmethod
     def insert_item(cls, item: BookingItem, timestamp: int = int(datetime.now().timestamp())):
@@ -97,7 +98,9 @@ class BookingDynamoDB:
             "how_to_know_terakoya": item.how_to_know_terakoya,
             "remarks": item.remarks,
             "timestamp": timestamp,
-            "uid": hashlib.md5(primary_key.encode()).hexdigest()
+            "uid": hashlib.md5(primary_key.encode()).hexdigest(),
+            # https://www.blog.danishi.net/2019/08/09/post-2091/
+            "date_unix_time": DT.convert_iso_to_timestamp(item.date),
         })
 
     @classmethod
@@ -117,10 +120,39 @@ class BookingDynamoDB:
             })
 
     @classmethod
+    def update_place(cls, date: str, sk: str, place: int):
+        cls.__table.update_item(
+            Key={
+                "date": date,
+                "sk": sk
+            },
+            UpdateExpression="set #place = :new_place",
+            ExpressionAttributeNames={
+                "#place": "place"
+            },
+            ExpressionAttributeValues={
+                ":new_place": place
+            })
+
+    @classmethod
+    def get_item_list(cls, target_date: str):
+        # PK can only accept the "=" operator
+        # https://dynobase.dev/dynamodb-errors/dynamodb-query-key-condition-not-supported/
+        # Key condition types
+        # https://docs.aws.amazon.com/ja_jp/amazondynamodb/latest/developerguide/LegacyConditionalParameters.KeyConditions.html
+        items = cls.__table.query(
+            KeyConditionExpression=Key("date").eq(target_date),
+        ).get("Items", [])
+        return items
+
+    @ classmethod
     def get_item_list_for_remind(cls):
         IS_NOT_REMINDED = 0
+        # Limit of query
+        # https://zoe6120.com/2019/02/20/503/
         items = cls.__table.query(
-            KeyConditionExpression=Key("date").eq(DT.CURRENT_JST_ISO_8601_ONLY_DATE),
+            KeyConditionExpression=Key("date").eq(
+                DT.CURRENT_JST_ISO_8601_ONLY_DATE),
             FilterExpression=Attr("is_reminded").eq(IS_NOT_REMINDED)
         ).get("Items", [])
 
@@ -128,7 +160,7 @@ class BookingDynamoDB:
             cast(str, item["date"]),  # PK
             cast(str, item["email"]),  # SK
             cast(int, item["terakoya_type"]),  # SK
-            cast(int, item["place"]),  # SK
+            cast(int, item.get("place", PLACE.NULL)),
             cast(str, item.get("name", "")),
             cast(int, item.get("grade", GRADE.NULL)),
             cast(int, item.get("arrival_time", ARRIVAL_TIME.NULL)),

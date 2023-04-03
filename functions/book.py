@@ -10,10 +10,8 @@ from domain.dynamodb import BookingDynamoDB, BookingItem
 
 from utils.mail import SesMail
 from utils.dt import DT
-from utils.spreadsheet import Spreadsheet
 
-from config.mail_config import TERAKOYA_GMAIL_ADDRESS, TERAKOYA_GROUP_MAIL_ADDRESS
-from config.google_config import TERAKOYA_SPREADSHEET_URL
+from config.env import TERAKOYA_GMAIL_ADDRESS, TERAKOYA_GROUP_MAIL_ADDRESS
 
 TERAKOYA_GMAIL_FROM = "" if TERAKOYA_GMAIL_ADDRESS is None else TERAKOYA_GMAIL_ADDRESS
 TERAKOYA_GROUP_MAIL_CC = "" if TERAKOYA_GROUP_MAIL_ADDRESS is None else TERAKOYA_GROUP_MAIL_ADDRESS
@@ -62,111 +60,6 @@ class IBooking(metaclass=ABCMeta):
     @abstractmethod
     def book(self) -> None:
         raise NotImplementedError()
-
-
-# TODO: Delete this after the way using DynamoDB starts
-class BookingViaSpreadsheet(IBooking):
-    """
-    NOTE: change main and system's sheet name to another one to test
-    """
-    __spread_sheet = Spreadsheet(TERAKOYA_SPREADSHEET_URL)
-    # for test
-    __main_sheet = __spread_sheet.get_worksheet("main_test")
-    __system_sheet = __spread_sheet.get_worksheet("system_test")
-    # __main_sheet = __spread_sheet.get_worksheet("参加予約_system")
-    # __system_sheet = __spread_sheet.get_worksheet("system")
-
-    TERAKOYA_TYPE_PLACE_DICT = {
-        "カフェ塾テラコヤ(池袋)": "",
-        "オンラインテラコヤ(多摩)": "キャリア・マム",
-        "テラコヤ中等部(池袋)": "サンシャインシティ",
-        "テラコヤ中等部(渋谷)": "キカガク"
-    }
-
-    def __record_to_main(self) -> None:
-        MAIN_SHEET_TIMESTAMP_FORMAT = f"%Y/%m/%d %H:%M:%S"
-        dt_jst = DT.CURRENT_JST_DATETIME.strftime(MAIN_SHEET_TIMESTAMP_FORMAT)
-        print(f"Record: {self.email},{self.attendance_date_list},{self.terakoya_type}")
-        if (self.__exists_record_in_main()):
-            print("Already registered in Main")
-            return
-        self.__main_sheet.append_row([
-            dt_jst,
-            self.name,
-            self.terakoya_type,
-            self.arrival_time,
-            self.grade,
-            ",".join(self.attendance_date_list),
-            self.terakoya_experience,
-            self.study_subject,
-            self.study_subject_detail,
-            self.study_style,
-            self.school_name,
-            self.course_choice,
-            self.future_free,
-            self.like_thing_free,
-            self.how_to_know_terakoya,
-            self.email,
-            self.remarks
-        ])
-
-    def __record_to_system(self) -> None:
-        for attendance_date in self.attendance_date_list:
-            print(f"Record: {self.email},{attendance_date},{self.terakoya_type}")
-            if (self.__exists_record_in_system(attendance_date)):
-                print("Already registered in System")
-                continue
-            self.__system_sheet.append_row([
-                self.name,
-                self.email,
-                attendance_date,
-                self.terakoya_type,
-                self.TERAKOYA_TYPE_PLACE_DICT[self.terakoya_type]
-            ])
-
-    def __exists_record_in_main(self) -> bool:
-        records_after_today = [rec for rec in self.__main_sheet.get_all_records() if len(
-            [x for x in rec["参加希望日"].split(",") if DT.convert_slashdate_to_datetime(x) > DT.CURRENT_JST_DATETIME]) > 0]
-        same_records = [rec for rec in records_after_today
-                        if len(list(set(rec["参加希望日"].split(",")) ^ set(self.attendance_date_list))) == 0
-                        and rec["メールアドレス"] == self.email
-                        and rec["参加希望"] == self.terakoya_type
-                        ]
-        return len(same_records) > 0
-
-    def __exists_record_in_system(self, attendance_date: str) -> bool:
-        records_after_today = [rec for rec in self.__system_sheet.get_all_records() if DT.convert_slashdate_to_datetime(
-            rec["参加日"]) > DT.CURRENT_JST_DATETIME]
-        searched_records = [rec for rec in records_after_today
-                            if rec["参加日"] == attendance_date
-                            and rec["メールアドレス"] == self.email
-                            and rec["参加希望"] == self.terakoya_type
-                            ]
-        return len(searched_records) > 0
-
-    def send_confirmation_email(self) -> None:
-        subject = "【カフェ塾テラコヤ】参加予約完了"
-        body = f"""
-            <p>{self.name}様</p>
-            <p>カフェ塾テラコヤへの参加予約が完了致しました。</p>
-            <p>予約内容は以下の通りです。</p>
-            <br/>
-            <p>参加区分: {self.terakoya_type}</p>
-            <p>参加希望日: {",".join(self.attendance_date_list)}</p>
-            <p>来れそうな時間帯: {self.arrival_time}</p>
-            <p>テラコヤへの参加経験: {self.terakoya_experience}</p>
-            <p>備考: {self.remarks}</p>
-            <br/>
-            {MAIL_BODY_CONTACT}
-        """
-        self.ses_client.send(self.email, subject, body, TERAKOYA_GROUP_MAIL_CC)
-
-    def book(self) -> None:
-        print(f"Record: {str(self.__dict__)}")
-        self.__record_to_main()
-        self.__record_to_system()
-        self.send_confirmation_email()
-        print("Record completed!")
 
 
 class BookingViaDynamoDB(IBooking):
@@ -250,15 +143,16 @@ class BookingViaDynamoDB(IBooking):
 
 def lambda_handler(event, context):
     try:
-        # BookingViaSpreadsheet(event["body"]).book()
         BookingViaDynamoDB(event["body"]).book()
+        return {
+            "statusCode": 200,
+            "message": "Success"
+        }
     except Exception as e:
         print(f"Error happend. Error message: {str(e)}")
 
 
 if __name__ == "__main__":
-    spreadsheet_event_body = '{"name": "Test(I.G)", "email": "i.g.freetech2021@gmail.com", "terakoya_type": "カフェ塾テラコヤ(池袋)", "attendance_date_list": ["01/31 (火)", "02/07 (火)", "01/30 (月)"], "arrival_time": "17:00前", "grade": "その他", "terakoya_experience": "過去に参加したことがある", "study_subject": "社会", "study_subject_detail": "勉強したい科目の詳細", "study_style": "その他", "school_name": "XX学校", "course_choice": "文系", "future_free": "将来の夢・目標", "like_thing_free": "好きなこと・もの", "how_to_know_terakoya": "知人の紹介", "remarks": "備考"}'
-    # BookingViaSpreadsheet(spreadsheet_event_body).book()
     dynamodb_event_body = '''
     {
         "name": "Test",
