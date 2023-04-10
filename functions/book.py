@@ -142,6 +142,7 @@ class BookingViaDynamoDB(IBooking):
 
 
 def lambda_handler(event, context):
+    print(f"Request body: {event['body']}")
     try:
         BookingViaDynamoDB(event["body"]).book()
         return {

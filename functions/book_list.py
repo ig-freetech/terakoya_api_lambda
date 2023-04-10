@@ -8,6 +8,7 @@ from domain.dynamodb import BookingDynamoDB
 
 
 def lambda_handler(event, context):
+    print(f"Request: {event}")
     try:
         # How to get a query parameter value
         # https://qiita.com/minsu/items/c9e983f109b1cf5a516e

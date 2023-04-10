@@ -1,12 +1,14 @@
 {
-  "name": "terakoya-api-py3.9",
-  "dockerComposeFile": "../docker-compose.yml",
-  "service": "py3.9",
-  "workspaceFolder": "/functions",
+  "name": "terakoya-api-lambda",
+  "build": {
+    "dockerfile": "Dockerfile",
+    "context": ".."
+  },
   "customizations": {
     "vscode": {
       "settings": {
-        "python.autoComplete.extraPaths": ["/functions/python/"],
+        "terminal.integrated.shell.linux": "/bin/bash",
+        "python.autoComplete.extraPaths": ["/workspaces/terakoya_api_lambda/functions/python/"],
         "editor.formatOnSave": true,
         "python.formatting.provider": "autopep8",
         "python.formatting.autopep8Args": [
@@ -27,7 +29,8 @@
       "extensions": [
         "ms-python.python",
         "boto3typed.boto3-ide",
-        "github.copilot"
+        "github.copilot",
+        "eamodio.gitlens"
       ]
     }
   }
