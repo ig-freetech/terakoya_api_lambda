@@ -1,20 +1,34 @@
 import os
 import sys
-from datetime import datetime
-from typing import List, Dict
 
 ROOT_DIR_PATH = os.path.dirname(__file__)
 sys.path.append(ROOT_DIR_PATH)
 
-from utils.dt import convert_to_datetime, calc_two_dates_diff_days, CURRENT_DATETIME
-from utils.spreadsheet import get_system_future_records, find_cell_address, update_cell
-from utils.mail import close_gmail_server, send_email
+from domain.dynamodb import BookingDynamoDB
 
-SHEET_NAME = "system"
-SHEET_URL = f"https://sheets.googleapis.com/v4/spreadsheets/1TFjUeVX36bSsGVoyRtFO1CJX8uVc52wAx6O2pvSbdUk/values/{SHEET_NAME}?key=AIzaSyCvhazrcQ92ov-kBa8HEZvkYYUO6rp2f6I"
-SUNSHINE_MAP_IMG_FILE_NAME = "sunshine-map.jpg"
+from api.booking import TERAKOYA_TYPE, PLACE
 
-PLACE_DICT: Dict[str, str] = {
+from utils.mail import SesMail
+
+from config.env import TERAKOYA_GMAIL_ADDRESS, TERAKOYA_GROUP_MAIL_ADDRESS
+
+TERAKOYA_GMAIL_FROM = "" if TERAKOYA_GMAIL_ADDRESS is None else TERAKOYA_GMAIL_ADDRESS
+TERAKOYA_GROUP_MAIL_CC = "" if TERAKOYA_GROUP_MAIL_ADDRESS is None else TERAKOYA_GROUP_MAIL_ADDRESS
+
+MAIL_BODY_CONTACT = """
+    <p>お会いできますことを心よりお待ちしております。</p>
+    <p>塾長 前田</p>
+    <br/>
+    <p>このメールは送信専用メールアドレスから配信しています。</p>
+    <p>返信頂いてもご回答できませんのでご了承ください。</p>
+    <p>※予約キャンセルの場合やその他ご不明点等ありましたら、下記連絡先 または 公式LINE からご連絡下さい。</p>
+    <p>＝＝＝＝＝＝＝連絡先＝＝＝＝＝＝＝＝</p>
+    <p>電話番号：090-6543-0718</p>
+    <p>メールアドレス：info@npoterakoya.org</p>
+    <p>＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝</p>
+"""
+
+PLACE_DICT = {
     "サンシャインシティ": """
         <p>■サンシャインシティ住所</p>
         <p>〒170-8630</p>
@@ -31,7 +45,7 @@ PLACE_DICT: Dict[str, str] = {
         <p>東京都豊島区</p>
         <p>東池袋4丁目26-3</p>
         <p>https://www.muji.com/jp/ja/shop/detail/046675</p>
-        <p>17:00以降に来られる場合は、到着しましたら公式LINEからご連絡下さい。</p>
+        <p>初回参加の方や17:00以降に到着される場合はご案内致しますので公式LINEからご連絡下さい。</p>
         <p>よろしくお願いします。</p>
     """,
     "DIORAMA CAFE": """
@@ -56,98 +70,67 @@ PLACE_DICT: Dict[str, str] = {
     """
 }
 
-REMIND_MAIL_ALREADY_SENT_COLUMN_NUMBER = 6
 
-ALREADY_REMIND_MAIL_COLUMN_NAME = "リマインドメール送信済み"
-ALREADY_REMIND_MAIL_VALUE = "済"
+class Remind():
+    __ses_client = SesMail(TERAKOYA_GMAIL_FROM)
 
+    # booking_date, terakoya_type are used only for spreadsheet
+    def __init__(self, name: str, place: str, email: str, booking_date: str = "", terakoya_type: str = "") -> None:
+        self.name = name
+        self.place = place
+        self.email = email
+        self.booking_date = booking_date
+        self.terakoya_type = terakoya_type
 
-class StudentInfo:
-    name = ''
-    original_reserved_date = ''
-    reserved_datetime: datetime
-    email = ''
-    terakoya_type = ''
-    place = ''
-
-
-def get_student_info_list() -> List[StudentInfo]:
-    future_system_records = get_system_future_records()
-    print(f"(Post-dating records counts: {len(future_system_records)}) Post-dating records are below:")
-    print("\n".join(map(lambda x: str(x), future_system_records)))
-    filtered_student_info_list = [res_student_info for res_student_info in future_system_records if
-                                  res_student_info["リマインドメール送信済み"] != "済"]
-    print(
-        f"(Post-dating unsent e-mail records counts: {len(filtered_student_info_list)}) Post-dating unsent e-mail records are below:")
-    print("\n".join(map(lambda x: str(x), filtered_student_info_list)))
-
-    student_info_list = []
-    for filtered_student_info in filtered_student_info_list:
-        student_info = StudentInfo()
-        student_info.name = filtered_student_info["名前"]
-        student_info.original_reserved_date = filtered_student_info["参加日"]
-        student_info.reserved_datetime = convert_to_datetime(
-            filtered_student_info["参加日"])
-        student_info.email = filtered_student_info["メールアドレス"]
-        student_info.terakoya_type = filtered_student_info["参加希望"]
-        student_info.place = filtered_student_info["拠点"]
-        student_info_list.append(student_info)
-
-    return student_info_list
+    def send_remind_mail(self) -> None:
+        subject = '【カフェ塾テラコヤ】ご参加当日のお知らせ'
+        body = f"""
+            <p>{self.name}様</p>
+            <p>カフェ塾テラコヤへの参加予約ありがとうございました。</p>
+            <p>ご予約の当日となりましたので、お知らせ申し上げます。</p>
+            <p>本日は、{self.place}にお越し下さい。</p>
+            <p>住所の詳細等につきましては本メール下部に記載しておりますので、ご確認下さい。</p>
+            <br/>
+            {MAIL_BODY_CONTACT}
+            <br/>
+            {PLACE_DICT[self.place]}
+        """
+        img_fpath = os.path.join(ROOT_DIR_PATH, "assets", "sunshine-map.jpg") if self.place == "サンシャインシティ" else ""
+        self.__ses_client.send(self.email, subject, body, TERAKOYA_GROUP_MAIL_CC, img_fpath)
 
 
-def update_already_remind_mail_column(student_info: StudentInfo):
-    search_words = [student_info.email, student_info.original_reserved_date,
-                    student_info.terakoya_type, student_info.place]
-    cell_address = find_cell_address(
-        search_words=search_words, column_name=ALREADY_REMIND_MAIL_COLUMN_NAME)
-    update_cell(cell_address=cell_address, value=ALREADY_REMIND_MAIL_VALUE)
+def main_dynamodb() -> None:
+    # Map定義
+    # https://terakoya20220112.slack.com/archives/C02V0PHDGP2/p1675009220056179
+    PLACE_MAP = {
+        0: "",  # 未設定状態
+        1: "サンシャインシティ",
+        2: "良品計画本社",
+        3: "DIORAMA CAFE",
+        4: "キャリア・マム",
+        5: "キカガク"
+    }
 
-
-def send_remind_mail_list(student_info_list: List[StudentInfo]):
-    for student_info in student_info_list:
-        print("(Check whether to send a e-mail) StudentInfo: " + str(student_info.__dict__))
-        if(should_send_email(student_info.reserved_datetime)):
-            print("Should send a e-mail.")
-            if(student_info.terakoya_type == "カフェ塾テラコヤ(池袋)" and student_info.place == ''):
-                print(f"Place in Ikebukuro is not filled.")
+    bk_item_list = BookingDynamoDB.get_item_list_for_remind()
+    for bk_item in bk_item_list:
+        print(f"Booking Item: {str(bk_item.__dict__)}")
+        try:
+            if (bk_item.terakoya_type == TERAKOYA_TYPE.HIGH_IKE and bk_item.place == PLACE.TBD):
+                print("Impossible to send a email because of no place filled in Ikebukuro")
                 continue
-            subject = 'ご参加当日のお知らせ'  # 件名
-            body_main = f'''
-                <p>{student_info.name}様</p>
-                <p>カフェ塾テラコヤへの参加予約ありがとうございました。</p>
-                <p>ご予約の当日となりましたので、お知らせ申し上げます。</p>
-                <p>本日は、{student_info.place}にお越し下さい。</p>
-                <p>住所の詳細等につきましては本メール下部に記載しておりますので、ご確認下さい。</p>
-            '''  # 本文
-            img_file_name = SUNSHINE_MAP_IMG_FILE_NAME if student_info.place == "サンシャインシティ" else None
-            send_email(mail_address_to=student_info.email,
-                       subject=subject, body_main=body_main, body_footer=PLACE_DICT[student_info.place], img_file_name=img_file_name)
-            update_already_remind_mail_column(student_info=student_info)
-        else:
-            continue
-    close_gmail_server()
-
-
-def should_send_email(reserved_datetime: datetime):
-    diff_days = calc_two_dates_diff_days(reserved_datetime, CURRENT_DATETIME)
-    print(f"Dates difference is {str(diff_days)} day(s).")
-    return diff_days == 0  # 日時差分が1日以内ならばメール送信の必要あり
-    # return -2 < diff_days < 2  # 日時差分が前後2日以内 (test)
-
-
-def main():
-    try:
-        student_info_list = get_student_info_list()
-        send_remind_mail_list(student_info_list)
-        print("Finished sending remind e-mails.")
-    except Exception as e:
-        print("Error happend. Error message: " + str(e))
+            Remind(bk_item.name, PLACE_MAP[bk_item.place], bk_item.email).send_remind_mail()
+            BookingDynamoDB.update_is_reminded(bk_item.sk)
+        except Exception as e:
+            print(f"Error happend. Error message: {str(e)}")
 
 
 def lambda_handler(event, context):
-    main()
+    try:
+        main_dynamodb()
+    except Exception as e:
+        print(f"Error happend. Error message: {str(e)}")
 
 
 if __name__ == '__main__':
-    main()
+    # main_dynamodb()
+    pass

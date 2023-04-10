@@ -1,19 +1,37 @@
 {
-  "name": "terakoya-api-py3.9",
-  "dockerComposeFile": "../docker-compose.yml",
-  "service": "py3.9",
-  "workspaceFolder": "/functions",
-  "settings": {
-    "python.autoComplete.extraPaths": ["/functions/python/"],
-    "editor.formatOnSave": true,
-    "python.formatting.provider": "autopep8",
-    "python.formatting.autopep8Args": [
-      "--max-line-length",
-      "120",
-      "--ignore",
-      "E402"
-    ],
-    "python.analysis.typeCheckingMode": "basic"
+  "name": "terakoya-api-lambda",
+  "build": {
+    "dockerfile": "Dockerfile",
+    "context": ".."
   },
-  "extensions": ["ms-python.python"]
+  "customizations": {
+    "vscode": {
+      "settings": {
+        "terminal.integrated.shell.linux": "/bin/bash",
+        "python.autoComplete.extraPaths": ["/workspaces/terakoya_api_lambda/functions/python/"],
+        "editor.formatOnSave": true,
+        "python.formatting.provider": "autopep8",
+        "python.formatting.autopep8Args": [
+          "--max-line-length",
+          "120",
+          "--ignore",
+          "E402"
+        ],
+        "python.analysis.typeCheckingMode": "basic",
+        "python.languageServer": "Pylance",
+        "files.exclude": {
+          "**/.DS_Store": true,
+          "**/.pytest_cache": true,
+          "**/__pycache__": true,
+          "tmp": true
+        }
+      },
+      "extensions": [
+        "ms-python.python",
+        "boto3typed.boto3-ide",
+        "github.copilot",
+        "eamodio.gitlens"
+      ]
+    }
+  }
 }
