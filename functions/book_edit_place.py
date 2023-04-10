@@ -9,6 +9,7 @@ from domain.dynamodb import BookingDynamoDB
 
 
 def lambda_handler(event, context):
+    print(f"Request body: {event['body']}")
     try:
         request_body = json.loads(event['body'])
         date = request_body["date"]

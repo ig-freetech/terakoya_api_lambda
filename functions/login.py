@@ -10,6 +10,7 @@ class Account():
 
 
 def lambda_handler(event, context):
+    print(f"Request body: {event['body']}")
     try:
         user = Account(event)
         if (user.is_valid_user):
