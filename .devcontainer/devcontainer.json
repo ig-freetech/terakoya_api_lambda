@@ -7,8 +7,15 @@
   "customizations": {
     "vscode": {
       "settings": {
-        "terminal.integrated.shell.linux": "/bin/bash",
-        "python.autoComplete.extraPaths": ["/workspaces/terakoya_api_lambda/functions/python/"],
+        "terminal.integrated.profiles.linux": {
+          "bash": {
+            "path": "bash",
+            "args": []
+          }
+        },
+        "python.autoComplete.extraPaths": [
+          "/workspaces/terakoya_api_lambda/functions/python/"
+        ],
         "editor.formatOnSave": true,
         "python.formatting.provider": "autopep8",
         "python.formatting.autopep8Args": [
@@ -29,6 +36,7 @@
       "extensions": [
         "ms-python.python",
         "boto3typed.boto3-ide",
+        "ms-azuretools.vscode-docker",
         "github.copilot",
         "eamodio.gitlens"
       ]

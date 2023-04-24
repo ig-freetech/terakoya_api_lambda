@@ -11,8 +11,6 @@ RUN yum update -y && \
     python3.9 -m pip install --upgrade pip
 # ソースコードでは使用しないが開発環境では必要なライブラリのインストール
 RUN pip install autopep8 pytest
-    
-COPY . .
 
 # WARNING: なぜかパッケージがインストールされない。イメージ作成時にはマウントディレクトリにパッケージをインストールできない？ 仕方ないのでパッケージインストールの度にコンテナ側で下記コマンドを打って対応
 # RUN pip install -r requirements.txt -t ./python
