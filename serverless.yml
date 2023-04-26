@@ -52,8 +52,21 @@ layers:
     # Specify the path of the layer
     path: functions/python
     compatibleRuntimes:
+      - python3.9
+    compatibleArchitectures:
       - x86_64
       - arm64
+
+# Specify the files and folders to be packaged for deployment to Lambda functions
+# https://symfoware.blog.fc2.com/blog-entry-2505.html
+# https://filip5114.github.io/sls-manage-function-package/
+# https://www.serverless.com/framework/docs/providers/aws/guide/packaging#package-configuration
+package:
+  patterns:
+    - 'functions/**'
+    - '!functions/python/**'
+    - '!functions/tmp/**'
+    - '!requirements.txt'
 
 # Lambda function settings
 # https://www.serverless.com/framework/docs/providers/aws/guide/serverless.yml#general-function-settings
@@ -88,9 +101,3 @@ functions:
   edit-booking-place:
     name: ${self:service}-${self:provider.stage}-edit-booking-place
     handler: functions/edit_booking_place.lambda_handler
-
-
-
-
-
-
