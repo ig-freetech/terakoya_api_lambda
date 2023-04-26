@@ -51,6 +51,7 @@ jobs:
       - name: Test
         run: |
           git log | grep Date
+          ls -a
 
 
       # Set the result of the step as an output parameter to use in the next step
@@ -115,6 +116,20 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: 18
+
+      # Save and restore npm packages' cache to reduce the time to install them
+      # https://github.com/actions/cache/blob/main/examples.md#node---npm
+      - name: Get npm cache directory
+        id: npm-cache-dir
+        shell: bash
+        run: echo "dir=$(npm config get cache)" >> ${GITHUB_OUTPUT}
+      - uses: actions/cache@v3
+        id: npm-cache
+        with:
+          path: ${{ steps.npm-cache-dir.outputs.dir }}
+          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-
         
       # - name: Doctor Serverless Framework
       #   uses: serverless/github-action@v3.1

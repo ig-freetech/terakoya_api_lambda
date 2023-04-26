@@ -64,7 +64,7 @@ layers:
 package:
   patterns:
     - 'functions/**'
-    - '!python/**'
+    # - '!python/**'
     - '!tmp/**'
     - '!requirements.txt'
 
