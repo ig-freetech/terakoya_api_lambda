@@ -68,13 +68,12 @@ layers:
 #     - '!tmp/**'
 #     - '!requirements.txt'
 package:
-  patterns:
-    exclude:
-      - 'functions/python/**'
-      - 'functions/tmp/**'
-      - 'functions/requirements.txt'
-    include:
-      - 'functions/**'
+  exclude:
+    - 'functions/python/**'
+    - 'functions/tmp/**'
+    - 'functions/requirements.txt'
+  include:
+    - 'functions/**'
 
 # Lambda function settings
 # https://www.serverless.com/framework/docs/providers/aws/guide/serverless.yml#general-function-settings
