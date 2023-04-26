@@ -1,24 +1,49 @@
+# name is used in Actions tab of GitHub
+# https://docs.github.com/ja/actions/using-workflows/workflow-syntax-for-github-actions#name
 name: Deploy Functions
 
+# on is used to specify the event that triggers the workflow
+# It's possible to specify multiple events, for example, push and pull_request
+# https://docs.github.com/ja/actions/using-workflows/workflow-syntax-for-github-actions#on
 on:
+  # push is used to trigger the workflow when a commit is pushed to the repository branch
+  # https://docs.github.com/ja/actions/using-workflows/events-that-trigger-workflows#push
   push:
     branches:
       - develop
       - master
 
+# env is used to set environment variables
+# https://docs.github.com/ja/actions/using-workflows/workflow-syntax-for-github-actions#env
 env:
   AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
   AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
   AWS_DEFAULT_REGION: ap-northeast-1
 
+# jobs is used to define one or more jobs to run in parallel or sequentially
+# https://docs.github.com/ja/actions/using-workflows/workflow-syntax-for-github-actions#jobs
 jobs:
+  # Set the arbitary name of the job
   deploy:
+    # runs-on is used to specify the type of machine to run the job
+    # Availlable machines are below
+    # https://docs.github.com/ja/actions/using-workflows/workflow-syntax-for-github-actions#jobsjob_idruns-on
     runs-on: ubuntu-latest
+    # steps is used to define a sequence of tasks to be executed by the job
+    # Each step is executed in a new process on runner, so the result of previous step's process is not available in the next step
     steps:
+      # Set the arbitary name of the step
+      # https://docs.github.com/ja/actions/using-workflows/workflow-syntax-for-github-actions#example-using-secrets
       - name: Checkout
-        uses: actions/checkout@master
+        # uses is used to specify the action pre-defined by GitHub or a Docker container to run the step or custom action defined in the same repository
+        # https://docs.github.com/ja/actions/using-workflows/workflow-syntax-for-github-actions#jobsjob_idstepsuses
+        # actions/checkout is a pre-defined action to clone the source code of the repository in the runner to run the following steps
+        # @v2, @v3 or @master is used to specify the version of the action. @v2 and @v3 are the major version of the action.
+        uses: actions/checkout@v2
 
       - name: Deploy to Dev
+        # Using if to specify the condition, only run a step if the condition is met
+        # https://docs.github.com/ja/actions/using-workflows/workflow-syntax-for-github-actions#jobsjob_idstepsif
         if: contains(toJSON(github.ref), 'develop')
         run: |
           zip -r functions_dev.zip ./functions -x '*python*'
