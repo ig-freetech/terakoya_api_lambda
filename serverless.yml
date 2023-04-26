@@ -113,8 +113,11 @@ functions:
     # Specify the event triggers of Lambda functions
     # https://dev.classmethod.jp/articles/serverless-framework-lambda-cron-execute/
     # https://www.serverless.com/framework/docs/providers/aws/guide/serverless.yml#eventbridge
+    # eventBridge properties
+    # https://www.serverless.com/framework/docs/providers/aws/events/event-bridge
     events:
       - eventBridge:
+          name: scheduled-remind
           schedule: cron(0 0,7 ? * TUE,SAT *)
   login:
     name: ${self:service}-${self:provider.stage}-login
