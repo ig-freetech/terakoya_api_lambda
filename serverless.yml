@@ -27,7 +27,8 @@ provider:
   stage: ${opt:stage, 'dev'}
   # Specify default settings of AWS resources
   # region: ap-northeast-1
-  region: ${env:AWS_DEFAULT_REGION}
+  region: us-east-1
+  # region: ${env:AWS_DEFAULT_REGION}
   # Specify default runtime of Lambda functions
   runtime: python3.9
   # Specify default architecture of Lambda functions
@@ -124,3 +125,8 @@ functions:
   edit-booking-place:
     name: ${self:service}-${self:provider.stage}-edit-booking-place
     handler: functions/edit_booking_place.lambda_handler
+
+# https://www.serverless.com/framework/docs/providers/aws/guide/resources#override-aws-cloudformation-resource
+resources:
+  extensions:
+    CreateLogGroup:

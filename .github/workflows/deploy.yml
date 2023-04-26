@@ -82,9 +82,10 @@ jobs:
           fi
 
       # Deploy the layer only when requirements.txt has changed
+      # https://github.com/actions/setup-python#basic-usage
       - name: Set up Python 3.9
         # if: steps.check_requirements.outputs.SHOULD_UPDATE_LAYER == 'true'
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v3
         with:
           python-version: 3.9
 
@@ -94,7 +95,7 @@ jobs:
         # if: steps.check_requirements.outputs.SHOULD_UPDATE_LAYER == 'true'
         # Note: Cache expires in 7 days
         # https://docs.github.com/en/actions/using-workflows/caching-dependencies-to-speed-up-workflows#usage-limits-and-eviction-policy
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         with:
           # path means the directory to save and restore the cache
           # ~/.cache/pip is the default directory to save packages installed by pip on Ubuntu
@@ -155,18 +156,6 @@ jobs:
           key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
           restore-keys: |
             ${{ runner.os }}-node-
-        
-      # - name: Doctor Serverless Framework
-      #   uses: serverless/github-action@v3.1
-      #   with:
-      #     args: doctor
-
-      # https://www.serverless.com/framework/docs/getting-started
-      # - name: Set up Serverless Framework and deploy
-      #   run: |
-      #     npm install -g serverless
-      #     sls doctor
-      #     sls deploy
 
       # npm ci is unnecessary because the packages are not node_modules in JavaScript but python modules
       # npm ci means that npm install is executed with package-lock.json deleting node_modules before installing packages without resolving　dependencies　of packages and saving them to package-lock.json
@@ -205,7 +194,7 @@ jobs:
       #     aws lambda update-function-code --function-name terakoya-booking-prod-book-list --s3-bucket terakoya-bucket --s3-key lambda/booking/functions_prod.zip
       #     aws lambda update-function-code --function-name terakoya-booking-prod-book-edit-place --s3-bucket terakoya-bucket --s3-key lambda/booking/functions_prod.zip
 
-      #TODO: Manually set a new source code deployed above in settings of each Lambda functions
+      # TODO: Manually set a new source code deployed above in settings of each Lambda functions
       # or execute the same number of commands as Lambda Functions like below
       # aws lambda update-function-code --function-name <func_name> --s3-bucket <bucket_name> --s3-key <zip_file_path>
       # aws lambda update-function-code --function-name <func_name> --s3-bucket <bucket_name> --s3-key <zip_file_path>
