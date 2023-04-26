@@ -47,6 +47,11 @@ jobs:
         # @v2 is deprecated, so @v3 is recommended
         # https://github.blog/changelog/2022-09-22-github-actions-all-actions-will-begin-running-on-node16-instead-of-node12/
         uses: actions/checkout@v3
+        # actions/checkout fetch only the latest commit of the repository by default
+        # https://zenn.dev/noraworld/articles/github-actions-checkout-fetch-depth
+        # https://github.com/actions/checkout/issues/265#issuecomment-636597844
+        with:
+          fetch-depth: 0
 
       - name: Test
         run: |
