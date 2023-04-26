@@ -44,18 +44,18 @@ provider:
 
 # Layer settings
 # https://www.serverless.com/framework/docs/providers/aws/guide/layers
-layers:
-  # Set arbitary name
-  booking:
-    # Specify the name of the layer that will be created and deployed
-    name: ${self:service}-${self:provider.stage}-layer
-    # Specify the path of the layer
-    path: functions/python
-    compatibleRuntimes:
-      - python3.9
-    compatibleArchitectures:
-      - x86_64
-      - arm64
+# layers:
+#   # Set arbitary name
+#   booking:
+#     # Specify the name of the layer that will be created and deployed
+#     name: ${self:service}-${self:provider.stage}-layer
+#     # Specify the path of the layer
+#     path: functions/python
+#     compatibleRuntimes:
+#       - python3.9
+#     compatibleArchitectures:
+#       - x86_64
+#       - arm64
 
 # Error "No file matches include / exclude patterns" happens when using patterns like below
 # Specify the files and folders to be packaged for deployment to Lambda functions
@@ -68,7 +68,8 @@ package:
     - '!python/**'
     - '!tmp/**'
     # - !functions/requirements.txt
-# Samples
+    - '!requirements.txt'
+# Sample
 # https://github.com/serverless/examples/blob/v3/aws-python-auth0-custom-authorizers-api/serverless.yml
 # Sample list
 # https://github.com/serverless/examples
