@@ -127,6 +127,7 @@ functions:
     handler: functions/edit_booking_place.lambda_handler
 
 # https://www.serverless.com/framework/docs/providers/aws/guide/resources#override-aws-cloudformation-resource
-resources:
-  extensions:
-    CreateLogGroup:
+# resources:
+#   extensions:
+#     CreateLogGroup:
+
