@@ -10,13 +10,13 @@ on:
   # https://docs.github.com/ja/actions/using-workflows/events-that-trigger-workflows#push
   push:
     branches:
-      # - develop
-      # - master
-      - 'feature/**' # test
+      - develop
+      - master
+      # - 'feature/**' # test
     # Run actions only when changes happens in functions directory
     # https://blog.35d.jp/2020-09-29-github-actions-path
-    # paths:
-    #   - 'functions/**'
+    paths:
+      - 'functions/**'
 
 # env is used to set environment variables
 # https://docs.github.com/ja/actions/using-workflows/workflow-syntax-for-github-actions#env
@@ -62,24 +62,24 @@ jobs:
 
       # Set the result of the step as an output parameter to use in the next step
       # https://docs.github.com/ja/actions/using-workflows/workflow-commands-for-github-actions#setting-an-output-parameter
-      - name: Check if requirements.txt has changed
-        id: check_requirements
-        # Get the name of the branch using ${{ github.ref_name }} in a run command
-        # https://dev.classmethod.jp/articles/how-to-get-a-ref-branch-within-a-workflow-execution-in-github-actions/
-        # Github context's content example is below
-        # https://docs.github.com/ja/actions/learn-github-actions/contexts#example-contents-of-the-github-context
-        # Compare the current merge commit with the HEAD commit of the target branch
-        # https://qiita.com/shibukk/items/8c9362a5bd399b9c56be
-        # https://qiita.com/shizen-shin/items/ddc0e5bf658bf02fbc3c
-        run: |
-          # Error like below happens when the following line is used
-          # https://jira.atlassian.com/browse/BCLOUD-16677
-          # if git diff --name-only HEAD^ HEAD | grep "requirements.txt"; then
-          if git diff --name-only HEAD^ HEAD -- functions/requirements.txt | grep "requirements.txt"; then
-            echo "SHOULD_UPDATE_LAYER=true" >> "$GITHUB_OUTPUT"
-          else
-            echo "SHOULD_UPDATE_LAYER=false" >> "$GITHUB_OUTPUT"
-          fi
+      # - name: Check if requirements.txt has changed
+      #   id: check_requirements
+      #   # Get the name of the branch using ${{ github.ref_name }} in a run command
+      #   # https://dev.classmethod.jp/articles/how-to-get-a-ref-branch-within-a-workflow-execution-in-github-actions/
+      #   # Github context's content example is below
+      #   # https://docs.github.com/ja/actions/learn-github-actions/contexts#example-contents-of-the-github-context
+      #   # Compare the current merge commit with the HEAD commit of the target branch
+      #   # https://qiita.com/shibukk/items/8c9362a5bd399b9c56be
+      #   # https://qiita.com/shizen-shin/items/ddc0e5bf658bf02fbc3c
+      #   run: |
+      #     # Error like below happens when the following line is used
+      #     # https://jira.atlassian.com/browse/BCLOUD-16677
+      #     # if git diff --name-only HEAD^ HEAD | grep "requirements.txt"; then
+      #     if git diff --name-only HEAD^ HEAD -- functions/requirements.txt | grep "requirements.txt"; then
+      #       echo "SHOULD_UPDATE_LAYER=true" >> "$GITHUB_OUTPUT"
+      #     else
+      #       echo "SHOULD_UPDATE_LAYER=false" >> "$GITHUB_OUTPUT"
+      #     fi
 
       # Deploy the layer only when requirements.txt has changed
       # https://github.com/actions/setup-python#basic-usage
@@ -162,19 +162,22 @@ jobs:
       # https://qiita.com/mstssk/items/8759c71f328cab802670
       # - run: npm ci
 
-      # - name: Deploy
-      #   uses: serverless/github-action@v3.1
-      #   with:
-      #     args: deploy
-      #   env:
-      #     STAGE: ${{ github.ref_name == 'develop' && 'dev' || 'prod' }}
-
-      - name: Remove all resources managed by the stack via Serverless Framework
+      - name: Deploy
         uses: serverless/github-action@v3.1
         with:
-          args: remove --verbose
+          # --verbose shows the log of all stack events during deployment
+          # https://www.serverless.com/framework/docs/providers/aws/cli-reference/deploy#options
+          args: deploy --verbose
         env:
           STAGE: ${{ github.ref_name == 'develop' && 'dev' || 'prod' }}
+
+      # https://codenote.net/aws/4293.html
+      # - name: Remove all resources managed by the stack via Serverless Framework
+      #   uses: serverless/github-action@v3.1
+      #   with:
+      #     args: remove --verbose
+      #   env:
+      #     STAGE: ${{ github.ref_name == 'develop' && 'dev' || 'prod' }}
 
 
       # - name: Deploy to Dev
