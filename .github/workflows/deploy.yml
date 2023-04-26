@@ -162,10 +162,17 @@ jobs:
       # https://qiita.com/mstssk/items/8759c71f328cab802670
       # - run: npm ci
 
-      - name: Deploy Lambda functions
+      # - name: Deploy
+      #   uses: serverless/github-action@v3.1
+      #   with:
+      #     args: deploy
+      #   env:
+      #     STAGE: ${{ github.ref_name == 'develop' && 'dev' || 'prod' }}
+
+      - name: Remove all resources managed by the stack via Serverless Framework
         uses: serverless/github-action@v3.1
         with:
-          args: deploy
+          args: remove --verbose
         env:
           STAGE: ${{ github.ref_name == 'develop' && 'dev' || 'prod' }}
 
