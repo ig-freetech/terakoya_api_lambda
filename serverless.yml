@@ -75,10 +75,11 @@ layers:
 # https://www.serverless.com/framework/docs/providers/aws/guide/packaging#package-configuration
 package:
   patterns:
+    - '!./**'
     - 'functions/**'
-    - '!python/**'
-    - '!tmp/**'
-    - '!requirements.txt'
+    - '!functions/python/**'
+    - '!functions/tmp/**'
+    - '!functions/requirements.txt'
     # - !functions/requirements.txt
 # Sample
 # https://github.com/serverless/examples/blob/v3/aws-python-auth0-custom-authorizers-api/serverless.yml
