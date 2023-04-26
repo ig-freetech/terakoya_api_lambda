@@ -57,6 +57,7 @@ jobs:
         run: |
           git log | grep Date
           ls -a
+          ls functions
 
 
       # Set the result of the step as an output parameter to use in the next step
