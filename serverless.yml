@@ -67,8 +67,8 @@ package:
     - 'functions/**'
     - '!python/**'
     - '!tmp/**'
-    # - !functions/requirements.txt
     - '!requirements.txt'
+    # - !functions/requirements.txt
 # Sample
 # https://github.com/serverless/examples/blob/v3/aws-python-auth0-custom-authorizers-api/serverless.yml
 # Sample list
