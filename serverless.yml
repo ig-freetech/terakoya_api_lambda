@@ -49,6 +49,7 @@ provider:
   # Specify default Lambda Layers of Lambda functions
   # https://www.serverless.com/framework/docs/providers/aws/guide/layers#using-your-layers
   layers:
+    # - arn:aws:lambda:${env:AWS_DEFAULT_REGION}:${env:AWS_ACCOUNT_ID}:layer:${self:service}-${self:provider.stage}-layer:1
     - !Ref BookingLambdaLayer
 
 # Layer settings
@@ -58,6 +59,13 @@ layers:
   booking:
     # Specify the name of the layer that will be created and deployed
     name: ${self:service}-${self:provider.stage}-layer
+    # Specify the path of the layer
+    path: functions/python
+    compatibleRuntimes:
+      - python3.9
+    compatibleArchitectures:
+      - x86_64
+      - arm64
 
 # Error "No file matches include / exclude patterns" happens when using patterns like below
 # Specify the files and folders to be packaged for deployment to Lambda functions

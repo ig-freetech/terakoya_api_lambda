@@ -7,6 +7,8 @@ provider:
   stage: ${opt:stage, 'dev'}
   region: ${env:AWS_DEFAULT_REGION}
 
+# Layer settings
+# https://www.serverless.com/framework/docs/providers/aws/guide/layers
 layers:
   # Set arbitary name
   booking:
