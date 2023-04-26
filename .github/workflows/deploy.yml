@@ -119,19 +119,19 @@ jobs:
           pip install -r requirements.txt -t ./functions/python
 
       # https://github.com/serverless/github-action
-      - name: Deploy Lambda Layers
-        if: steps.check_requirements.outputs.SHOULD_UPDATE_LAYER == 'true'
-        uses: serverless/github-action@v3.1
-        with:
-          # sls deploy --config /path/to/serverless.any.yml
-          # https://ema-hiro.hatenablog.com/entry/2021/09/19/203541
-          # https://www.serverless.com/framework/docs/providers/aws/cli-reference/deploy
-          # https://zenn.dev/burizae/articles/c811cae767965a
-          args: deploy --config serverless.layer.yml
-        env:
-          # Set the name of the stage to deploy based on the branch name using ternary operator
-          # https://qiita.com/technote-space/items/cbeed6ddd0488499afaa
-          STAGE: ${{ github.ref_name == 'develop' && 'dev' || 'prod' }}
+      # - name: Deploy Lambda Layers
+      #   if: steps.check_requirements.outputs.SHOULD_UPDATE_LAYER == 'true'
+      #   uses: serverless/github-action@v3.1
+      #   with:
+      #     # sls deploy --config /path/to/serverless.any.yml
+      #     # https://ema-hiro.hatenablog.com/entry/2021/09/19/203541
+      #     # https://www.serverless.com/framework/docs/providers/aws/cli-reference/deploy
+      #     # https://zenn.dev/burizae/articles/c811cae767965a
+      #     args: deploy --config serverless.layer.yml
+      #   env:
+      #     # Set the name of the stage to deploy based on the branch name using ternary operator
+      #     # https://qiita.com/technote-space/items/cbeed6ddd0488499afaa
+      #     STAGE: ${{ github.ref_name == 'develop' && 'dev' || 'prod' }}
 
       # Set up Serverless Framework on Github Actions runner
       # https://github.com/serverless/github-action#usage
