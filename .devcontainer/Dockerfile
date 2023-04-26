@@ -23,5 +23,5 @@ RUN pip install autopep8 pytest
 #     npm install -g serverless
 
 # WARNING: なぜかパッケージがインストールされない。イメージ作成時にはマウントディレクトリにパッケージをインストールできない？ 仕方ないのでパッケージインストールの度にコンテナ側で下記コマンドを打って対応
-# RUN pip install -r requirements.txt -t ./python
+# RUN pip install -r requirements.txt -t ./functions/python
 ENV PYTHONPATH $PYTHONPATH:./functions/python
