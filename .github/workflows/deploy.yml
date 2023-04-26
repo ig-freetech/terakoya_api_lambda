@@ -57,7 +57,7 @@ jobs:
       # https://stackoverflow.com/questions/60176044/how-do-i-use-an-env-file-with-github-actions
       - name: Create .env file
         run: |
-          echo "${{ secrets.ENV_FILE }}" > .env
+          echo "${{ secrets.ENV_FILE_CONTENTS }}" > .env
 
 
       # Set the result of the step as an output parameter to use in the next step
@@ -127,7 +127,7 @@ jobs:
 
       # Save and restore npm packages' cache to reduce the time to install them
       # https://github.com/actions/cache/blob/main/examples.md#node---npm
-      - name: Get npm cache directory
+      - name: Cache npm packages
         id: npm-cache-dir
         shell: bash
         run: echo "dir=$(npm config get cache)" >> ${GITHUB_OUTPUT}
@@ -155,7 +155,7 @@ jobs:
       # npm ci means that npm install is executed with package-lock.json deleting node_modules before installing packages without resolving　dependencies　of packages and saving them to package-lock.json
       # https://qiita.com/mstssk/items/8759c71f328cab802670
       # - run: npm ci
-      
+
       - name: Deploy based on Serverless Framework
         uses: serverless/github-action@v3.1
         with:
