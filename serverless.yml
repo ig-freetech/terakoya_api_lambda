@@ -7,6 +7,7 @@ service: terakoya-booking
 frameworkVersion: '3'
 # Enable dotenv plugin to load environment variables from .env file
 # https://mseeeen.msen.jp/how-to-set-environment-variables-of-lambda-with-serverless-framework/
+# https://www.serverless.com/plugins/serverless-dotenv-plugin
 # https://www.serverless.com/framework/docs/environment-variables
 useDotenv: true
 
@@ -20,7 +21,8 @@ provider:
   # https://www.serverless.com/framework/docs/providers/aws/guide/variables#referencing-cli-options
   stage: ${opt:stage, 'dev'}
   # Specify default settings of AWS resources
-  region: ap-northeast-1
+  # region: ap-northeast-1
+  region: ${env:AWS_DEFAULT_REGION}
   # Specify default runtime of Lambda functions
   runtime: python3.9
   # Specify default architecture of Lambda functions
@@ -29,14 +31,14 @@ provider:
   # Specify default Environment Variables of Lambda functions
   # https://www.serverless.com/framework/docs/providers/aws/guide/functions#environment-variables
   environment:
-    ACCESS_KEY: ${env.AWS_ACCESS_KEY_ID}
-    SECRET_ACCESS_KEY: ${env.AWS_SECRET_ACCESS_KEY}
-    DEFAULT_REGION: ${env.AWS_DEFAULT_REGION}
+    ACCESS_KEY: ${env:AWS_ACCESS_KEY_ID}
+    SECRET_ACCESS_KEY: ${env:AWS_SECRET_ACCESS_KEY}
+    DEFAULT_REGION: ${env:AWS_DEFAULT_REGION}
     DYNAMO_DB_BOOKING_TABLE: booking_${self:provider.stage}
   # Specify default IAM role of Lambda functions
   # https://www.serverless.com/framework/docs/providers/aws/guide/iam
   iam:
-    role: ${env.AWS_LAMBDA_EXECUTION_ROLE_ARN}
+    role: ${env:AWS_LAMBDA_EXECUTION_ROLE_ARN}
   # Specify default Lambda Layers of Lambda functions
   # https://www.serverless.com/framework/docs/providers/aws/guide/layers#using-your-layers
   layers:
