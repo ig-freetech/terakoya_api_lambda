@@ -23,7 +23,7 @@ on:
 env:
   AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
   AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-  AWS_DEFAULT_REGION: ap-northeast-1
+  AWS_DEFAULT_REGION: ${{ secrets.AWS_DEFAULT_REGION }}
 
 # jobs is used to define one or more jobs to run in parallel or sequentially
 # https://docs.github.com/ja/actions/using-workflows/workflow-syntax-for-github-actions#jobs
@@ -53,11 +53,11 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Test
+      # Create .env file to use in serverless.yml because .env file is excluded from the repository by .gitignore and then environemnt variables are not available in serverless.yml on GitHub Actions runner
+      # https://stackoverflow.com/questions/60176044/how-do-i-use-an-env-file-with-github-actions
+      - name: Create .env file
         run: |
-          git log | grep Date
-          ls -a
-          ls functions
+          echo "${{ secrets.ENV_FILE }}" > .env
 
 
       # Set the result of the step as an output parameter to use in the next step
@@ -145,24 +145,25 @@ jobs:
       #     args: doctor
 
       # https://www.serverless.com/framework/docs/getting-started
-      - name: Set up Serverless Framework and deploy
-        run: |
-          npm install -g serverless
-          sls doctor
-          sls deploy
+      # - name: Set up Serverless Framework and deploy
+      #   run: |
+      #     npm install -g serverless
+      #     sls doctor
+      #     sls deploy
 
       # npm ci is unnecessary because the packages are not node_modules in JavaScript but python modules
       # npm ci means that npm install is executed with package-lock.json deleting node_modules before installing packages without resolving　dependencies　of packages and saving them to package-lock.json
       # https://qiita.com/mstssk/items/8759c71f328cab802670
       # - run: npm ci
-      # - name: Deploy based on Serverless Framework
-      #   uses: serverless/github-action@v3.1
-      #   with:
-      #     args: deploy
-      #   env:
-      #     # Set the name of the stage to deploy based on the branch name using ternary operator
-      #     # https://qiita.com/technote-space/items/cbeed6ddd0488499afaa
-      #     STAGE: ${{ github.ref_name == 'develop' && 'dev' || 'prod' }}
+      
+      - name: Deploy based on Serverless Framework
+        uses: serverless/github-action@v3.1
+        with:
+          args: deploy
+        env:
+          # Set the name of the stage to deploy based on the branch name using ternary operator
+          # https://qiita.com/technote-space/items/cbeed6ddd0488499afaa
+          STAGE: ${{ github.ref_name == 'develop' && 'dev' || 'prod' }}
 
       # sls deploy --config /path/to/serverless.any.yml
       # https://ema-hiro.hatenablog.com/entry/2021/09/19/203541

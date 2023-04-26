@@ -11,6 +11,11 @@ frameworkVersion: '3'
 # https://www.serverless.com/framework/docs/environment-variables
 useDotenv: true
 
+# Disable deprecation warnings
+# https://www.serverless.com/framework/docs/deprecations
+disabledDeprecations:
+  - '*' # all deprecation warnings are disabled
+
 # General AWS settings
 # https://www.serverless.com/framework/docs/providers/aws/guide/serverless.yml#general-settings
 provider:
@@ -37,8 +42,10 @@ provider:
     DYNAMO_DB_BOOKING_TABLE: booking_${self:provider.stage}
   # Specify default IAM role of Lambda functions
   # https://www.serverless.com/framework/docs/providers/aws/guide/iam
+  # IAM role arn syntax
+  # https://docs.aws.amazon.com/ja_jp/IAM/latest/UserGuide/reference_identifiers.html#identifiers-arns
   iam:
-    role: ${env:AWS_LAMBDA_EXECUTION_ROLE_ARN}
+    role: arn:aws:iam::${env:AWS_ACCOUNT_ID}:role/${env:AWS_LAMBDA_EXECUTION_ROLE_NAME}
   # Specify default Lambda Layers of Lambda functions
   # https://www.serverless.com/framework/docs/providers/aws/guide/layers#using-your-layers
   layers:
