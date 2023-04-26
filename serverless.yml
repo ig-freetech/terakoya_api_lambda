@@ -64,8 +64,8 @@ layers:
 package:
   patterns:
     - 'functions/**'
-    - '!functions/python/**'
-    - '!functions/tmp/**'
+    - '!python/**'
+    - '!tmp/**'
     - '!requirements.txt'
 
 # Lambda function settings
