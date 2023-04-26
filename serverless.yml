@@ -61,12 +61,20 @@ layers:
 # https://symfoware.blog.fc2.com/blog-entry-2505.html
 # https://filip5114.github.io/sls-manage-function-package/
 # https://www.serverless.com/framework/docs/providers/aws/guide/packaging#package-configuration
+# package:
+#   patterns:
+#     - 'functions/**'
+#     - '!python/**'
+#     - '!tmp/**'
+#     - '!requirements.txt'
 package:
   patterns:
-    - 'functions/**'
-    # - '!python/**'
-    - '!tmp/**'
-    - '!requirements.txt'
+    exclude:
+      - 'functions/python/**'
+      - 'functions/tmp/**'
+      - 'functions/requirements.txt'
+    include:
+      - 'functions/**'
 
 # Lambda function settings
 # https://www.serverless.com/framework/docs/providers/aws/guide/serverless.yml#general-function-settings

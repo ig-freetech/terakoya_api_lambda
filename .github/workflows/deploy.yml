@@ -72,8 +72,10 @@ jobs:
         # https://qiita.com/shibukk/items/8c9362a5bd399b9c56be
         # https://qiita.com/shizen-shin/items/ddc0e5bf658bf02fbc3c
         run: |
-          if git diff --name-only HEAD^ HEAD -- functions/requirements.txt | grep "requirements.txt"; then
+          # Error like below happens when the following line is used
+          # https://jira.atlassian.com/browse/BCLOUD-16677
           # if git diff --name-only HEAD^ HEAD | grep "requirements.txt"; then
+          if git diff --name-only HEAD^ HEAD -- functions/requirements.txt | grep "requirements.txt"; then
             echo "SHOULD_UPDATE_LAYER=true" >> "$GITHUB_OUTPUT"
           else
             echo "SHOULD_UPDATE_LAYER=false" >> "$GITHUB_OUTPUT"
