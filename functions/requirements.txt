@@ -2,4 +2,3 @@ dataclasses-json
 boto3
 boto3-stubs
 python-dotenv
-requests
