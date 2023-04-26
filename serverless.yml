@@ -1,4 +1,4 @@
-# Root properties of AWS provider are below
+# Root properties of AWS provider
 # https://www.serverless.com/framework/docs/providers/aws/guide/serverless.yml#root-properties
 
 # Set the arbitary service name
@@ -10,7 +10,7 @@ frameworkVersion: '3'
 # https://www.serverless.com/framework/docs/environment-variables
 useDotenv: true
 
-# General AWS settings are below
+# General AWS settings
 # https://www.serverless.com/framework/docs/providers/aws/guide/serverless.yml#general-settings
 provider:
   # Specify the AWS provider
@@ -42,7 +42,7 @@ provider:
   layers:
     - !Ref BookingLambdaLayer
 
-# Layer settings are below
+# Layer settings
 # https://www.serverless.com/framework/docs/providers/aws/guide/layers
 layers:
   # Set arbitary name
@@ -55,7 +55,7 @@ layers:
       - x86_64
       - arm64
 
-# Lambda settings are below
+# Lambda function settings
 # https://www.serverless.com/framework/docs/providers/aws/guide/serverless.yml#general-function-settings
 functions:
   # https://www.serverless.com/framework/docs/providers/aws/guide/serverless.yml#functions
