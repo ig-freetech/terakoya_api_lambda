@@ -1,0 +1,21 @@
+service: terakoya-booking
+frameworkVersion: '3'
+useDotenv: true
+
+provider:
+  name: aws
+  stage: ${opt:stage, 'dev'}
+  region: ${env:AWS_DEFAULT_REGION}
+
+layers:
+  # Set arbitary name
+  booking:
+    # Specify the name of the layer that will be created and deployed
+    name: ${self:service}-${self:provider.stage}-layer
+    # Specify the path of the layer
+    path: functions/python
+    compatibleRuntimes:
+      - python3.9
+    compatibleArchitectures:
+      - x86_64
+      - arm64
