@@ -107,9 +107,10 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: 18
+      # npm ci is unnecessary because the packages are not node_modules in JavaScript but python modules
       # npm ci means that npm install is executed with package-lock.json deleting node_modules before installing packages without resolving　dependencies　of packages and saving them to package-lock.json
       # https://qiita.com/mstssk/items/8759c71f328cab802670
-      - run: npm ci
+      # - run: npm ci
       - name: Deploy based on Serverless Framework
         uses: serverless/github-action@v3.1
         with:
