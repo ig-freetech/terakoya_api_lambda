@@ -44,7 +44,9 @@ jobs:
         # https://docs.github.com/ja/actions/using-workflows/workflow-syntax-for-github-actions#jobsjob_idstepsuses
         # actions/checkout is a pre-defined action to clone the source code of the repository in the runner to run the following steps
         # @v2, @v3 or @master is used to specify the version of the action. @v2 and @v3 are the major version of the action.
-        uses: actions/checkout@v2
+        # @v2 is deprecated, so @v3 is recommended
+        # https://github.blog/changelog/2022-09-22-github-actions-all-actions-will-begin-running-on-node16-instead-of-node12/
+        uses: actions/checkout@v3
 
       # Set the result of the step as an output parameter to use in the next step
       # https://docs.github.com/ja/actions/using-workflows/workflow-commands-for-github-actions#setting-an-output-parameter
@@ -58,7 +60,8 @@ jobs:
         # https://qiita.com/shibukk/items/8c9362a5bd399b9c56be
         # https://qiita.com/shizen-shin/items/ddc0e5bf658bf02fbc3c
         run: |
-          if git diff --name-only HEAD^ HEAD | grep "requirements.txt"; then
+          if git diff --name-only HEAD^ HEAD -- functions/requirements.txt | grep "requirements.txt"; then
+          # if git diff --name-only HEAD^ HEAD | grep "requirements.txt"; then
             echo "SHOULD_UPDATE_LAYER=true" >> "$GITHUB_OUTPUT"
           else
             echo "SHOULD_UPDATE_LAYER=false" >> "$GITHUB_OUTPUT"
