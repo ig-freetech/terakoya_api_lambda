@@ -50,7 +50,7 @@ jobs:
 
       - name: Test
         run: |
-          git log
+          git log | grep Date
 
 
       # Set the result of the step as an output parameter to use in the next step
