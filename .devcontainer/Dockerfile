@@ -28,7 +28,10 @@ RUN pip install autopep8 pytest
 # https://qiita.com/arene-calix/items/41d8d4ba572f1d652727#--
 RUN yum install -y yum-utils && \
     yum-config-manager --add-repo https://cli.github.com/packages/rpm/gh-cli.repo && \
-    yum install -y gh && yum update gh
+    yum install -y gh && yum update gh && \
+    # Change the default path of git hooks (=.git/hooks)
+    # https://stackoverflow.com/questions/39332407/git-hooks-applying-git-config-core-hookspath
+    git config core.hooksPath .githooks
 # TODO: Need to run `gh auth login` to use gh cli every time when container is created
 # https://cli.github.com/manual/gh_auth_login
 # https://cli.github.com/manual/
