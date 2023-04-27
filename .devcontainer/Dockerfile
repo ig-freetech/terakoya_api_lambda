@@ -22,6 +22,17 @@ RUN pip install autopep8 pytest
 #     # https://www.serverless.com/framework/docs/getting-started
 #     npm install -g serverless
 
+# Install gh cli to set secrets
+# https://github.com/cli/cli/blob/trunk/docs/install_linux.md#amazon-linux-2-yum
+# command A || command B means if command A fails, run command B
+# https://qiita.com/arene-calix/items/41d8d4ba572f1d652727#--
+RUN yum install -y yum-utils && \
+    yum-config-manager --add-repo https://cli.github.com/packages/rpm/gh-cli.repo && \
+    yum install -y gh && yum update gh
+# TODO: First time, you need to run `gh auth login` to use gh cli
+# https://cli.github.com/manual/gh_auth_login
+# https://cli.github.com/manual/
+
 # WARNING: なぜかパッケージがインストールされない。イメージ作成時にはマウントディレクトリにパッケージをインストールできない？ 仕方ないのでパッケージインストールの度にコンテナ側で下記コマンドを打って対応
 # RUN pip install -r requirements.txt -t ./functions/python
 ENV PYTHONPATH $PYTHONPATH:./functions/python
