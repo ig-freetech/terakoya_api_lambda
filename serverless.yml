@@ -43,7 +43,7 @@ provider:
     ACCESS_KEY: ${env:AWS_ACCESS_KEY_ID}
     SECRET_ACCESS_KEY: ${env:AWS_SECRET_ACCESS_KEY}
     DEFAULT_REGION: ${env:AWS_DEFAULT_REGION}
-    DYNAMO_DB_BOOKING_TABLE: booking_${self:provider.stage}
+    DYNAMO_BOOKING_TABLE_NAME: booking_${self:provider.stage}
   # Specify default IAM role of Lambda functions
   # https://www.serverless.com/framework/docs/providers/aws/guide/iam
   # IAM role arn syntax

@@ -29,10 +29,13 @@ RUN pip install autopep8 pytest
 RUN yum install -y yum-utils && \
     yum-config-manager --add-repo https://cli.github.com/packages/rpm/gh-cli.repo && \
     yum install -y gh && yum update gh
-# TODO: First time, you need to run `gh auth login` to use gh cli
+# TODO: Need to run `gh auth login` to use gh cli every time when container is created
 # https://cli.github.com/manual/gh_auth_login
 # https://cli.github.com/manual/
 
 # WARNING: なぜかパッケージがインストールされない。イメージ作成時にはマウントディレクトリにパッケージをインストールできない？ 仕方ないのでパッケージインストールの度にコンテナ側で下記コマンドを打って対応
 # RUN pip install -r requirements.txt -t ./functions/python
 ENV PYTHONPATH $PYTHONPATH:./functions/python
+
+# Set environment variables for development
+ENV STAGE dev

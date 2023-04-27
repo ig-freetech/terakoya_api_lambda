@@ -11,7 +11,7 @@ from domain.dynamodb import BookingDynamoDB, BookingItem
 from utils.mail import SesMail
 from utils.dt import DT
 
-from config.env import TERAKOYA_GMAIL_ADDRESS, TERAKOYA_GROUP_MAIL_ADDRESS
+from conf.env import TERAKOYA_GMAIL_ADDRESS, TERAKOYA_GROUP_MAIL_ADDRESS
 
 TERAKOYA_GMAIL_FROM = "" if TERAKOYA_GMAIL_ADDRESS is None else TERAKOYA_GMAIL_ADDRESS
 TERAKOYA_GROUP_MAIL_CC = "" if TERAKOYA_GROUP_MAIL_ADDRESS is None else TERAKOYA_GROUP_MAIL_ADDRESS
@@ -151,28 +151,3 @@ def lambda_handler(event, context):
         }
     except Exception as e:
         print(f"Error happend. Error message: {str(e)}")
-
-
-if __name__ == "__main__":
-    dynamodb_event_body = '''
-    {
-        "name": "Test",
-        "email": "laughingman2045.sac@gmail.com",
-        "terakoya_type": 0,
-        "attendance_date_list": ["2023-02-21", "2023-02-28", "2023-02-14"],
-        "arrival_time": 0,
-        "grade": 11,
-        "terakoya_experience": 1,
-        "study_subject": 4,
-        "study_subject_detail": "勉強したい内容について詳しく(自由記入)",
-        "study_style": 3,
-        "school_name": "学校名(自由記入)",
-        "first_choice_school": "志望校名(自由記入)",
-        "course_choice": 0,
-        "future_free": "将来の夢など(自由記入)",
-        "like_thing_free": "好きなこと(自由記入)",
-        "how_to_know_terakoya": 1,
-        "remarks": "備考(自由記入)"
-    }
-    '''
-    BookingViaDynamoDB(dynamodb_event_body).book()

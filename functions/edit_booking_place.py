@@ -28,10 +28,3 @@ def lambda_handler(event, context):
             'result_type': 0,
             'message': 'Failed'
         }
-
-
-if __name__ == '__main__':
-    date = "2023-04-18"
-    sk = "#i.g.freetech2021@gmail.com#1"
-    place = 5
-    BookingDynamoDB().update_place(date, sk, place)
