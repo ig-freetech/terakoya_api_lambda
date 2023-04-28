@@ -1,0 +1,23 @@
+service: terakoya-booking-layer
+frameworkVersion: "3"
+useDotenv: true
+
+provider:
+  name: aws
+  deploymentMethod: direct
+  stage: ${opt:stage, 'dev'}
+  # stage: ${env:STAGE, 'dev'}
+  region: ${env:AWS_DEFAULT_REGION}
+
+layers:
+  booking:
+    name: ${self:service}-${self:provider.stage}
+    path: functions/python
+    compatibleRuntimes:
+      - python3.9
+    compatibleArchitectures:
+      - x86_64
+      - arm64
+
+outputs:
+  layer: !Ref BookingLambdaLayer

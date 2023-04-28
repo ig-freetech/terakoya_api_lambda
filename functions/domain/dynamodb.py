@@ -11,7 +11,7 @@ sys.path.append(ROOT_DIR_PATH)
 
 from utils.dt import DT
 
-from api.booking import TERAKOYA_TYPE, TERAKOYA_EXPERIENCE, GRADE, ARRIVAL_TIME, STUDY_STYLE, STUDY_SUBJECT, COURSE_CHOICE, HOW_TO_KNOW_TERAKOYA, PLACE
+from api.booking import TERAKOYA_EXPERIENCE, GRADE, ARRIVAL_TIME, STUDY_STYLE, STUDY_SUBJECT, COURSE_CHOICE, HOW_TO_KNOW_TERAKOYA, PLACE
 
 from conf.env import AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, AWS_DEFAULT_REGION, STAGE
 
@@ -68,7 +68,7 @@ class BookingDynamoDB:
         aws_access_key_id=AWS_ACCESS_KEY_ID,
         aws_secret_access_key=AWS_SECRET_ACCESS_KEY,
         region_name=AWS_DEFAULT_REGION
-    ).Table(f"booking-{STAGE}")
+    ).Table(f"booking_{STAGE}")
 
     @classmethod
     def insert_item(cls, item: BookingItem, timestamp: int = int(datetime.now().timestamp())):

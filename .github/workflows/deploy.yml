@@ -67,24 +67,21 @@ jobs:
 
       # Set the result of the step as an output parameter to use in the next step
       # https://docs.github.com/ja/actions/using-workflows/workflow-commands-for-github-actions#setting-an-output-parameter
-      # - name: Check if requirements.txt has changed
-      #   id: check_requirements
-      #   # Get the name of the branch using ${{ github.ref_name }} in a run command
-      #   # https://dev.classmethod.jp/articles/how-to-get-a-ref-branch-within-a-workflow-execution-in-github-actions/
-      #   # Github context's content example is below
-      #   # https://docs.github.com/ja/actions/learn-github-actions/contexts#example-contents-of-the-github-context
-      #   # Compare the current merge commit with the HEAD commit of the target branch
-      #   # https://qiita.com/shibukk/items/8c9362a5bd399b9c56be
-      #   # https://qiita.com/shizen-shin/items/ddc0e5bf658bf02fbc3c
-      #   run: |
-      #     # Error like below happens when the following line is used
-      #     # https://jira.atlassian.com/browse/BCLOUD-16677
-      #     # if git diff --name-only HEAD^ HEAD | grep "requirements.txt"; then
-      #     if git diff --name-only HEAD^ HEAD -- functions/requirements.txt | grep "requirements.txt"; then
-      #       echo "SHOULD_UPDATE_LAYER=true" >> "$GITHUB_OUTPUT"
-      #     else
-      #       echo "SHOULD_UPDATE_LAYER=false" >> "$GITHUB_OUTPUT"
-      #     fi
+      - name: Check if requirements.txt has changed
+        id: check_requirements
+        # Get the name of the branch using ${{ github.ref_name }} in a run command
+        # https://dev.classmethod.jp/articles/how-to-get-a-ref-branch-within-a-workflow-execution-in-github-actions/
+        # Github context's content example is below
+        # https://docs.github.com/ja/actions/learn-github-actions/contexts#example-contents-of-the-github-context
+        # Compare the current merge commit with the HEAD commit of the target branch
+        # https://qiita.com/shibukk/items/8c9362a5bd399b9c56be
+        # https://qiita.com/shizen-shin/items/ddc0e5bf658bf02fbc3c
+        run: |
+          if git diff --name-only HEAD^ HEAD -- functions/requirements.txt | grep "requirements.txt"; then
+            echo "SHOULD_UPDATE_LAYER=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "SHOULD_UPDATE_LAYER=false" >> "$GITHUB_OUTPUT"
+          fi
 
       # Deploy the layer only when requirements.txt has changed
       # https://github.com/actions/setup-python#basic-usage
@@ -125,25 +122,22 @@ jobs:
           pip install -r ./functions/requirements.txt -t ./functions/python
 
       # https://github.com/serverless/github-action
-      # - name: Deploy Lambda Layers
-      #   if: steps.check_requirements.outputs.SHOULD_UPDATE_LAYER == 'true'
-      #   uses: serverless/github-action@v3.1
-      #   with:
-      #     # sls deploy --config /path/to/serverless.any.yml
-      #     # https://ema-hiro.hatenablog.com/entry/2021/09/19/203541
-      #     # https://www.serverless.com/framework/docs/providers/aws/cli-reference/deploy
-      #     # https://zenn.dev/burizae/articles/c811cae767965a
-      #     # Multiple arguments can be passed by using the following format
-      #     # https://stackoverflow.com/questions/71208276/github-workflow-uses-with-multiple-args
-      #     args: deploy --config serverless.layer.yml
-      #   env:
-      #     # Set the name of the stage to deploy based on the branch name using ternary operator
-      #     # https://qiita.com/technote-space/items/cbeed6ddd0488499afaa
-      #     STAGE: ${{ github.ref_name == 'develop' && 'dev' || 'prod' }}
+      - name: Deploy Lambda Layers
+        # if: steps.check_requirements.outputs.SHOULD_UPDATE_LAYER == 'true'
+        uses: serverless/github-action@v3.1
+        with:
+          # sls deploy --config /path/to/serverless.any.yml
+          # https://ema-hiro.hatenablog.com/entry/2021/09/19/203541
+          # https://www.serverless.com/framework/docs/providers/aws/cli-reference/deploy
+          # https://zenn.dev/burizae/articles/c811cae767965a
+          # Multiple arguments can be passed by using the following format
+          # https://stackoverflow.com/questions/71208276/github-workflow-uses-with-multiple-args
+          args: deploy --verbose --config serverless.layer.yml --stage ${{ github.ref_name == 'develop' && 'dev' || 'prod' }}
 
       # Set up Serverless Framework on Github Actions runner
       # https://github.com/serverless/github-action#usage
       - name: Set up Node.js
+        if: false
         uses: actions/setup-node@v3
         with:
           node-version: 18
@@ -151,10 +145,12 @@ jobs:
       # Save and restore npm packages' cache to reduce the time to install them
       # https://github.com/actions/cache/blob/main/examples.md#node---npm
       - name: Cache npm packages
+        if: false
         id: npm-cache-dir
         shell: bash
         run: echo "dir=$(npm config get cache)" >> ${GITHUB_OUTPUT}
       - uses: actions/cache@v3
+        if: false
         id: npm-cache
         with:
           path: ${{ steps.npm-cache-dir.outputs.dir }}
@@ -168,12 +164,15 @@ jobs:
       # - run: npm ci
 
       - name: Deploy
+        if: false
         uses: serverless/github-action@v3.1
         with:
           # --verbose shows the log of all stack events during deployment
           # https://www.serverless.com/framework/docs/providers/aws/cli-reference/deploy#options
           args: deploy --verbose
         env:
+          # Set the name of the stage to deploy based on the branch name using ternary operator
+          # https://qiita.com/technote-space/items/cbeed6ddd0488499afaa
           STAGE: ${{ github.ref_name == 'develop' && 'dev' || 'prod' }}
 
       # https://codenote.net/aws/4293.html

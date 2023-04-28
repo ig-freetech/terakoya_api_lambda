@@ -27,7 +27,8 @@ provider:
   # ${opt:stage, 'dev'} means that if the stage is not specified, it will be set to 'dev'
   # But, if serverless deploy --stage prod is executed, it will be set to 'prod'
   # https://www.serverless.com/framework/docs/providers/aws/guide/variables#referencing-cli-options
-  stage: ${opt:stage, 'dev'}
+  # stage: ${opt:stage, 'dev'}
+  stage: ${env:STAGE, 'dev'}
   # Specify default settings of AWS resources
   # region: ap-northeast-1
   # region: us-east-1
@@ -115,7 +116,7 @@ functions:
     # https://www.serverless.com/framework/docs/providers/aws/events/event-bridge
     events:
       - eventBridge:
-          name: scheduled-remind
+          name: ${self:service}-scheduled-remind
           schedule: cron(0 0,7 ? * TUE,SAT *)
   login:
     name: ${self:service}-${self:provider.stage}-login
