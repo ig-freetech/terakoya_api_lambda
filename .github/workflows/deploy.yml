@@ -64,6 +64,8 @@ jobs:
       - name: Create .env file
         run: |
           echo "${{ secrets.ENV_FILE_CONTENTS }}" > .env
+          echo ${{ github.ref_name }}
+          echo ${{ github.ref_name == 'develop' && 'dev' || 'prod' }}
 
       # Set the result of the step as an output parameter to use in the next step
       # https://docs.github.com/ja/actions/using-workflows/workflow-commands-for-github-actions#setting-an-output-parameter
@@ -86,6 +88,7 @@ jobs:
       # Deploy the layer only when requirements.txt has changed
       # https://github.com/actions/setup-python#basic-usage
       - name: Set up Python 3.9
+        if: false
         # if: steps.check_requirements.outputs.SHOULD_UPDATE_LAYER == 'true'
         uses: actions/setup-python@v3
         with:
@@ -94,6 +97,7 @@ jobs:
       # Save and restore pip packages to reduce the time to install them if requirements.txt has not changed
       # https://github.com/actions/cache#cache-action
       - name: Cache pip packages
+        if: false
         # if: steps.check_requirements.outputs.SHOULD_UPDATE_LAYER == 'true'
         # Note: Cache expires in 7 days
         # https://docs.github.com/en/actions/using-workflows/caching-dependencies-to-speed-up-workflows#usage-limits-and-eviction-policy
@@ -116,6 +120,7 @@ jobs:
       # pip first checks the local cache and doesn't download packages if they are already stored in the cache directory
       # https://pip.pypa.io/en/stable/topics/caching/
       - name: Install pip packages in python directory
+        if: false
         # if: steps.check_requirements.outputs.SHOULD_UPDATE_LAYER == 'true'
         run: |
           python -m pip install --upgrade pip
@@ -123,6 +128,7 @@ jobs:
 
       # https://github.com/serverless/github-action
       - name: Deploy Lambda Layers
+        if: false
         # if: steps.check_requirements.outputs.SHOULD_UPDATE_LAYER == 'true'
         uses: serverless/github-action@v3.1
         with:
