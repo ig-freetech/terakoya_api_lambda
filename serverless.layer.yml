@@ -6,12 +6,18 @@ provider:
   name: aws
   deploymentMethod: direct
   stage: ${opt:stage, 'dev'}
-  # stage: ${env:STAGE, 'dev'}
   region: ${env:AWS_DEFAULT_REGION}
+
+# Define variables that can be used in this file
+# https://www.serverless.com/framework/docs/providers/openwhisk/guide/variables
+custom:
+  resourcePrefix: terakoya-booking
 
 layers:
   booking:
-    name: ${self:service}-${self:provider.stage}
+    # Refer variables difined in this file
+    # https://www.serverless.com/framework/docs/providers/aws/guide/variables#reference-properties-in-serverlessyml
+    name: ${self:custom.resourcePrefix}-${self:provider.stage}-layer
     path: functions/python
     compatibleRuntimes:
       - python3.9
@@ -19,5 +25,7 @@ layers:
       - x86_64
       - arm64
 
+# Define key-value pairs that will be outputted after deployment so that they can be used by other services
+# https://www.serverless.com/framework/docs/guides/output-variables
 outputs:
-  layer: !Ref BookingLambdaLayer
+  layerRef: !Ref BookingLambdaLayer

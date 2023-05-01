@@ -64,8 +64,6 @@ jobs:
       - name: Create .env file
         run: |
           echo "${{ secrets.ENV_FILE_CONTENTS }}" > .env
-          echo ${{ github.ref_name }}
-          echo ${{ github.ref_name == 'develop' && 'dev' || 'prod' }}
 
       # Set the result of the step as an output parameter to use in the next step
       # https://docs.github.com/ja/actions/using-workflows/workflow-commands-for-github-actions#setting-an-output-parameter
@@ -138,7 +136,7 @@ jobs:
           # https://zenn.dev/burizae/articles/c811cae767965a
           # Multiple arguments can be passed by using the following format
           # https://stackoverflow.com/questions/71208276/github-workflow-uses-with-multiple-args
-          args: deploy --verbose --config serverless.layer.yml --stage ${{ github.ref_name == 'develop' && 'dev' || 'prod' }}
+          args: deploy --verbose --config serverless.layer.yml --stage ${{ github.ref_name == 'master' && 'prod' || 'dev' }}
 
       # Set up Serverless Framework on Github Actions runner
       # https://github.com/serverless/github-action#usage
@@ -175,19 +173,17 @@ jobs:
         with:
           # --verbose shows the log of all stack events during deployment
           # https://www.serverless.com/framework/docs/providers/aws/cli-reference/deploy#options
-          args: deploy --verbose
-        env:
-          # Set the name of the stage to deploy based on the branch name using ternary operator
-          # https://qiita.com/technote-space/items/cbeed6ddd0488499afaa
-          STAGE: ${{ github.ref_name == 'develop' && 'dev' || 'prod' }}
+          args: deploy --verbose --stage ${{ github.ref_name == 'master' && 'prod' || 'dev' }}
+        # env:
+        #   # Set the name of the stage to deploy based on the branch name using ternary operator
+        #   # https://qiita.com/technote-space/items/cbeed6ddd0488499afaa
+        #   STAGE: ${{ github.ref_name == 'master' && 'prod' || 'dev' }}
 
       # https://codenote.net/aws/4293.html
       # - name: Remove all resources managed by the stack via Serverless Framework
       #   uses: serverless/github-action@v3.1
       #   with:
-      #     args: remove --verbose
-      #   env:
-      #     STAGE: ${{ github.ref_name == 'develop' && 'dev' || 'prod' }}
+      #     args: remove --verbose --stage ${{ github.ref_name == 'master' && 'prod' || 'dev' }}
 
 
       # - name: Deploy to Dev
