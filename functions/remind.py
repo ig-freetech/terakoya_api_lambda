@@ -49,11 +49,11 @@ PLACE_DICT = {
         <p>よろしくお願いします。</p>
     """,
     "DIORAMA CAFE": """
-        <p>■DIORAMA CAFE</p>
-        <p>(池袋駅1b出口から徒歩1分) </p>
-        <p>〒171-0021 </p>
-        <p>東京都豊島区西池袋3-29-4 ジェスト7ビルB1</p>
-        <p>https://tabelog.com/tokyo/A1305/A130501/13234609/</p>
+        <p>■DIORAMA CAFE ※住所が変わりました</p>
+        <p>(池袋駅1b出口から徒歩1分)</p>
+        <p>〒171-0021</p>
+        <p>東京都豊島区西池袋3丁目30-1Nビル1階 ※虹の描かれたバスが目印です</p>
+        <p>https://www.instagram.com/diorama_cafe/</p>
     """,
     "キカガク": """
         <p>■株式会社キカガク住所</p>
@@ -132,5 +132,4 @@ def lambda_handler(event, context):
 
 
 if __name__ == '__main__':
-    # main_dynamodb()
     pass
