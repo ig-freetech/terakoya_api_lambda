@@ -10,4 +10,7 @@ python
 # Config
 .env
 
+# Serverless framework
+.serverless
+
 MEMO.md
