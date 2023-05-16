@@ -15,7 +15,6 @@ from api.booking import TERAKOYA_EXPERIENCE, GRADE, ARRIVAL_TIME, STUDY_STYLE, S
 
 from conf.env import AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, AWS_DEFAULT_REGION, STAGE
 
-
 class BookingItem:
     def __init__(
         self,
@@ -68,7 +67,7 @@ class BookingDynamoDB:
         aws_access_key_id=AWS_ACCESS_KEY_ID,
         aws_secret_access_key=AWS_SECRET_ACCESS_KEY,
         region_name=AWS_DEFAULT_REGION
-    ).Table(f"booking-{STAGE}")
+    ).Table(f"terakoya-booking-renewal-${STAGE}")
 
     @classmethod
     def insert_item(cls, item: BookingItem, timestamp: int = int(datetime.now().timestamp())):

@@ -160,7 +160,7 @@ jobs:
       # https://qiita.com/mstssk/items/8759c71f328cab802670
       # - run: npm ci
 
-      - name: Deploy Lambda Functions
+      - name: Deploy
         uses: serverless/github-action@v3.1
         with:
           # --verbose shows the log of all stack events during deployment

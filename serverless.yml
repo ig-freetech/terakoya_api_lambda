@@ -2,7 +2,7 @@
 # https://www.serverless.com/framework/docs/providers/aws/guide/serverless.yml#root-properties
 
 # Set the arbitary service name
-service: terakoya-booking
+service: terakoya-booking-renewal
 # frameworkVersion is the version of the Serverless framework that you want to use
 frameworkVersion: '3'
 # Enable dotenv plugin to load environment variables from .env file
@@ -70,7 +70,7 @@ provider:
     # - arn:aws:lambda:${env:AWS_DEFAULT_REGION}:${env:AWS_ACCOUNT_ID}:layer:${self:service}-${self:provider.stage}-layer:1
     # Specify TitleCased layer name + LambdaLayer
     # https://www.serverless.com/framework/docs/providers/aws/guide/layers#using-your-layers
-    - !Ref TerakoyaBookingLambdaLayer
+    - !Ref BookingLambdaLayer
   # Specify default API Gateway (v2 HTTP API) settings
   # https://www.serverless.com/framework/docs/providers/aws/guide/serverless.yml#api-gateway-v2-http-api
   httpApi:
@@ -83,7 +83,7 @@ provider:
 layers:
   # Set arbitary name
   # this name becomes zip file to be uploaded to S3
-  terakoya-booking:
+  booking:
     # Specify the name of the layer that will be created and deployed
     name: ${self:service}-${self:provider.stage}-layer
     # Specify the path of the layer
@@ -201,7 +201,7 @@ resources:
       Type: AWS::DynamoDB::Table
       # https://docs.aws.amazon.com/ja_jp/AWSCloudFormation/latest/UserGuide/aws-resource-dynamodb-table.html#aws-resource-dynamodb-table-properties
       Properties:
-        TableName: booking-${self:provider.stage}
+        TableName: ${self:service}-${self:provider.stage}
         # Define attributes used at KeySchema
         AttributeDefinitions:
           - AttributeName: date
