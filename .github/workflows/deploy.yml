@@ -127,7 +127,7 @@ jobs:
       # https://github.com/serverless/github-action
       - name: Deploy Lambda Layers
         # if: false
-        # if: steps.check_requirements.outputs.SHOULD_UPDATE_LAYER == 'true'
+        if: steps.check_requirements.outputs.SHOULD_UPDATE_LAYER == 'true'
         uses: serverless/github-action@v3.1
         with:
           # sls deploy --config /path/to/serverless.any.yml
@@ -166,7 +166,6 @@ jobs:
       # - run: npm ci
 
       - name: Deploy Lambda Functions
-        if: false
         uses: serverless/github-action@v3.1
         with:
           # --verbose shows the log of all stack events during deployment
