@@ -157,7 +157,7 @@ functions:
           path: /login
   fetch-booking-list:
     name: ${self:service}-${self:provider.stage}-fetch-booking-list
-    handler: functions/fetch-booking-list.lambda_handler
+    handler: functions/fetch_booking_list.lambda_handler
     events:
       - httpApi:
           method: get
