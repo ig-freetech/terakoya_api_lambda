@@ -86,8 +86,7 @@ jobs:
       # Deploy the layer only when requirements.txt has changed
       # https://github.com/actions/setup-python#basic-usage
       - name: Set up Python 3.9
-        # if: false
-        # if: steps.check_requirements.outputs.SHOULD_UPDATE_LAYER == 'true'
+        if: steps.check_requirements.outputs.SHOULD_UPDATE_LAYER == 'true'
         uses: actions/setup-python@v3
         with:
           python-version: 3.9
@@ -95,8 +94,7 @@ jobs:
       # Save and restore pip packages to reduce the time to install them if requirements.txt has not changed
       # https://github.com/actions/cache#cache-action
       - name: Cache pip packages
-        # if: false
-        # if: steps.check_requirements.outputs.SHOULD_UPDATE_LAYER == 'true'
+        if: steps.check_requirements.outputs.SHOULD_UPDATE_LAYER == 'true'
         # Note: Cache expires in 7 days
         # https://docs.github.com/en/actions/using-workflows/caching-dependencies-to-speed-up-workflows#usage-limits-and-eviction-policy
         uses: actions/cache@v3
@@ -118,33 +116,30 @@ jobs:
       # pip first checks the local cache and doesn't download packages if they are already stored in the cache directory
       # https://pip.pypa.io/en/stable/topics/caching/
       - name: Install pip packages in python directory
-        # if: false
-        # if: steps.check_requirements.outputs.SHOULD_UPDATE_LAYER == 'true'
+        if: steps.check_requirements.outputs.SHOULD_UPDATE_LAYER == 'true'
         run: |
           python -m pip install --upgrade pip
           pip install -r ./functions/requirements.txt -t ./functions/python
 
       # https://github.com/serverless/github-action
-      - name: Deploy Lambda Layers
-        # if: false
-        if: steps.check_requirements.outputs.SHOULD_UPDATE_LAYER == 'true'
-        uses: serverless/github-action@v3.1
-        with:
-          # sls deploy --config /path/to/serverless.any.yml
-          # https://ema-hiro.hatenablog.com/entry/2021/09/19/203541
-          # https://www.serverless.com/framework/docs/providers/aws/cli-reference/deploy
-          # https://zenn.dev/burizae/articles/c811cae767965a
-          # Multiple arguments can be passed by using the following format
-          # https://stackoverflow.com/questions/71208276/github-workflow-uses-with-multiple-args
-          args: deploy --verbose --config serverless.layer.yml --stage ${{ github.ref_name == 'master' && 'prod' || 'dev' }}
+      # - name: Deploy Lambda Layers
+      #   if: steps.check_requirements.outputs.SHOULD_UPDATE_LAYER == 'true'
+      #   uses: serverless/github-action@v3.1
+      #   with:
+      #     # sls deploy --config /path/to/serverless.any.yml
+      #     # https://ema-hiro.hatenablog.com/entry/2021/09/19/203541
+      #     # https://www.serverless.com/framework/docs/providers/aws/cli-reference/deploy
+      #     # https://zenn.dev/burizae/articles/c811cae767965a
+      #     # Multiple arguments can be passed by using the following format
+      #     # https://stackoverflow.com/questions/71208276/github-workflow-uses-with-multiple-args
+      #     args: deploy --verbose --config serverless.layer.yml --stage ${{ github.ref_name == 'master' && 'prod' || 'dev' }}
 
       # Set up Serverless Framework on Github Actions runner
       # https://github.com/serverless/github-action#usage
-      - name: Set up Node.js
-        # if: false
-        uses: actions/setup-node@v3
-        with:
-          node-version: 18
+      # - name: Set up Node.js
+      #   uses: actions/setup-node@v3
+      #   with:
+      #     node-version: 18
 
       # Save and restore npm packages' cache to reduce the time to install them
       # https://github.com/actions/cache/blob/main/examples.md#node---npm

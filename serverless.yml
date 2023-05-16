@@ -16,6 +16,9 @@ useDotenv: true
 # disabledDeprecations:
 #   - '*' # all deprecation warnings are disabled
 
+custom:
+  deploymentBucketName: ${self:service}-${self:provider.stage}
+
 # General AWS settings
 # https://www.serverless.com/framework/docs/providers/aws/guide/serverless.yml#general-settings
 provider:
@@ -29,9 +32,8 @@ provider:
   # https://www.serverless.com/framework/docs/providers/aws/guide/variables#referencing-cli-options
   stage: ${opt:stage, 'dev'}
   # Specify default settings of AWS resources
-  # region: ap-northeast-1
-  # region: us-east-1
-  region: ${env:AWS_DEFAULT_REGION}
+  region: ap-northeast-3
+  # region: ${env:AWS_DEFAULT_REGION}
   # Specify default runtime of Lambda functions
   runtime: python3.9
   # Specify default architecture of Lambda functions
@@ -43,13 +45,21 @@ provider:
     ACCESS_KEY: ${env:AWS_ACCESS_KEY_ID}
     SECRET_ACCESS_KEY: ${env:AWS_SECRET_ACCESS_KEY}
     DEFAULT_REGION: ${env:AWS_DEFAULT_REGION}
-    DYNAMO_BOOKING_TABLE_NAME: booking_${self:provider.stage}
+    STAGE: ${self:provider.stage}
   # Specify default IAM role of Lambda functions
   # https://www.serverless.com/framework/docs/providers/aws/guide/iam
   # IAM role arn syntax
   # https://docs.aws.amazon.com/ja_jp/IAM/latest/UserGuide/reference_identifiers.html#identifiers-arns
   iam:
-    role: arn:aws:iam::${env:AWS_ACCOUNT_ID}:role/${env:AWS_LAMBDA_EXECUTION_ROLE_NAME}
+    # role: arn:aws:iam::${env:AWS_ACCOUNT_ID}:role/${env:AWS_LAMBDA_EXECUTION_ROLE_NAME}
+    role: canExecuteLambdaRole
+  # Specify the bucket for deployment
+  # https://www.serverless.com/framework/docs/providers/aws/guide/serverless.yml#deployment-bucket
+  # https://suzuki-navi.hatenablog.com/entry/2021/01/08/142206
+  deploymentBucket:
+    name: ${self:custom.deploymentBucketName}
+    # maxPreviousDeploymentArtifacts is the number of previous deployment artifacts that will be kept in the bucket
+    maxPreviousDeploymentArtifacts: 2
   # Specify default Lambda Layers of Lambda functions
   # https://www.serverless.com/framework/docs/providers/aws/guide/layers#using-your-layers
   layers:
@@ -57,28 +67,33 @@ provider:
     # https://blog.ikedaosushi.com/entry/2019/04/07/012612
     # https://dev.classmethod.jp/articles/serverless-framework-ref-cloudformation-outputs/
     # https://www.serverless.com/framework/docs/providers/aws/guide/variables#reference-cloudformation-outputs
-    # - ${cf:terakoya-booking-layer.layerRef}
-    - ${cf:${self:service}-layer.layerRef}
+    # - ${cf:${self:service}-layer.layerRef}
     # - arn:aws:lambda:${env:AWS_DEFAULT_REGION}:${env:AWS_ACCOUNT_ID}:layer:${self:service}-${self:provider.stage}-layer:1
-    # - !Ref BookingLambdaLayer
+    - !Ref BookingLambdaLayer
+  # Specify default API Gateway (v2 HTTP API) settings
+  # https://www.serverless.com/framework/docs/providers/aws/guide/serverless.yml#api-gateway-v2-http-api
+  httpApi:
+    name: ${self:service}-${self:provider.stage}-agw
+    # Allow CORS HTTP all headers
+    cors: true
 
 # Layer settings
 # https://www.serverless.com/framework/docs/providers/aws/guide/layers
-# layers:
-#   # Set arbitary name
-#   booking:
-#     # Specify the name of the layer that will be created and deployed
-#     name: ${self:service}-${self:provider.stage}-layer
-#     # Specify the path of the layer
-#     # Maybe it's no choice but to give up deleting the old S3 object including the old Lambda layer zip file after deployment
-#     # https://forum.serverless.com/t/delete-s3-buckets-after-deployment/5208
-#     # https://repost.aws/questions/QUYKQHC78_QCG7OeK4i8Rb4g/questions/QUYKQHC78_QCG7OeK4i8Rb4g/a-lambda-function-to-delete-old-archive-files-in-s3-bucket?
-#     path: functions/python
-#     compatibleRuntimes:
-#       - python3.9
-#     compatibleArchitectures:
-#       - x86_64
-#       - arm64
+layers:
+  # Set arbitary name
+  booking:
+    # Specify the name of the layer that will be created and deployed
+    name: ${self:service}-${self:provider.stage}-layer
+    # Specify the path of the layer
+    # Maybe it's no choice but to give up deleting the old S3 object including the old Lambda layer zip file after deployment
+    # https://forum.serverless.com/t/delete-s3-buckets-after-deployment/5208
+    # https://repost.aws/questions/QUYKQHC78_QCG7OeK4i8Rb4g/questions/QUYKQHC78_QCG7OeK4i8Rb4g/a-lambda-function-to-delete-old-archive-files-in-s3-bucket?
+    path: functions/python
+    compatibleRuntimes:
+      - python3.9
+    compatibleArchitectures:
+      - x86_64
+      - arm64
 
 # Error "No file matches include / exclude patterns" happens when using patterns like below
 # Specify the files and folders to be packaged for deployment to Lambda functions
@@ -108,6 +123,12 @@ functions:
     environment:
       TERAKOYA_GMAIL_ADDRESS: ${env.TERAKOYA_GMAIL_ADDRESS}
       TERAKOYA_GROUP_MAIL_ADDRESS: ${env.TERAKOYA_GROUP_MAIL_ADDRESS}
+    # Attach a function to an API Gateway (v2 HTTP API) endpoint
+    # https://www.serverless.com/framework/docs/providers/aws/events/http-api#event-definition
+    events:
+      - httpApi:
+          method: post
+          path: /book
   remind:
     name: ${self:service}-${self:provider.stage}-remind
     handler: functions/remind.lambda_handler
@@ -126,17 +147,84 @@ functions:
   login:
     name: ${self:service}-${self:provider.stage}-login
     handler: functions/login.lambda_handler
+    events:
+      - httpApi:
+          method: post
+          path: /login
   fetch-booking-list:
     name: ${self:service}-${self:provider.stage}-fetch-booking-list
     handler: functions/fetch-booking-list.lambda_handler
+    events:
+      - httpApi:
+          method: get
+          path: /booking/list
   edit-booking-place:
     name: ${self:service}-${self:provider.stage}-edit-booking-place
     handler: functions/edit_booking_place.lambda_handler
+    events:
+      - httpApi:
+          method: post
+          path: /booking/edit/place
   # added-func:
   #   name: ${self:service}-${self:provider.stage}-added-func
   #   handler: functions/added-func.lambda_handler
 
 # https://www.serverless.com/framework/docs/providers/aws/guide/resources#override-aws-cloudformation-resource
-# resources:
-#   extensions:
+resources:
+  Resources:
+    # Define IAM role for Lambda functions
+    # https://www.serverless.com/framework/docs/providers/aws/guide/iam#one-custom-iam-role-for-all-functions
+    # Set arbitary name
+    canExecuteLambdaRole:
+      Type: AWS::IAM::Role
+      # https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-resource-iam-role.html#aws-resource-iam-role-properties
+      Properties:
+        RoleName: AWSLambdaEnableCloudWatchS3
+        # AssumeRolePolicyDocument is required
+        AssumeRolePolicyDocument:
+          Version: '2012-10-17'
+          Statement:
+            - Effect: Allow
+              Principal:
+                Service:
+                  - lambda.amazonaws.com
+              Action: sts:AssumeRole
+        # ManagedPolicyArns are policies to be attached to the role that are managed by AWS
+        # https://dev.classmethod.jp/articles/created_a_cross-account_access_role_in_cloudformation/
+        ManagedPolicyArns:
+          - arn:aws:iam::aws:policy/AWSLambdaExecute
+      # Define DynamoDB table
+      # https://www.serverless.com/framework/docs/providers/aws/guide/resources
+      bookingTable:
+        Type: AWS::DynamoDB::Table
+        # https://docs.aws.amazon.com/ja_jp/AWSCloudFormation/latest/UserGuide/aws-resource-dynamodb-table.html#aws-resource-dynamodb-table-properties
+        Properties:
+          TableName: booking-${self:provider.stage}
+          # Define attributes used at KeySchema
+          AttributeDefinitions:
+            - AttributeName: date
+              AttributeType: S
+            - AttributeName: sk
+              AttributeType: S
+          # Define pk and sk
+          # https://atsushinotes.com/deploy_dynamodb_from_cloudformation-by-yaml/#index_id11
+          KeySchema:
+            - AttributeName: date
+              # HASH is partition key
+              KeyType: HASH
+            - AttributeName: sk
+              # RANGE is sort key
+              KeyType: RANGE
+          # PAY_PER_REQUEST is on-demand mode
+          # https://dev.classmethod.jp/articles/dynamodb-cfn-ondemand-reinvent-2018/
+          BillingMode: PAY_PER_REQUEST
+      # Define S3 bucket
+      bucketForLambda:
+        # https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-s3-bucket.html#aws-properties-s3-bucket--examples
+        Type: 'AWS::S3::Bucket'
+        DeletionPolicy: Retain
+        Properties:
+          BucketName: ${self:custom.deploymentBucketName}
+
+
 
