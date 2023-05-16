@@ -19,9 +19,8 @@
         "python.autoComplete.extraPaths": [
           "/workspaces/terakoya_api_lambda/functions/python/"
         ],
-        "editor.defaultFormatter": "ms-python.autopep8",
         "editor.formatOnSave": true,
-        "python.formatting.provider": "none",
+        "python.formatting.provider": "autopep8",
         "python.formatting.autopep8Args": [
           "--max-line-length",
           "120",
@@ -41,8 +40,9 @@
         "ms-python.python",
         "boto3typed.boto3-ide",
         "ms-azuretools.vscode-docker",
+        "github.vscode-github-actions",
         "github.copilot",
-        "eamodio.gitlens",
+        "eamodio.gitlens"
       ]
     }
   }
