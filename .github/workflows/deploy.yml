@@ -67,26 +67,26 @@ jobs:
 
       # Set the result of the step as an output parameter to use in the next step
       # https://docs.github.com/ja/actions/using-workflows/workflow-commands-for-github-actions#setting-an-output-parameter
-      - name: Check if requirements.txt has changed
-        id: check_requirements
-        # Get the name of the branch using ${{ github.ref_name }} in a run command
-        # https://dev.classmethod.jp/articles/how-to-get-a-ref-branch-within-a-workflow-execution-in-github-actions/
-        # Github context's content example is below
-        # https://docs.github.com/ja/actions/learn-github-actions/contexts#example-contents-of-the-github-context
-        # Compare the current merge commit with the HEAD commit of the target branch
-        # https://qiita.com/shibukk/items/8c9362a5bd399b9c56be
-        # https://qiita.com/shizen-shin/items/ddc0e5bf658bf02fbc3c
-        run: |
-          if git diff --name-only HEAD^ HEAD -- functions/requirements.txt | grep "requirements.txt"; then
-            echo "SHOULD_UPDATE_LAYER=true" >> "$GITHUB_OUTPUT"
-          else
-            echo "SHOULD_UPDATE_LAYER=false" >> "$GITHUB_OUTPUT"
-          fi
+      # - name: Check if requirements.txt has changed
+      #   id: check_requirements
+      #   # Get the name of the branch using ${{ github.ref_name }} in a run command
+      #   # https://dev.classmethod.jp/articles/how-to-get-a-ref-branch-within-a-workflow-execution-in-github-actions/
+      #   # Github context's content example is below
+      #   # https://docs.github.com/ja/actions/learn-github-actions/contexts#example-contents-of-the-github-context
+      #   # Compare the current merge commit with the HEAD commit of the target branch
+      #   # https://qiita.com/shibukk/items/8c9362a5bd399b9c56be
+      #   # https://qiita.com/shizen-shin/items/ddc0e5bf658bf02fbc3c
+      #   run: |
+      #     if git diff --name-only HEAD^ HEAD -- functions/requirements.txt | grep "requirements.txt"; then
+      #       echo "SHOULD_UPDATE_LAYER=true" >> "$GITHUB_OUTPUT"
+      #     else
+      #       echo "SHOULD_UPDATE_LAYER=false" >> "$GITHUB_OUTPUT"
+      #     fi
 
       # Deploy the layer only when requirements.txt has changed
       # https://github.com/actions/setup-python#basic-usage
       - name: Set up Python 3.9
-        if: steps.check_requirements.outputs.SHOULD_UPDATE_LAYER == 'true'
+        # if: steps.check_requirements.outputs.SHOULD_UPDATE_LAYER == 'true'
         uses: actions/setup-python@v3
         with:
           python-version: 3.9
@@ -94,7 +94,7 @@ jobs:
       # Save and restore pip packages to reduce the time to install them if requirements.txt has not changed
       # https://github.com/actions/cache#cache-action
       - name: Cache pip packages
-        if: steps.check_requirements.outputs.SHOULD_UPDATE_LAYER == 'true'
+        # if: steps.check_requirements.outputs.SHOULD_UPDATE_LAYER == 'true'
         # Note: Cache expires in 7 days
         # https://docs.github.com/en/actions/using-workflows/caching-dependencies-to-speed-up-workflows#usage-limits-and-eviction-policy
         uses: actions/cache@v3
@@ -116,7 +116,7 @@ jobs:
       # pip first checks the local cache and doesn't download packages if they are already stored in the cache directory
       # https://pip.pypa.io/en/stable/topics/caching/
       - name: Install pip packages in python directory
-        if: steps.check_requirements.outputs.SHOULD_UPDATE_LAYER == 'true'
+        # if: steps.check_requirements.outputs.SHOULD_UPDATE_LAYER == 'true'
         run: |
           python -m pip install --upgrade pip
           pip install -r ./functions/requirements.txt -t ./functions/python
