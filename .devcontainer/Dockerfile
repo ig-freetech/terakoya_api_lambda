@@ -16,11 +16,11 @@ RUN pip install autopep8 pytest
 
 # Install Nodejs on Amazon Linux 2
 # https://docs.aws.amazon.com/sdk-for-javascript/v2/developer-guide/setting-up-node-on-ec2-instance.html
-RUN curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.3/install.sh | bash && \
-    . ~/.nvm/nvm.sh && nvm install --lts && \
-    # Install serverless cli via npm
-    # https://www.serverless.com/framework/docs/getting-started
-    npm install -g npm@9.6.6 && npm install -g serverless
+# RUN curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.3/install.sh | bash && \
+#     . ~/.nvm/nvm.sh && nvm install --lts && \
+#     # Install serverless cli via npm
+#     # https://www.serverless.com/framework/docs/getting-started
+#     npm install -g npm@9.6.6 && npm install -g serverless
 
 # Install Node.js to run serverless framework
 # https://qiita.com/3582/items/31a9a98325b7f205d009
