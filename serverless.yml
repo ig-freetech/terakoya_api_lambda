@@ -125,8 +125,8 @@ functions:
     name: ${self:service}-${self:provider.stage}-book
     handler: functions/book.lambda_handler
     environment:
-      TERAKOYA_GMAIL_ADDRESS: ${env.TERAKOYA_GMAIL_ADDRESS}
-      TERAKOYA_GROUP_MAIL_ADDRESS: ${env.TERAKOYA_GROUP_MAIL_ADDRESS}
+      TERAKOYA_GMAIL_ADDRESS: ${env:TERAKOYA_GMAIL_ADDRESS}
+      TERAKOYA_GROUP_MAIL_ADDRESS: ${env:TERAKOYA_GROUP_MAIL_ADDRESS}
     # Attach a function to an API Gateway (v2 HTTP API) endpoint
     # https://www.serverless.com/framework/docs/providers/aws/events/http-api#event-definition
     events:
@@ -137,8 +137,8 @@ functions:
     name: ${self:service}-${self:provider.stage}-remind
     handler: functions/remind.lambda_handler
     environment:
-      TERAKOYA_GMAIL_ADDRESS: ${env.TERAKOYA_GMAIL_ADDRESS}
-      TERAKOYA_GROUP_MAIL_ADDRESS: ${env.TERAKOYA_GROUP_MAIL_ADDRESS}
+      TERAKOYA_GMAIL_ADDRESS: ${env:TERAKOYA_GMAIL_ADDRESS}
+      TERAKOYA_GROUP_MAIL_ADDRESS: ${env:TERAKOYA_GROUP_MAIL_ADDRESS}
     # Specify the event triggers of Lambda functions
     # https://dev.classmethod.jp/articles/serverless-framework-lambda-cron-execute/
     # https://www.serverless.com/framework/docs/providers/aws/guide/serverless.yml#eventbridge
