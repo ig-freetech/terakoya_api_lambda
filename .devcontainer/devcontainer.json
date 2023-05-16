@@ -4,13 +4,24 @@
     "dockerfile": "Dockerfile",
     "context": ".."
   },
+  // Set environment variables when container is created with .env file without dotenv package
+  // https://code.visualstudio.com/remote/advancedcontainers/environment-variables#_option-2-use-an-env-file
+  "runArgs": ["--env-file", ".env"],
   "customizations": {
     "vscode": {
       "settings": {
-        "terminal.integrated.shell.linux": "/bin/bash",
-        "python.autoComplete.extraPaths": ["/workspaces/terakoya_api_lambda/functions/python/"],
+        "terminal.integrated.profiles.linux": {
+          "bash": {
+            "path": "bash",
+            "args": []
+          }
+        },
+        "python.autoComplete.extraPaths": [
+          "/workspaces/terakoya_api_lambda/functions/python/"
+        ],
+        "editor.defaultFormatter": "ms-python.autopep8",
         "editor.formatOnSave": true,
-        "python.formatting.provider": "autopep8",
+        "python.formatting.provider": "none",
         "python.formatting.autopep8Args": [
           "--max-line-length",
           "120",
@@ -29,8 +40,9 @@
       "extensions": [
         "ms-python.python",
         "boto3typed.boto3-ide",
+        "ms-azuretools.vscode-docker",
         "github.copilot",
-        "eamodio.gitlens"
+        "eamodio.gitlens",
       ]
     }
   }

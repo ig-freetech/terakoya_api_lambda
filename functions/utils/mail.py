@@ -12,7 +12,7 @@ from botocore.exceptions import ClientError
 ROOT_DIR_PATH = os.path.dirname(os.path.dirname(__file__))
 sys.path.append(ROOT_DIR_PATH)
 
-from config.env import AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, AWS_DEFAULT_REGION, SES_TEST_ADDRESS_1, SES_TEST_ADDRESS_2, TERAKOYA_GMAIL_ADDRESS
+from conf.env import AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, AWS_DEFAULT_REGION, TERAKOYA_GMAIL_ADDRESS
 
 
 class IMail(metaclass=ABCMeta):
@@ -80,18 +80,3 @@ class SesMail(IMail):
             print(str(dict(e.response)))
         else:
             print(f"Email sent! Message ID: {response['MessageId']}")
-
-
-if __name__ == "__main__":
-    mail_from = GMAIL_ACCOUNT
-    mail_to = "" if SES_TEST_ADDRESS_1 is None else SES_TEST_ADDRESS_1
-    subject = "【テスト】"
-    body = f"""
-        <br/>
-        <p>メール送信テストです。</p>
-        <br/>
-    """
-    mail_cc = "" if SES_TEST_ADDRESS_2 is None else SES_TEST_ADDRESS_2
-    img_fpath = os.path.join(ROOT_DIR_PATH, "assets", "sunshine-map.jpg")
-    ses_mail = SesMail(mail_from)
-    ses_mail.send(mail_to, subject, body, mail_cc, img_fpath)

@@ -25,8 +25,3 @@ def lambda_handler(event, context):
             'result_type': 0,
             'message': 'Failed',
         }
-
-
-if __name__ == '__main__':
-    item_list = BookingDynamoDB.get_item_list("2023-01-31")
-    print(item_list)

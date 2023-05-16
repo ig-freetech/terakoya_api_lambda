@@ -49,7 +49,3 @@ class DT:
     def convert_iso_to_timestamp(iso_date: str) -> int:
         # https://kokufu.blogspot.com/2018/12/python-datetime-unix-time.html
         return int(datetime.strptime(iso_date, ISO_DATE_FORMAT).timestamp())
-
-
-if __name__ == "__main__":
-    pass

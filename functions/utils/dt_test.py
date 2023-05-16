@@ -1,4 +1,4 @@
-from datetime import datetime, timezone
+from datetime import datetime
 from utils.dt import DT, JST
 
 
@@ -23,9 +23,3 @@ def test_convert_slashdate_to_datetime():
 def test_convert_iso_to_slushdate():
     assert DT.convert_iso_to_slushdate("2023-01-31") == "01/31"
     # assert DT.convert_iso_to_slushdate("2023-01-31") == "1/31" # NG
-
-
-if __name__ == "__main__":
-    print(datetime.now().timestamp())
-    print(datetime.now(JST).timestamp())
-    print(datetime.now(timezone.utc).timestamp())
