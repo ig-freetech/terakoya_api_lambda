@@ -16,8 +16,8 @@ useDotenv: true
 # disabledDeprecations:
 #   - '*' # all deprecation warnings are disabled
 
-custom:
-  deploymentBucketName: ${self:service}-${self:provider.stage}
+# custom:
+#   deploymentBucketName: ${self:service}-${self:provider.stage}
 
 # General AWS settings
 # https://www.serverless.com/framework/docs/providers/aws/guide/serverless.yml#general-settings
@@ -32,8 +32,8 @@ provider:
   # https://www.serverless.com/framework/docs/providers/aws/guide/variables#referencing-cli-options
   stage: ${opt:stage, 'dev'}
   # Specify default settings of AWS resources
-  region: ap-northeast-3
-  # region: ${env:AWS_DEFAULT_REGION}
+  # region: ap-northeast-3
+  region: ${env:AWS_DEFAULT_REGION}
   # Specify default runtime of Lambda functions
   runtime: python3.9
   # Specify default architecture of Lambda functions
@@ -57,7 +57,6 @@ provider:
   # https://www.serverless.com/framework/docs/providers/aws/guide/serverless.yml#deployment-bucket
   # https://suzuki-navi.hatenablog.com/entry/2021/01/08/142206
   deploymentBucket:
-    name: ${self:custom.deploymentBucketName}
     # maxPreviousDeploymentArtifacts is the number of previous deployment artifacts that will be kept in the bucket
     maxPreviousDeploymentArtifacts: 2
   # Specify default Lambda Layers of Lambda functions
@@ -69,7 +68,9 @@ provider:
     # https://www.serverless.com/framework/docs/providers/aws/guide/variables#reference-cloudformation-outputs
     # - ${cf:${self:service}-layer.layerRef}
     # - arn:aws:lambda:${env:AWS_DEFAULT_REGION}:${env:AWS_ACCOUNT_ID}:layer:${self:service}-${self:provider.stage}-layer:1
-    - !Ref BookingLambdaLayer
+    # Specify TitleCased layer name + LambdaLayer
+    # https://www.serverless.com/framework/docs/providers/aws/guide/layers#using-your-layers
+    - !Ref TerakoyaBookingLambdaLayer
   # Specify default API Gateway (v2 HTTP API) settings
   # https://www.serverless.com/framework/docs/providers/aws/guide/serverless.yml#api-gateway-v2-http-api
   httpApi:
@@ -81,7 +82,8 @@ provider:
 # https://www.serverless.com/framework/docs/providers/aws/guide/layers
 layers:
   # Set arbitary name
-  booking:
+  # this name becomes zip file to be uploaded to S3
+  terakoya-booking:
     # Specify the name of the layer that will be created and deployed
     name: ${self:service}-${self:provider.stage}-layer
     # Specify the path of the layer
@@ -193,38 +195,38 @@ resources:
         # https://dev.classmethod.jp/articles/created_a_cross-account_access_role_in_cloudformation/
         ManagedPolicyArns:
           - arn:aws:iam::aws:policy/AWSLambdaExecute
-      # Define DynamoDB table
-      # https://www.serverless.com/framework/docs/providers/aws/guide/resources
-      bookingTable:
-        Type: AWS::DynamoDB::Table
-        # https://docs.aws.amazon.com/ja_jp/AWSCloudFormation/latest/UserGuide/aws-resource-dynamodb-table.html#aws-resource-dynamodb-table-properties
-        Properties:
-          TableName: booking-${self:provider.stage}
-          # Define attributes used at KeySchema
-          AttributeDefinitions:
-            - AttributeName: date
-              AttributeType: S
-            - AttributeName: sk
-              AttributeType: S
-          # Define pk and sk
-          # https://atsushinotes.com/deploy_dynamodb_from_cloudformation-by-yaml/#index_id11
-          KeySchema:
-            - AttributeName: date
-              # HASH is partition key
-              KeyType: HASH
-            - AttributeName: sk
-              # RANGE is sort key
-              KeyType: RANGE
-          # PAY_PER_REQUEST is on-demand mode
-          # https://dev.classmethod.jp/articles/dynamodb-cfn-ondemand-reinvent-2018/
-          BillingMode: PAY_PER_REQUEST
-      # Define S3 bucket
-      bucketForLambda:
-        # https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-s3-bucket.html#aws-properties-s3-bucket--examples
-        Type: 'AWS::S3::Bucket'
-        DeletionPolicy: Retain
-        Properties:
-          BucketName: ${self:custom.deploymentBucketName}
+    # Define DynamoDB table
+    # https://www.serverless.com/framework/docs/providers/aws/guide/resources
+    bookingTable:
+      Type: AWS::DynamoDB::Table
+      # https://docs.aws.amazon.com/ja_jp/AWSCloudFormation/latest/UserGuide/aws-resource-dynamodb-table.html#aws-resource-dynamodb-table-properties
+      Properties:
+        TableName: booking-${self:provider.stage}
+        # Define attributes used at KeySchema
+        AttributeDefinitions:
+          - AttributeName: date
+            AttributeType: S
+          - AttributeName: sk
+            AttributeType: S
+        # Define pk and sk
+        # https://atsushinotes.com/deploy_dynamodb_from_cloudformation-by-yaml/#index_id11
+        KeySchema:
+          - AttributeName: date
+            # HASH is partition key
+            KeyType: HASH
+          - AttributeName: sk
+            # RANGE is sort key
+            KeyType: RANGE
+        # PAY_PER_REQUEST is on-demand mode
+        # https://dev.classmethod.jp/articles/dynamodb-cfn-ondemand-reinvent-2018/
+        BillingMode: PAY_PER_REQUEST
+    # Define S3 bucket
+    # bucketForLambda:
+    #   # https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-s3-bucket.html#aws-properties-s3-bucket--examples
+    #   Type: 'AWS::S3::Bucket'
+    #   DeletionPolicy: Retain
+    #   Properties:
+    #     BucketName: ${self:custom.deploymentBucketName}
 
 
 
