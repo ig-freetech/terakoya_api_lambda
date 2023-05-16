@@ -86,7 +86,7 @@ jobs:
       # Deploy the layer only when requirements.txt has changed
       # https://github.com/actions/setup-python#basic-usage
       - name: Set up Python 3.9
-        if: false
+        # if: false
         # if: steps.check_requirements.outputs.SHOULD_UPDATE_LAYER == 'true'
         uses: actions/setup-python@v3
         with:
@@ -95,7 +95,7 @@ jobs:
       # Save and restore pip packages to reduce the time to install them if requirements.txt has not changed
       # https://github.com/actions/cache#cache-action
       - name: Cache pip packages
-        if: false
+        # if: false
         # if: steps.check_requirements.outputs.SHOULD_UPDATE_LAYER == 'true'
         # Note: Cache expires in 7 days
         # https://docs.github.com/en/actions/using-workflows/caching-dependencies-to-speed-up-workflows#usage-limits-and-eviction-policy
@@ -118,7 +118,7 @@ jobs:
       # pip first checks the local cache and doesn't download packages if they are already stored in the cache directory
       # https://pip.pypa.io/en/stable/topics/caching/
       - name: Install pip packages in python directory
-        if: false
+        # if: false
         # if: steps.check_requirements.outputs.SHOULD_UPDATE_LAYER == 'true'
         run: |
           python -m pip install --upgrade pip
@@ -126,7 +126,7 @@ jobs:
 
       # https://github.com/serverless/github-action
       - name: Deploy Lambda Layers
-        if: false
+        # if: false
         # if: steps.check_requirements.outputs.SHOULD_UPDATE_LAYER == 'true'
         uses: serverless/github-action@v3.1
         with:
@@ -141,33 +141,31 @@ jobs:
       # Set up Serverless Framework on Github Actions runner
       # https://github.com/serverless/github-action#usage
       - name: Set up Node.js
-        if: false
+        # if: false
         uses: actions/setup-node@v3
         with:
           node-version: 18
 
       # Save and restore npm packages' cache to reduce the time to install them
       # https://github.com/actions/cache/blob/main/examples.md#node---npm
-      - name: Cache npm packages
-        if: false
-        id: npm-cache-dir
-        shell: bash
-        run: echo "dir=$(npm config get cache)" >> ${GITHUB_OUTPUT}
-      - uses: actions/cache@v3
-        if: false
-        id: npm-cache
-        with:
-          path: ${{ steps.npm-cache-dir.outputs.dir }}
-          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
-          restore-keys: |
-            ${{ runner.os }}-node-
+      # - name: Cache npm packages
+      #   id: npm-cache-dir
+      #   shell: bash
+      #   run: echo "dir=$(npm config get cache)" >> ${GITHUB_OUTPUT}
+      # - uses: actions/cache@v3
+      #   id: npm-cache
+      #   with:
+      #     path: ${{ steps.npm-cache-dir.outputs.dir }}
+      #     key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+      #     restore-keys: |
+      #       ${{ runner.os }}-node-
 
       # npm ci is unnecessary because the packages are not node_modules in JavaScript but python modules
       # npm ci means that npm install is executed with package-lock.json deleting node_modules before installing packages without resolving　dependencies　of packages and saving them to package-lock.json
       # https://qiita.com/mstssk/items/8759c71f328cab802670
       # - run: npm ci
 
-      - name: Deploy
+      - name: Deploy Lambda Functions
         if: false
         uses: serverless/github-action@v3.1
         with:
