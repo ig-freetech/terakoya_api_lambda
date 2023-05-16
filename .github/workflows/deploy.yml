@@ -10,9 +10,9 @@ on:
   # https://docs.github.com/ja/actions/using-workflows/events-that-trigger-workflows#push
   push:
     branches:
-      - develop
-      - master
-      # - 'feature/**' # test
+      # - develop
+      # - master
+      - 'feature/**' # test
     # Run actions only when changes happens in functions directory
     # https://blog.35d.jp/2020-09-29-github-actions-path
     # paths:
