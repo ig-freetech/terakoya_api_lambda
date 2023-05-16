@@ -67,7 +67,7 @@ class BookingDynamoDB:
         aws_access_key_id=AWS_ACCESS_KEY_ID,
         aws_secret_access_key=AWS_SECRET_ACCESS_KEY,
         region_name=AWS_DEFAULT_REGION
-    ).Table(f"terakoya-booking-renewal-${STAGE}")
+    ).Table(f"terakoya-booking-renewal-{STAGE}")
 
     @classmethod
     def insert_item(cls, item: BookingItem, timestamp: int = int(datetime.now().timestamp())):

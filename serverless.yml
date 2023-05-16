@@ -106,6 +106,8 @@ layers:
 # https://github.com/serverless/examples/blob/v3/aws-python-auth0-custom-authorizers-api/serverless.yml
 # Sample list
 # https://github.com/serverless/examples
+
+# packages are not uploaded to S3 if there's no changes in packages
 package:
   patterns:
     - 'functions/**'
