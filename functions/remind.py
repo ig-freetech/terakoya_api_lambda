@@ -10,7 +10,7 @@ from api.booking import TERAKOYA_TYPE, PLACE
 
 from utils.mail import SesMail
 
-from config.env import TERAKOYA_GMAIL_ADDRESS, TERAKOYA_GROUP_MAIL_ADDRESS
+from conf.env import TERAKOYA_GMAIL_ADDRESS, TERAKOYA_GROUP_MAIL_ADDRESS
 
 TERAKOYA_GMAIL_FROM = "" if TERAKOYA_GMAIL_ADDRESS is None else TERAKOYA_GMAIL_ADDRESS
 TERAKOYA_GROUP_MAIL_CC = "" if TERAKOYA_GROUP_MAIL_ADDRESS is None else TERAKOYA_GROUP_MAIL_ADDRESS
@@ -129,7 +129,3 @@ def lambda_handler(event, context):
         main_dynamodb()
     except Exception as e:
         print(f"Error happend. Error message: {str(e)}")
-
-
-if __name__ == '__main__':
-    pass
