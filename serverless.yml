@@ -167,7 +167,7 @@ functions:
     handler: functions/edit_booking_place.lambda_handler
     events:
       - httpApi:
-          method: post
+          method: put
           path: /booking/edit/place
   # added-func:
   #   name: ${self:service}-${self:provider.stage}-added-func
