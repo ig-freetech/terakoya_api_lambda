@@ -146,7 +146,7 @@ functions:
     # https://www.serverless.com/framework/docs/providers/aws/events/event-bridge
     events:
       - eventBridge:
-          name: ${self:service}-scheduled-remind
+          name: ${self:service}-${self:provider.stage}-scheduled-remind
           schedule: cron(0 0,7 ? * TUE,SAT *)
   login:
     name: ${self:service}-${self:provider.stage}-login
@@ -183,7 +183,7 @@ resources:
       Type: AWS::IAM::Role
       # https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-resource-iam-role.html#aws-resource-iam-role-properties
       Properties:
-        RoleName: AWSLambdaEnableCloudWatchS3${self:provider.stage}
+        RoleName: AWSLambdaEnableCloudWatchS3-${self:provider.stage}
         # AssumeRolePolicyDocument is required
         AssumeRolePolicyDocument:
           Version: '2012-10-17'
