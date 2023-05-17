@@ -183,7 +183,7 @@ resources:
       Type: AWS::IAM::Role
       # https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-resource-iam-role.html#aws-resource-iam-role-properties
       Properties:
-        RoleName: AWSLambdaEnableCloudWatchS3
+        RoleName: AWSLambdaEnableCloudWatchS3${self:provider.stage}
         # AssumeRolePolicyDocument is required
         AssumeRolePolicyDocument:
           Version: '2012-10-17'
