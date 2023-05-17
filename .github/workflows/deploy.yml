@@ -65,6 +65,12 @@ jobs:
         run: |
           echo "${{ secrets.ENV_FILE_CONTENTS }}" > .env
 
+      # https://codenote.net/aws/4293.html
+      # - name: Remove all resources managed by the stack via Serverless Framework
+      #   uses: serverless/github-action@v3.1
+      #   with:
+      #     args: remove --verbose --stage ${{ github.ref_name == 'master' && 'prod' || 'dev' }}
+
       # Set the result of the step as an output parameter to use in the next step
       # https://docs.github.com/ja/actions/using-workflows/workflow-commands-for-github-actions#setting-an-output-parameter
       # - name: Check if requirements.txt has changed
@@ -170,12 +176,6 @@ jobs:
         #   # Set the name of the stage to deploy based on the branch name using ternary operator
         #   # https://qiita.com/technote-space/items/cbeed6ddd0488499afaa
         #   STAGE: ${{ github.ref_name == 'master' && 'prod' || 'dev' }}
-
-      # https://codenote.net/aws/4293.html
-      # - name: Remove all resources managed by the stack via Serverless Framework
-      #   uses: serverless/github-action@v3.1
-      #   with:
-      #     args: remove --verbose --stage ${{ github.ref_name == 'master' && 'prod' || 'dev' }}
 
 
       # - name: Deploy to Dev
