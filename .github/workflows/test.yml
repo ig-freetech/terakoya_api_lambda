@@ -1,0 +1,31 @@
+name: Test
+
+# Run every time a commit is pushed to the repository regardless of branch
+on: push
+
+jobs:
+    test:
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v3
+              with:
+                fetch-depth: 0
+            - name: Set up Python 3.9
+              uses: actions/setup-python@v3
+              with:
+                python-version: 3.9
+            - name: Cache pip packages
+              uses: actions/cache@v3
+              with:
+                path: ~/.cache/pip
+                key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
+                restore-keys: |
+                  ${{ runner.os }}-pip-
+
+            # Run pytest and show the results on Github
+            # https://enu23456.hatenablog.com/entry/2022/12/08/194105
+            - name: Install dependencies
+              run: |
+                python -m pip install --upgrade pip
+                pip install pytest
+                

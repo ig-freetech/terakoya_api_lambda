@@ -13,4 +13,7 @@ python
 # Serverless framework
 .serverless
 
+# AWS
+.aws
+
 MEMO.md

@@ -26,22 +26,6 @@ class DT:
         return cls.CURRENT_JST_DATETIME.strftime(ISO_DATE_FORMAT)
 
     @staticmethod
-    def convert_slashdate_to_datetime(date: str) -> datetime:
-        # ['MM', 'DD'] の形で抽出
-        regDate = re.search(r'\d+/\d+', date)
-        if (regDate == None):
-            raise Exception("Invalid Date Format.")
-        month_day_list = regDate.group().split('/')
-        TERAKOYA_START_TIME = 17
-        return datetime(
-            year=datetime.now(JST).year,
-            month=int(month_day_list[0]),
-            day=int(month_day_list[1]),
-            hour=TERAKOYA_START_TIME,  # To send a remind mail at an hour before Terakoya starts
-            tzinfo=JST
-        )
-
-    @staticmethod
     def convert_iso_to_slushdate(iso_date: str):
         return datetime.fromisoformat(iso_date).strftime(f"%m/%d")
 

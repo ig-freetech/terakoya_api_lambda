@@ -29,6 +29,18 @@
         ],
         "python.analysis.typeCheckingMode": "basic",
         "python.languageServer": "Pylance",
+        // https://code.visualstudio.com/docs/python/testing#_pytest-configuration-settings
+        // https://docs.pytest.org/en/latest/reference/reference.html#command-line-flags
+        "python.testing.pytestArgs": [
+          // Show output from print()
+          // https://qiita.com/sugarpot/items/53fbf92002781731efce
+          "-s",
+          // Run tests in only tests directory
+          // https://docs.pytest.org/en/7.1.x/how-to/usage.html#specifying-tests-selecting-tests
+          "tests"
+        ],
+        "python.testing.unittestEnabled": false,
+        "python.testing.pytestEnabled": true,
         "files.exclude": {
           "**/.DS_Store": true,
           "**/.pytest_cache": true,
@@ -39,8 +51,12 @@
       "extensions": [
         "ms-python.python",
         "boto3typed.boto3-ide",
+        // https://developer.mamezou-tech.com/blogs/2023/03/05/using-pytest-02/
+        "littlefoxteam.vscode-python-test-adapter",
         "ms-azuretools.vscode-docker",
         "github.vscode-github-actions",
+        // https://github.com/aws/aws-toolkit-vscode/blob/master/README.quickstart.vscode.md
+        "amazonwebservices.aws-toolkit-vscode",
         "github.copilot",
         "eamodio.gitlens"
       ]
