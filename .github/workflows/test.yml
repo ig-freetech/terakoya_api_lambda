@@ -1,7 +1,12 @@
 name: Test
 
 # Run every time a commit is pushed to the repository regardless of branch
-on: push
+# on: push
+on: 
+    push:
+        branches:
+            - master
+            - develop
 
 jobs:
     test:
