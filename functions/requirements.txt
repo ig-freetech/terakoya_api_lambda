@@ -1,9 +1,7 @@
-dataclasses-json
-
 # AWS
 boto3
 boto3-stubs
 
-# Json parser for models and request bodies
+# Json parser and validator for models and request bodies
 # https://docs.pydantic.dev/latest/install/
 pydantic
