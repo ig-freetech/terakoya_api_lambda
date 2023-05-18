@@ -1,0 +1,38 @@
+# Document structure of the OpenAPI(Swagger) Specification
+# Minimum required fields are "openapi", "info", and "paths" only
+# https://learn.openapis.org/specification/structure.html
+
+# Specify the OpenAPI Specification version
+# https://spec.openapis.org/oas/v3.0.3#versions
+# Check the latest version at https://www.openapis.org/
+# HACK: 3.0.3 may be suitable for Swagger viewer extension for VSCode to automatically update preview every time the spec changes
+openapi: "3.0.3"
+
+# Metadata about the API
+# Required fields are "title" and "version" only
+# https://spec.openapis.org/oas/v3.0.3#infoObject
+info:
+  title: Terakoya API (Lambda) Specification
+  version: 1.0.0
+
+servers:
+  - url: https://${GATEWAY_ID_DEV}.execute-api.ap-northeast-1.amazonaws.com/dev
+    description: Development environment
+
+# https://spec.openapis.org/oas/v3.0.3#path-item-object
+paths: 
+  "/book":
+    post:
+      # https://spec.openapis.org/oas/v3.0.3#operationObject
+      summary: Insert a new booking into DynamoDB and send a e-mail to the student
+      responses:
+        "200":
+          description: default response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Booking item inserted successfully"

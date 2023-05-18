@@ -16,4 +16,7 @@ python
 # AWS
 .aws
 
+# OpenAPI
+openapi.yml
+
 MEMO.md
