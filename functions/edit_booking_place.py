@@ -6,11 +6,11 @@ ROOT_DIR_PATH = os.path.dirname(__file__)
 sys.path.append(ROOT_DIR_PATH)
 
 from domain.dynamodb import BookingDynamoDB
+from utils.process import lambda_handler_wrapper
 
 
 def lambda_handler(event, context):
-    print(f"Request body: {event['body']}")
-    try:
+    def func():
         request_body = json.loads(event['body'])
         date = request_body["date"]
         email = request_body["email"]
@@ -18,13 +18,4 @@ def lambda_handler(event, context):
         place = request_body["place"]
         sk = f"#{email}#{terakoya_type}"
         BookingDynamoDB().update_place(date, sk, place)
-        return {
-            'result_type': 1,
-            'message': 'Success'
-        }
-    except Exception as e:
-        print(f"Error happend. Error message: {str(e)}")
-        return {
-            'result_type': 0,
-            'message': 'Failed'
-        }
+    lambda_handler_wrapper(event, func)

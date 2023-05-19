@@ -34,12 +34,18 @@
           "**/.pytest_cache": true,
           "**/__pycache__": true,
           "tmp": true
-        }
+        },
+        // Swagger viewer extension settings for development on Remote Container
+        // https://yatta47.hateblo.jp/entry/2021/03/19/222311
+        "swaggerViewer.defaultPort": 18512,
+        "swaggerViewer.previewInBrowser": true
       },
       "extensions": [
         "ms-python.python",
         "boto3typed.boto3-ide",
         "ms-azuretools.vscode-docker",
+        // https://qiita.com/KNR109/items/7e094dba6bcf37ed73cf#servers
+        "arjun.swagger-viewer",
         "github.vscode-github-actions",
         "github.copilot",
         "eamodio.gitlens"

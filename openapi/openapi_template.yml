@@ -1,0 +1,324 @@
+# Document structure of the OpenAPI(Swagger) Specification
+# Minimum required fields are "openapi", "info", and "paths" only
+# https://learn.openapis.org/specification/structure.html
+
+# Specify the OpenAPI Specification version
+# https://spec.openapis.org/oas/v3.0.3#versions
+# Check the latest version at https://www.openapis.org/
+# HACK: 3.0.3 may be suitable for Swagger viewer extension for VSCode to automatically update preview every time the spec changes
+openapi: "3.0.3"
+
+# Metadata about the API
+# Required fields are "title" and "version" only
+# https://spec.openapis.org/oas/v3.0.3#infoObject
+info:
+  title: Terakoya API (Lambda) Specification
+  version: 1.0.0
+
+servers:
+  - url: https://${GATEWAY_ID_DEV}.execute-api.ap-northeast-1.amazonaws.com
+    description: dev
+
+# Define reusable objects in the form of components.<type>.<name>
+# https://swagger.io/docs/specification/components/
+# https://qiita.com/shigeru10/items/8f20fafd04f7901da939#requestbodies
+components:
+  schemas:
+    BookingItem:
+      type: object
+      properties:
+        date:
+          type: string
+          example: "2045-05-08"
+        email:
+          type: string
+          example: "i.g.freetech2021@gmail.com"
+        terakoya_type:
+          description: |
+            テラコヤ種別
+            (1: カフェ塾テラコヤ(池袋), 2: オンラインテラコヤ(多摩), 3: テラコヤ中等部(池袋), 4: テラコヤ中等部(渋谷), 0: その他, 999: NULL)
+          type: integer
+          example: 1
+        place:
+          description: |
+            拠点
+            (0: 未設定, 1: サンシャインシティ, 2: 良品計画本社, 3: DIORAMA CAFE, 4: キャリア・マム, 5: キカガク)
+          type: integer
+          example: 1
+        name:      
+          type: string
+          example: "I.G"
+        grade:
+          description: |
+            学年
+            (1: 高校1年生, 2: 高校2年生, 3: 高校3年生, 11: 中学1年生, 12: 中学2年生, 13: 中学3年生, 0: その他, 999: NULL)
+          type: integer
+          example: 0
+        arrival_time:
+          description: |
+            到着予定時間帯
+            (1: 17:00前, 2: 17:00~17:30, 3: 17:30~18:00, 4: 18:00以降, 0: その他, 999: NULL)
+          type: integer
+          example: 4
+        terakoya_experience:
+          description: |
+            テラコヤ参加経験
+            (1: 今回が初回, 2: 過去に参加したことがある, 0: その他, 999: NULL)
+          type: integer
+          example: 1
+        study_subject:
+          description: |
+            勉強したい科目
+            (1: 英語, 2: 国語, 3: 数学, 4: 社会, 5: 理科, 6: 推薦型入試対策（志望理由書・面接など）, 7: 大学説明会, 8: キャリア説明会, 9: 英検, 0: その他, 999: NULL)
+          type: integer
+          example: 9
+        study_subject_detail:
+          description: 勉強したい内容について詳しく(自由記入)
+          type: string
+          example: "IELTS"
+        study_style:
+          description: |
+            勉強のスタイル
+            (1: 黙々と静かに勉強したい, 2: 分からない点があったらスタッフに質問したい, 3: 友達と話しながら楽しく勉強したい, 4: 1人では難しいのでスタッフ付きっ切りで勉強を教えて欲しい, 5: 勉強も教えて欲しいけどスタッフの話を聞いたり、相談したい。, 0: その他, 999: NULL)
+          type: integer
+          example: 0
+        school_name:
+          description: 今通っている学校
+          type: string
+          example: "Hogwarts School of Witchcraft and Wizardry"
+        first_choice_school:
+          description: 志望校
+          type: string
+          example: "MIT"
+        course_choice:
+          description: |
+            文理選択
+            (1: まだ決めていない, 2: 文系, 3: 理系, 0: その他, 999: NULL)
+          type: integer
+          example: 999
+        future_free:
+          description: 将来の夢など(自由記入)
+          type: string
+          example: "I want to be a doctor."
+        like_thing_free:
+          description: 好きなこと(自由記入)
+          type: string
+          example: "I like to play soccer."
+        how_to_know_terakoya:
+          description: |
+            テラコヤを知ったきっかけ
+            (1: HP, 2: Instagram, 3: Facebook, 4: Twitter, 5: 知人の紹介, 6: ポスター、ビラ, 0: その他, 999: NULL)
+          type: integer
+          example: 6
+        remarks:
+          description: 備考(自由記入)
+          type: string
+          example: "I want to study English.\nBecause I want to study abroad."
+        is_reminded:
+          description: |
+            リマインドメール送信済みフラグ
+            (0: 未送信, 1: 送信済み)
+          type: integer
+          example: 0
+  responses:
+    success:
+        description: Success
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                message:
+                  type: string
+                  example: "Success"
+    internalServerError:
+        description: Internal Server Error
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                message:
+                  type: string
+                  example: "Internal Server Error"
+
+# https://spec.openapis.org/oas/v3.0.3#path-item-object
+paths: 
+  "/book":
+    # https://spec.openapis.org/oas/v3.0.3#operationObject
+    post:
+      summary: Insert booking items for the days the student selected into DynamoDB table and send a e-mail to them.
+      # https://spec.openapis.org/oas/v3.0.3#fixed-fields-10
+      requestBody:
+        description: |
+          # Booking information for the days the student selected
+          ## [Reference Source](https://terakoya20220112.slack.com/archives/C02V0PHDGP2/p1675009220056179)
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              # https://spec.openapis.org/oas/v3.0.3#schema-object
+              properties:
+                name:
+                  # https://swagger.io/docs/specification/describing-responses/
+                  type: string
+                  example: "I.G"
+                email:
+                  type: string
+                  example: "i.g.freetech2021@gmail.com"
+                terakoya_type:
+                  description: |
+                    テラコヤ種別
+                    (1: カフェ塾テラコヤ(池袋), 2: オンラインテラコヤ(多摩), 3: テラコヤ中等部(池袋), 4: テラコヤ中等部(渋谷), 0: その他, 999: NULL)
+                  # number is any number, float or double
+                  # integer is integer number, int32, or int64
+                  # https://swagger.io/docs/specification/data-models/data-types/#numbers
+                  type: integer
+                  example: 1
+                attendance_date_list:
+                  # Example of array of mutiple items
+                  # https://swagger.io/docs/specification/adding-examples/
+                  type: array
+                  items:
+                    type: string
+                  example: ["2045-05-08", "2045-05-15", "2045-05-22"]
+                arrival_time:
+                  description: |
+                    到着予定時間帯
+                    (1: 17:00前, 2: 17:00~17:30, 3: 17:30~18:00, 4: 18:00以降, 0: その他, 999: NULL)
+                  type: integer
+                  example: 4
+                grade:
+                  description: |
+                    学年
+                    (1: 高校1年生, 2: 高校2年生, 3: 高校3年生, 11: 中学1年生, 12: 中学2年生, 13: 中学3年生, 0: その他, 999: NULL)
+                  type: integer
+                  example: 0
+                terakoya_experience:
+                  description: |
+                    テラコヤ参加経験
+                    (1: 今回が初回, 2: 過去に参加したことがある, 0: その他, 999: NULL)
+                  type: integer
+                  example: 1
+                study_subject:
+                  description: |
+                    勉強したい科目
+                    (1: 英語, 2: 国語, 3: 数学, 4: 社会, 5: 理科, 6: 推薦型入試対策（志望理由書・面接など）, 7: 大学説明会, 8: キャリア説明会, 9: 英検, 0: その他, 999: NULL)
+                  type: integer
+                  example: 9
+                study_subject_detail:
+                  description: 勉強したい内容について詳しく(自由記入)
+                  type: string
+                  example: "IELTS"
+                study_style:
+                  description: |
+                    勉強のスタイル
+                    (1: 黙々と静かに勉強したい, 2: 分からない点があったらスタッフに質問したい, 3: 友達と話しながら楽しく勉強したい, 4: 1人では難しいのでスタッフ付きっ切りで勉強を教えて欲しい, 5: 勉強も教えて欲しいけどスタッフの話を聞いたり、相談したい。, 0: その他, 999: NULL)
+                  type: integer
+                  example: 0
+                school_name:
+                  description: 今通っている学校
+                  type: string
+                  example: "Hogwarts School of Witchcraft and Wizardry"
+                first_choice_school:
+                  description: 志望校
+                  type: string
+                  example: "MIT"
+                course_choice:
+                  description: |
+                    文理選択
+                    (1: まだ決めていない, 2: 文系, 3: 理系, 0: その他, 999: NULL)
+                  type: integer
+                  example: 999
+                future_free:
+                  description: 将来の夢など(自由記入)
+                  type: string
+                  example: "I want to be a doctor."
+                like_thing_free:
+                  description: 好きなこと(自由記入)
+                  type: string
+                  example: "I like to play soccer."
+                how_to_know_terakoya:
+                  description: |
+                    テラコヤを知ったきっかけ
+                    (1: HP, 2: Instagram, 3: Facebook, 4: Twitter, 5: 知人の紹介, 6: ポスター、ビラ, 0: その他, 999: NULL)
+                  type: integer
+                  example: 6
+                remarks:
+                  description: 備考(自由記入)
+                  type: string
+                  example: "I want to study English.\nBecause I want to study abroad."
+      responses:
+        '200':
+          $ref: '#/components/responses/success'
+        '500':
+          $ref: '#/components/responses/internalServerError'
+  "/booking/list":
+    get:
+      summary: Get booking items of the specified date from DynamoDB table.
+      # https://swagger.io/docs/specification/describing-parameters/
+      parameters:
+        - in: query
+          name: date
+          description: The date of booking items to be retrieved.
+          required: true
+          schema:
+            type: string
+            example: "2045-05-08"
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Success"
+                  item_list:
+                    type: array
+                    items: 
+                      $ref: '#/components/schemas/BookingItem'
+        '500':
+          $ref: '#/components/responses/internalServerError'
+  "/booking/edit/place":
+    put:
+      summary: Edit place of the specified booking item.
+      requestBody:
+        description: Booking item to be edited.
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BookingItem'
+      responses:
+        '200':
+          $ref: '#/components/responses/success'
+        '500':
+          $ref: '#/components/responses/internalServerError'
+  "/login":
+    post:
+      summary: Login to the system.
+      requestBody:
+        description: User information to be logged in.
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  description: Email address of the user.
+                  type: string
+                  example: "i.g.freetech2021@gmail.com"
+                password:
+                  description: Password of the user.
+                  type: string
+                  example: "password"
+      responses:
+        '200':
+          $ref: '#/components/responses/success'
+        '500':
+          $ref: '#/components/responses/internalServerError'

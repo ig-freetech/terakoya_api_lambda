@@ -10,6 +10,7 @@ from domain.dynamodb import BookingDynamoDB, BookingItem
 
 from utils.mail import SesMail
 from utils.dt import DT
+from utils.process import lambda_handler_wrapper, handle_exception
 
 from conf.env import TERAKOYA_GMAIL_ADDRESS, TERAKOYA_GROUP_MAIL_ADDRESS
 
@@ -142,12 +143,8 @@ class BookingViaDynamoDB(IBooking):
 
 
 def lambda_handler(event, context):
-    print(f"Request body: {event['body']}")
-    try:
-        BookingViaDynamoDB(event["body"]).book()
-        return {
-            "statusCode": 200,
-            "message": "Success"
-        }
-    except Exception as e:
-        print(f"Error happend. Error message: {str(e)}")
+    # lambda args: return value (ex: lambda n: n * 2, lambda: "Hello World", lambda text: print(text))
+    # https://qiita.com/nagataaaas/items/531b1fc5ce42a791c7df
+    # lambda is anonymous function as arrow function in JavaScript but it can't be used to define a function more than two lines.
+    # https://qiita.com/masaru/items/48ee394640400f0f0d1c
+    lambda_handler_wrapper(event, lambda: BookingViaDynamoDB(event["body"]).book())
