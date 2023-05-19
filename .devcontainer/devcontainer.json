@@ -46,7 +46,11 @@
           "**/.pytest_cache": true,
           "**/__pycache__": true,
           "tmp": true
-        }
+        },
+        // Swagger viewer extension settings for development on Remote Container
+        // https://yatta47.hateblo.jp/entry/2021/03/19/222311
+        "swaggerViewer.defaultPort": 18512,
+        "swaggerViewer.previewInBrowser": true
       },
       "extensions": [
         "ms-python.python",
@@ -54,6 +58,8 @@
         // https://developer.mamezou-tech.com/blogs/2023/03/05/using-pytest-02/
         "littlefoxteam.vscode-python-test-adapter",
         "ms-azuretools.vscode-docker",
+        // https://qiita.com/KNR109/items/7e094dba6bcf37ed73cf#servers
+        "arjun.swagger-viewer",
         "github.vscode-github-actions",
         // https://github.com/aws/aws-toolkit-vscode/blob/master/README.quickstart.vscode.md
         "amazonwebservices.aws-toolkit-vscode",
