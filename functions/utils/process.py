@@ -5,9 +5,6 @@ def lambda_handler_wrapper(event, func: Callable):
     print(f"Request Body: {event['body']}")
     try:
         func()
-        return {
-            "message": "Success"
-        }
     except Exception as e:
         print(f"Error happend. Error message: {str(e)}")
         # re-raise the exception to notify the error to the caller (ex: client)

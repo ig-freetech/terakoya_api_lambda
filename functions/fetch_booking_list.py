@@ -15,7 +15,6 @@ def lambda_handler(event, context):
         target_date = event['queryStringParameters']['date']
         item_list = BookingDynamoDB.get_item_list(target_date)
         return {
-            'message': 'Success',
             'item_list': item_list
         }
     except Exception as e:
