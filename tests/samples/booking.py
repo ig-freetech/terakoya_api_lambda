@@ -4,29 +4,27 @@ import sys
 ROOT_DIR_PATH = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
 sys.path.append(ROOT_DIR_PATH)
 
-from functions.api.booking import TERAKOYA_TYPE, ARRIVAL_TIME, GRADE, TERAKOYA_EXPERIENCE, STUDY_SUBJECT, STUDY_STYLE, COURSE_CHOICE, HOW_TO_KNOW_TERAKOYA
-
 from functions.utils.dt import DT
 
 name = "I.G"
 email = "i.g.freetech2021@gmail.com"
-terakoya_type = TERAKOYA_TYPE.HIGH_IKE.value
+terakoya_type = 1
 attendance_date_list = ["3000-01-07", "3000-01-14", "3000-01-21"]  # All dates are Tuesday
-arrival_time = ARRIVAL_TIME.AFTER_1800.value
-grade = GRADE.OTHER.value
-terakoya_experience = TERAKOYA_EXPERIENCE.FIRST_TIME.value
-study_subject = STUDY_SUBJECT.EIKEN.value
+arrival_time = 0
+grade = 13
+terakoya_experience = 1
+study_subject = 9
 study_subject_detail = "I'm studying English."
-study_style = STUDY_STYLE.CONSULT.value
+study_style = 5
 school_name = "Hogwarts School of Witchcraft and Wizardry"
 first_choice_school = "MIT"
-course_choice = COURSE_CHOICE.LIBERAL_ARTS.value
+course_choice = 3
 future_free = "I want to be a wizard."
 like_thing_free = "I like magic.\nAnd I like to play Quidditch."
-how_to_know_terakoya = HOW_TO_KNOW_TERAKOYA.LEAFLET.value
+how_to_know_terakoya = 6
 remarks = f"Current time is {DT.CURRENT_JST_DATETIME.strftime('%Y-%m-%d %H:%M:%S')}."
 
-book_request_body = {
+book_request_body_json = {
     "name": name,
     "email": email,
     "terakoya_type": terakoya_type,

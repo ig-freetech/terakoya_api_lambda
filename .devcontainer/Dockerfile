@@ -49,7 +49,9 @@ COPY ./.aws /root/.aws
 # https://cli.github.com/manual/
 
 COPY ./functions/requirements.txt ./functions/requirements.txt
-RUN pip install -r ./functions/requirements.txt -t ./functions/python
+# Use --no-cache-dir to install packages strictly based on requirements.txt without cache every time
+# https://daeudaeu.com/pip-no-cache-dir/
+RUN pip install --no-cache-dir -r ./functions/requirements.txt -t ./functions/python
 ENV PYTHONPATH $PYTHONPATH:./functions/python
 
 # Set environment variables for local

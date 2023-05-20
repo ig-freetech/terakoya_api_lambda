@@ -4,7 +4,7 @@ import sys
 ROOT_DIR_PATH = os.path.dirname(__file__)
 sys.path.append(ROOT_DIR_PATH)
 
-from domain.dynamodb import BookingDynamoDB
+from functions.domain.booking import BookingTable
 
 from api.booking import TERAKOYA_TYPE, PLACE
 
@@ -111,7 +111,7 @@ def main_dynamodb() -> None:
         5: "キカガク"
     }
 
-    bk_item_list = BookingDynamoDB.get_item_list_for_remind()
+    bk_item_list = BookingTable.get_item_list_for_remind()
     for bk_item in bk_item_list:
         print(f"Booking Item: {str(bk_item.__dict__)}")
         try:
@@ -119,7 +119,7 @@ def main_dynamodb() -> None:
                 print("Impossible to send a email because of no place filled in Ikebukuro")
                 continue
             Remind(bk_item.name, PLACE_MAP[bk_item.place], bk_item.email).send_remind_mail()
-            BookingDynamoDB.update_is_reminded(bk_item.sk)
+            BookingTable.update_is_reminded(bk_item.sk)
         except Exception as e:
             print(f"Error happend. Error message: {str(e)}")
 

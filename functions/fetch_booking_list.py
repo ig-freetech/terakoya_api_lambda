@@ -4,7 +4,7 @@ import sys
 ROOT_DIR_PATH = os.path.dirname(__file__)
 sys.path.append(ROOT_DIR_PATH)
 
-from domain.dynamodb import BookingDynamoDB
+from functions.domain.booking import BookingTable
 
 
 def lambda_handler(event, context):
@@ -13,7 +13,7 @@ def lambda_handler(event, context):
         # How to get a query parameter value
         # https://qiita.com/minsu/items/c9e983f109b1cf5a516e
         target_date = event['queryStringParameters']['date']
-        item_list = BookingDynamoDB.get_item_list(target_date)
+        item_list = BookingTable.get_item_list(target_date)
         return {
             'item_list': item_list
         }
