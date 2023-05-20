@@ -64,7 +64,9 @@
         // https://github.com/aws/aws-toolkit-vscode/blob/master/README.quickstart.vscode.md
         "amazonwebservices.aws-toolkit-vscode",
         "github.copilot",
-        "eamodio.gitlens"
+        "eamodio.gitlens",
+        // https://qiita.com/take_me/items/ae0772646dd59630a8b5
+        "aaron-bond.better-comments"
       ]
     }
   }

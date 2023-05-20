@@ -57,6 +57,11 @@ provider:
   # https://www.serverless.com/framework/docs/providers/aws/guide/serverless.yml#deployment-bucket
   # https://suzuki-navi.hatenablog.com/entry/2021/01/08/142206
   deploymentBucket:
+    # Specify the name of the bucket for deployment that Lambda functions and Layers are uploaded to
+    # But the bucket must be created in advance
+    # Path is <bucket_name>/serveless/<service_name>/<stage_name>/<timestamp>/*.zip
+    # https://suzuki-navi.hatenablog.com/entry/2021/01/08/142206
+    name: terakoya-bucket
     # maxPreviousDeploymentArtifacts is the number of previous deployment artifacts that will be kept in the bucket
     maxPreviousDeploymentArtifacts: 2
   # Specify default Lambda Layers of Lambda functions
@@ -101,19 +106,27 @@ layers:
 # Specify the files and folders to be packaged for deployment to Lambda functions
 # https://symfoware.blog.fc2.com/blog-entry-2505.html
 # https://filip5114.github.io/sls-manage-function-package/
-# https://www.serverless.com/framework/docs/providers/aws/guide/packaging#package-configuration
 # Sample
 # https://github.com/serverless/examples/blob/v3/aws-python-auth0-custom-authorizers-api/serverless.yml
 # Sample list
 # https://github.com/serverless/examples
 
 # packages are not uploaded to S3 if there's no changes in packages
+# https://www.serverless.com/framework/docs/providers/aws/guide/packaging#package-configuration
 package:
+  # By default, .gitignore is excluded
+  # https://www.serverless.com/framework/docs/providers/aws/guide/packaging#patterns
   patterns:
     - 'functions/**'
     - '!functions/python/**'
     - '!functions/tmp/**'
     - '!functions/requirements.txt'
+    - '!.devcontainer/**'
+    - '!.github/**'
+    - '!infrastructure/**'
+    - '!openapi/**'
+    - '!tests/**'
+    - '!README.md'
 
 # Lambda function settings
 # https://www.serverless.com/framework/docs/providers/aws/guide/serverless.yml#general-function-settings

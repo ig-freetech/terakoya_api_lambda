@@ -10,7 +10,7 @@ from domain.dynamodb import BookingDynamoDB, BookingItem
 
 from utils.mail import SesMail
 from utils.dt import DT
-from utils.process import lambda_handler_wrapper, handle_exception
+from utils.process import lambda_handler_wrapper
 
 from conf.env import TERAKOYA_GMAIL_ADDRESS, TERAKOYA_GROUP_MAIL_ADDRESS
 
