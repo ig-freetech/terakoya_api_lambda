@@ -37,7 +37,6 @@ def test_lambda():
 
 
 def test_func():
-    """NOTE: Maybe this test case is unnecessary because it's redundant"""
     booking_request = BookingRequest(book_request_body_json)
     # List comprehension is better to do the same thing as Array.map(obj => obj.prop) in JavaScript rather than using map(lambda x: x.prop, list)
     # https://blog.utgw.net/entry/2017/03/09/154314
