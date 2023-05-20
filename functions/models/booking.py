@@ -12,6 +12,9 @@ from utils.dt import DT
 # Define a private member with '__' prefix
 # https://rinatz.github.io/python-book/ch03-02-scopes/
 
+# Difference between private and protected member
+# https://www.nblog09.com/w/2019/01/09/python-protected-private/
+
 
 class __CommonProperties(BaseModel):
     name: str

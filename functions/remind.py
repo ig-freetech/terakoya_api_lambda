@@ -1,12 +1,11 @@
 import os
 import sys
+from enum import Enum
 
 ROOT_DIR_PATH = os.path.dirname(__file__)
 sys.path.append(ROOT_DIR_PATH)
 
 from functions.domain.booking import BookingTable
-
-from api.booking import TERAKOYA_TYPE, PLACE
 
 from utils.mail import SesMail
 
@@ -99,7 +98,41 @@ class Remind():
         self.__ses_client.send(self.email, subject, body, TERAKOYA_GROUP_MAIL_CC, img_fpath)
 
 
-def main_dynamodb() -> None:
+class TERAKOYA_TYPE(Enum):
+    """テラコヤ種別 (terakoya_type)"""
+    HIGH_IKE = 1
+    """カフェ塾テラコヤ(池袋)"""
+    ONLINE_TAMA = 2
+    """オンラインテラコヤ(多摩)"""
+    MID_IKE = 3
+    """テラコヤ中等部(池袋)"""
+    MID_SHIBU = 4
+    """テラコヤ中等部(渋谷)"""
+    OTHER = 0
+    """その他"""
+    NULL = 999
+    """NULL"""
+
+
+class PLACE(Enum):
+    """拠点 (Place)"""
+    TBD = 0
+    """未設定"""
+    SUNSHINE = 1
+    """サンシャインシティ"""
+    RYOHIN = 2
+    """良品計画本社"""
+    DIORAMA_CAFE = 3
+    """DIORAMA CAFE"""
+    CAREER_MOM = 4
+    """キャリア・マム"""
+    KIKAGAKU = 5
+    """キカガク"""
+    NULL = 999
+    """NULL"""
+
+
+def remind() -> None:
     # Map定義
     # https://terakoya20220112.slack.com/archives/C02V0PHDGP2/p1675009220056179
     PLACE_MAP = {
@@ -126,6 +159,6 @@ def main_dynamodb() -> None:
 
 def lambda_handler(event, context):
     try:
-        main_dynamodb()
+        remind()
     except Exception as e:
         print(f"Error happend. Error message: {str(e)}")

@@ -11,7 +11,7 @@ sys.path.append(ROOT_DIR_PATH)
 from functions.conf.env import AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, AWS_DEFAULT_REGION, STAGE
 
 from functions.book import BookingRequest
-from functions.models.booking import TERAKOYA_TYPE_TO_PLACE_MAP
+from functions.models.booking import TERAKOYA_TYPE_TO_PLACE_MAP, BookingItem
 from functions.domain.booking import generate_sk, BookingTable
 from tests.samples.booking import book_request_body_json, attendance_date_list, name, email, terakoya_type, arrival_time, grade, terakoya_experience, study_subject, study_subject_detail, study_style, school_name, first_choice_school, course_choice, future_free, like_thing_free, how_to_know_terakoya, remarks
 
@@ -65,4 +65,6 @@ def test_func():
     assert attendance_date_list[1] in date_list
     assert attendance_date_list[2] in date_list
     booking_request.book()
-    BookingTable.get_item(date_list[0], email, terakoya_type)
+    bk_item = BookingItem(**BookingTable.get_item(date_list[0], email, terakoya_type))
+    assert bk_item.timestamp == booking_request.booking_item_list[0].timestamp
+    assert bk_item.uid == booking_request.booking_item_list[0].uid

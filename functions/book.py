@@ -22,6 +22,8 @@ TERAKOYA_GROUP_MAIL_CC = "" if TERAKOYA_GROUP_MAIL_ADDRESS is None else TERAKOYA
 class BookingRequest:
     def __init__(self, book_request_body_json: Dict[str, Any]) -> None:
         book_request_body = BookRequestBody(**book_request_body_json)
+        # **obj converts obj to kwargs to be able to combine with other kwargs as ...obj in TypeScript
+        # https://www.koatech.info/blog/python-asterisk
         self.booking_item_list = [BookingItem(**{**book_request_body.dict(), "date": date})
                                   for date in book_request_body.attendance_date_list]
         # * Props for sending confirmation email
