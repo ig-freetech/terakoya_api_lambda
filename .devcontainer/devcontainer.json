@@ -48,7 +48,9 @@
         "arjun.swagger-viewer",
         "github.vscode-github-actions",
         "github.copilot",
-        "eamodio.gitlens"
+        "eamodio.gitlens",
+        // https://qiita.com/take_me/items/ae0772646dd59630a8b5
+        "aaron-bond.better-comments"
       ]
     }
   }
