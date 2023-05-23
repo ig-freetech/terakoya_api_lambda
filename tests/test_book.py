@@ -21,6 +21,8 @@ from tests.samples.booking import book_request_body_json, attendance_date_list, 
 
 
 def test_lambda():
+    # https://www.qbook.jp/column/633.html
+    """Black-box testing for /book"""
     base_url = f"https://{GATEWAY_ID_DEV}.execute-api.{AWS_DEFAULT_REGION}.amazonaws.com"
     # Unless specifying Content-Type, the request body is not recognized as JSON and decoded as a string incorrectly in Lambda
     response = requests.post(f"{base_url}/book", headers={'Content-Type': 'application/json'}, data=json.dumps({
@@ -34,6 +36,8 @@ def test_lambda():
 
 
 def test_func():
+    # https://hnavi.co.jp/knowledge/blog/white-box-test/
+    """White-box testing for /book"""
     booking_request = BookingRequest({**book_request_body_json, "remarks": "pytest_book_via_func"})
     # List comprehension is better to do the same thing as Array.map(obj => obj.prop) in JavaScript rather than using map(lambda x: x.prop, list)
     # https://blog.utgw.net/entry/2017/03/09/154314

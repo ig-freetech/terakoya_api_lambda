@@ -9,6 +9,9 @@ email = "i.g.freetech2021@gmail.com"
 terakoya_type = 1
 attendance_date_list = ["3000-01-07", "3000-01-14", "3000-01-21"]  # All dates are Tuesday
 arrival_time = 0
+# Boundary value test
+# https://www.veriserve.co.jp/gihoz/boundary.html
+# https://qiita.com/softest/items/648d8bb4021cd1256b02
 grade = 13
 terakoya_experience = 1
 study_subject = 9
