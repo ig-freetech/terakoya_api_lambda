@@ -2,6 +2,8 @@ name: Test
 
 # Run every time a commit is pushed to the repository regardless of branch
 # on: push
+# TODO: Run tests to access AWS resources only when pushed to master or develop
+# ? Divide job?
 on: 
     push:
         branches:

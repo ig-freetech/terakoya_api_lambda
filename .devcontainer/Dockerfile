@@ -13,7 +13,10 @@ RUN yum update -y && \
 
 # Install packages for development and testing that are not needed in production
 # https://docs.pytest.org/en/7.1.x/getting-started.html
-RUN pip install autopep8 pytest pytest-freezegun
+RUN pip install autopep8 pytest pytest-freezegun requests
+# moto is a library that allows your python tests to easily mock out the boto library
+# https://qiita.com/abemaru/items/7a521a8cf6d755c0f34c
+# RUN pip install autopep8 pytest pytest-freezegun moto
 
 # Copy aws credentials to use AWS toolkit extension
 # https://docs.aws.amazon.com/ja_jp/cli/latest/userguide/cli-configure-files.html

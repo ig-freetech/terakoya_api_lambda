@@ -1,14 +1,14 @@
 import os
 import sys
 import json
-import boto3
+import requests
 
 from samples.booking import book_request_body_json
 
 ROOT_DIR_PATH = os.path.dirname(os.path.dirname(__file__))
 sys.path.append(ROOT_DIR_PATH)
 
-from functions.conf.env import AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, AWS_DEFAULT_REGION, STAGE
+from functions.conf.env import AWS_DEFAULT_REGION, GATEWAY_ID_DEV
 
 from functions.book import BookingRequest
 from functions.models.booking import TERAKOYA_TYPE_TO_PLACE_MAP, BookingItem
@@ -21,23 +21,20 @@ from tests.samples.booking import book_request_body_json, attendance_date_list, 
 
 
 def test_lambda():
-    client = boto3.client('lambda', aws_access_key_id=AWS_ACCESS_KEY_ID,
-                          aws_secret_access_key=AWS_SECRET_ACCESS_KEY, region_name=AWS_DEFAULT_REGION)
-    response = client.invoke(
-        FunctionName=f'terakoya-booking-renewal-dev-book',
-        InvocationType='RequestResponse',
-        Payload=json.dumps({
-            "body": book_request_body_json
-        })
-    )
+    base_url = f"https://{GATEWAY_ID_DEV}.execute-api.{AWS_DEFAULT_REGION}.amazonaws.com"
+    # Unless specifying Content-Type, the request body is not recognized as JSON and decoded as a string incorrectly in Lambda
+    response = requests.post(f"{base_url}/book", headers={'Content-Type': 'application/json'}, data=json.dumps({
+        **book_request_body_json, "attendance_date_list": ["4000-01-04"], "remarks": "pytest_book_via_api_gateway"},
+    ))
     print(response)
-    print(response['Payload'])
-    assert response['StatusCode'] == 200
-    assert response['FunctionError'] is None
+    response_body = response.json()
+    print(response_body)
+    assert response.status_code == 200
+    assert response_body.get("status_code") == 200
 
 
 def test_func():
-    booking_request = BookingRequest(book_request_body_json)
+    booking_request = BookingRequest({**book_request_body_json, "remarks": "pytest_book_via_func"})
     # List comprehension is better to do the same thing as Array.map(obj => obj.prop) in JavaScript rather than using map(lambda x: x.prop, list)
     # https://blog.utgw.net/entry/2017/03/09/154314
     date_list = [bk_item.date for bk_item in booking_request.booking_item_list]

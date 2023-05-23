@@ -95,4 +95,4 @@ def lambda_handler(event, context):
     # https://qiita.com/nagataaaas/items/531b1fc5ce42a791c7df
     # lambda is anonymous function as arrow function in JavaScript but it can't be used to define a function more than two lines.
     # https://qiita.com/masaru/items/48ee394640400f0f0d1c
-    lambda_handler_wrapper(event, lambda: BookingRequest(event["body"]).book())
+    return lambda_handler_wrapper(event, lambda: BookingRequest(event["body"]).book())

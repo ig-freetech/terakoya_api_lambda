@@ -4,9 +4,7 @@ import sys
 ROOT_DIR_PATH = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
 sys.path.append(ROOT_DIR_PATH)
 
-from functions.utils.dt import DT
-
-name = "I.G"
+name = "Test"
 email = "i.g.freetech2021@gmail.com"
 terakoya_type = 1
 attendance_date_list = ["3000-01-07", "3000-01-14", "3000-01-21"]  # All dates are Tuesday
@@ -14,15 +12,15 @@ arrival_time = 0
 grade = 13
 terakoya_experience = 1
 study_subject = 9
-study_subject_detail = "I'm studying English."
+study_subject_detail = "Test"
 study_style = 5
-school_name = "Hogwarts School of Witchcraft and Wizardry"
+school_name = "Test"
 first_choice_school = "MIT"
 course_choice = 3
-future_free = "I want to be a wizard."
-like_thing_free = "I like magic.\nAnd I like to play Quidditch."
+future_free = "This is test.\nThis is pytest."
+like_thing_free = "This is test.\nThis is pytest."
 how_to_know_terakoya = 6
-remarks = f"Current time is {DT.CURRENT_JST_DATETIME.strftime('%Y-%m-%d %H:%M:%S')}."
+remarks = ""
 
 book_request_body_json = {
     "name": name,
