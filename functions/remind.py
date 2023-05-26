@@ -1,15 +1,16 @@
 import os
 import sys
-from enum import Enum
+from typing import Dict
 
-ROOT_DIR_PATH = os.path.dirname(__file__)
-sys.path.append(ROOT_DIR_PATH)
-
-from functions.domain.booking import BookingTable
-
-from utils.mail import SesMail
+FUNCTIONS_DIR_PATH = os.path.dirname(__file__)
+sys.path.append(FUNCTIONS_DIR_PATH)
 
 from conf.env import TERAKOYA_GMAIL_ADDRESS, TERAKOYA_GROUP_MAIL_ADDRESS
+from domain.booking import BookingTable
+from models.booking import TERAKOYA_TYPE, PLACE
+from utils.process import lambda_handler_wrapper
+from utils.mail import SesMail
+
 
 TERAKOYA_GMAIL_FROM = "" if TERAKOYA_GMAIL_ADDRESS is None else TERAKOYA_GMAIL_ADDRESS
 TERAKOYA_GROUP_MAIL_CC = "" if TERAKOYA_GROUP_MAIL_ADDRESS is None else TERAKOYA_GROUP_MAIL_ADDRESS
@@ -94,54 +95,20 @@ class Remind():
             <br/>
             {PLACE_DICT[self.place]}
         """
-        img_fpath = os.path.join(ROOT_DIR_PATH, "assets", "sunshine-map.jpg") if self.place == "サンシャインシティ" else ""
+        img_fpath = os.path.join(FUNCTIONS_DIR_PATH, "assets", "sunshine-map.jpg") if self.place == "サンシャインシティ" else ""
         self.__ses_client.send(self.email, subject, body, TERAKOYA_GROUP_MAIL_CC, img_fpath)
-
-
-class TERAKOYA_TYPE(Enum):
-    """テラコヤ種別 (terakoya_type)"""
-    HIGH_IKE = 1
-    """カフェ塾テラコヤ(池袋)"""
-    ONLINE_TAMA = 2
-    """オンラインテラコヤ(多摩)"""
-    MID_IKE = 3
-    """テラコヤ中等部(池袋)"""
-    MID_SHIBU = 4
-    """テラコヤ中等部(渋谷)"""
-    OTHER = 0
-    """その他"""
-    NULL = 999
-    """NULL"""
-
-
-class PLACE(Enum):
-    """拠点 (Place)"""
-    TBD = 0
-    """未設定"""
-    SUNSHINE = 1
-    """サンシャインシティ"""
-    RYOHIN = 2
-    """良品計画本社"""
-    DIORAMA_CAFE = 3
-    """DIORAMA CAFE"""
-    CAREER_MOM = 4
-    """キャリア・マム"""
-    KIKAGAKU = 5
-    """キカガク"""
-    NULL = 999
-    """NULL"""
 
 
 def remind() -> None:
     # Map定義
     # https://terakoya20220112.slack.com/archives/C02V0PHDGP2/p1675009220056179
-    PLACE_MAP = {
-        0: "",  # 未設定状態
-        1: "サンシャインシティ",
-        2: "良品計画本社",
-        3: "DIORAMA CAFE",
-        4: "キャリア・マム",
-        5: "キカガク"
+    PLACE_MAP: Dict[PLACE, str] = {
+        PLACE.TBD: "",  # 未設定状態
+        PLACE.SUNSHINE: "サンシャインシティ",
+        PLACE.RYOHIN: "良品計画本社",
+        PLACE.DIORAMA_CAFE: "DIORAMA CAFE",
+        PLACE.CAREER_MOM: "キャリア・マム",
+        PLACE.KIKAGAKU: "キカガク"
     }
 
     bk_item_list = BookingTable.get_item_list_for_remind()
@@ -158,7 +125,4 @@ def remind() -> None:
 
 
 def lambda_handler(event, context):
-    try:
-        remind()
-    except Exception as e:
-        print(f"Error happend. Error message: {str(e)}")
+    return lambda_handler_wrapper(event, remind)

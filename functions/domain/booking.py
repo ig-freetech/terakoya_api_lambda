@@ -7,12 +7,12 @@ ROOT_DIR_PATH = os.path.dirname(os.path.dirname(__file__))
 sys.path.append(ROOT_DIR_PATH)
 
 from utils.dt import DT
-from models.booking import BookingItem
+from models.booking import REMIND_STATUS, BookingItem, TERAKOYA_TYPE, PLACE
 from conf.env import AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, AWS_DEFAULT_REGION, STAGE
 
 
-def generate_sk(email: str, terakoya_type: int) -> str:
-    return f"#{email}#{terakoya_type}"
+def generate_sk(email: str, terakoya_type: TERAKOYA_TYPE) -> str:
+    return f"#{email}#{terakoya_type.value}"
 
 
 class BookingTable:
@@ -27,7 +27,7 @@ class BookingTable:
     def insert_item(cls, item: BookingItem):
         # BaseModel.dict() returns a dict with camelCase keys.
         # https://docs.pydantic.dev/latest/usage/exporting_models/#modeldict
-        cls.__table.put_item(Item=item.dict())
+        cls.__table.put_item(Item=item.to_dict())  # to_dict() converts Enum to value
 
     @classmethod
     def update_is_reminded(cls, sk: str):
@@ -42,11 +42,11 @@ class BookingTable:
                 "#is_reminded": "is_reminded"
             },
             ExpressionAttributeValues={
-                ":is_reminded_true": 1
+                ":is_reminded_true": REMIND_STATUS.SENT.value
             })
 
     @classmethod
-    def update_place(cls, date: str, sk: str, place: int):
+    def update_place(cls, date: str, sk: str, place: PLACE):
         cls.__table.update_item(
             Key={
                 "date": date,
@@ -57,7 +57,7 @@ class BookingTable:
                 "#place": "place"
             },
             ExpressionAttributeValues={
-                ":new_place": place
+                ":new_place": place.value
             })
 
     @classmethod
@@ -72,7 +72,7 @@ class BookingTable:
         return items
 
     @classmethod
-    def get_item(cls, target_date: str, email: str, terakoya_type: int):
+    def get_item(cls, target_date: str, email: str, terakoya_type: TERAKOYA_TYPE):
         item = cls.__table.get_item(
             Key={
                 "date": target_date,
@@ -83,13 +83,12 @@ class BookingTable:
 
     @classmethod
     def get_item_list_for_remind(cls):
-        IS_NOT_REMINDED = 0
         # Max limit to be able to get items by a query at once is 1MB
         # https://zoe6120.com/2019/02/20/503/
         items = cls.__table.query(
             KeyConditionExpression=Key("date").eq(
                 DT.CURRENT_JST_ISO_8601_ONLY_DATE),
-            FilterExpression=Attr("is_reminded").eq(IS_NOT_REMINDED)
+            FilterExpression=Attr("is_reminded").eq(REMIND_STATUS.NOT_SENT.value)
         ).get("Items", [])
         booking_item_list = [BookingItem(**item) for item in items]
         return booking_item_list

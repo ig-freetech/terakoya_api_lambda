@@ -19,4 +19,7 @@ python
 # OpenAPI
 openapi.yml
 
+# pytest
+pyproject.toml
+
 MEMO.md

@@ -42,7 +42,7 @@ components:
         terakoya_type:
           description: |
             テラコヤ種別
-            (1: カフェ塾テラコヤ(池袋), 2: オンラインテラコヤ(多摩), 3: テラコヤ中等部(池袋), 4: テラコヤ中等部(渋谷), 0: その他)
+            (1: カフェ塾テラコヤ(池袋), 2: オンラインテラコヤ(多摩), 3: テラコヤ中等部(池袋), 4: テラコヤ中等部(渋谷))
           type: integer
           example: 1
         place:
@@ -63,13 +63,13 @@ components:
         arrival_time:
           description: |
             到着予定時間帯
-            (1: 17:00前, 2: 17:00~17:30, 3: 17:30~18:00, 4: 18:00以降, 0: その他)
+            (1: 17:00前, 2: 17:00~17:30, 3: 17:30~18:00, 4: 18:00以降)
           type: integer
           example: 4
         terakoya_experience:
           description: |
             テラコヤ参加経験
-            (1: 今回が初回, 2: 過去に参加したことがある, 0: その他)
+            (1: 今回が初回, 2: 過去に参加したことがある)
           type: integer
           example: 1
         study_subject:
@@ -113,7 +113,7 @@ components:
         how_to_know_terakoya:
           description: |
             テラコヤを知ったきっかけ
-            (1: HP, 2: Instagram, 3: Facebook, 4: Twitter, 5: 知人の紹介, 6: ポスター、ビラ, 0: その他, -1: 未選択)
+            (1: HP, 2: Instagram, 3: Facebook, 4: Twitter, 5: 知人の紹介, 6: ポスター・ビラ, 0: その他, -1: 未選択)
           type: integer
           example: 6
         remarks:
@@ -199,7 +199,7 @@ paths:
                 terakoya_type:
                   description: |
                     テラコヤ種別
-                    (1: カフェ塾テラコヤ(池袋), 2: オンラインテラコヤ(多摩), 3: テラコヤ中等部(池袋), 4: テラコヤ中等部(渋谷), 0: その他)
+                    (1: カフェ塾テラコヤ(池袋), 2: オンラインテラコヤ(多摩), 3: テラコヤ中等部(池袋), 4: テラコヤ中等部(渋谷))
                   # number is any number, float or double
                   # integer is integer number, int32, or int64
                   # https://swagger.io/docs/specification/data-models/data-types/#numbers
@@ -215,7 +215,7 @@ paths:
                 arrival_time:
                   description: |
                     到着予定時間帯
-                    (1: 17:00前, 2: 17:00~17:30, 3: 17:30~18:00, 4: 18:00以降, 0: その他)
+                    (1: 17:00前, 2: 17:00~17:30, 3: 17:30~18:00, 4: 18:00以降)
                   type: integer
                   example: 4
                 grade:
@@ -227,7 +227,7 @@ paths:
                 terakoya_experience:
                   description: |
                     テラコヤ参加経験
-                    (1: 今回が初回, 2: 過去に参加したことがある, 0: その他)
+                    (1: 今回が初回, 2: 過去に参加したことがある)
                   type: integer
                   example: 1
                 study_subject:
@@ -271,7 +271,7 @@ paths:
                 how_to_know_terakoya:
                   description: |
                     テラコヤを知ったきっかけ
-                    (1: HP, 2: Instagram, 3: Facebook, 4: Twitter, 5: 知人の紹介, 6: ポスター、ビラ, 0: その他, -1: 未選択)
+                    (1: HP, 2: Instagram, 3: Facebook, 4: Twitter, 5: 知人の紹介, 6: ポスター・ビラ, 0: その他, -1: 未選択)
                   type: integer
                   example: 6
                 remarks:

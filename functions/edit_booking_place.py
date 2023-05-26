@@ -1,21 +1,26 @@
 import os
 import sys
 import json
+from pydantic import BaseModel
 
-ROOT_DIR_PATH = os.path.dirname(__file__)
-sys.path.append(ROOT_DIR_PATH)
+FUNCTIONS_DIR_PATH = os.path.dirname(__file__)
+sys.path.append(FUNCTIONS_DIR_PATH)
 
 from domain.booking import BookingTable, generate_sk
+from models.booking import TERAKOYA_TYPE, PLACE
 from utils.process import lambda_handler_wrapper
 
 
+class EditRequest(BaseModel):
+    date: str
+    email: str
+    terakoya_type: TERAKOYA_TYPE
+    place: PLACE
+
+    def update_place(self):
+        sk = generate_sk(self.email, self.terakoya_type)
+        BookingTable.update_place(self.date, sk, self.place)
+
+
 def lambda_handler(event, context):
-    def func():
-        request_body = json.loads(event['body'])
-        date = request_body["date"]
-        email = request_body["email"]
-        terakoya_type = request_body["terakoya_type"]
-        place = request_body["place"]
-        sk = generate_sk(email, terakoya_type)
-        BookingTable.update_place(date, sk, place)
-    lambda_handler_wrapper(event, func)
+    return lambda_handler_wrapper(event, EditRequest(**json.loads(event['body'])).update_place)

@@ -2,18 +2,15 @@ import os
 import sys
 from typing import Any, Dict
 
-ROOT_DIR_PATH = os.path.dirname(__file__)
-sys.path.append(ROOT_DIR_PATH)
+FUNCTIONS_DIR_PATH = os.path.dirname(__file__)
+sys.path.append(FUNCTIONS_DIR_PATH)
 
-from models.booking import BookRequestBody, BookingItem
-
+from conf.env import TERAKOYA_GMAIL_ADDRESS, TERAKOYA_GROUP_MAIL_ADDRESS
 from domain.booking import BookingTable
-
+from models.booking import ARRIVAL_TIME, TERAKOYA_EXPERIENCE, TERAKOYA_TYPE, BookRequestBody, BookingItem
 from utils.mail import SesMail
 from utils.dt import DT
 from utils.process import lambda_handler_wrapper
-
-from conf.env import TERAKOYA_GMAIL_ADDRESS, TERAKOYA_GROUP_MAIL_ADDRESS
 
 TERAKOYA_GMAIL_FROM = "" if TERAKOYA_GMAIL_ADDRESS is None else TERAKOYA_GMAIL_ADDRESS
 TERAKOYA_GROUP_MAIL_CC = "" if TERAKOYA_GROUP_MAIL_ADDRESS is None else TERAKOYA_GROUP_MAIL_ADDRESS
@@ -37,24 +34,21 @@ class BookingRequest:
 
     def __send_confirmation_email(self) -> None:
         subject = "【カフェ塾テラコヤ】参加予約完了"
-        TERAKOYA_TYPE_MAP = {
-            1: 'カフェ塾テラコヤ(池袋)',
-            2: 'オンラインテラコヤ(多摩)',
-            3: 'テラコヤ中等部(池袋)',
-            4: 'テラコヤ中等部(渋谷)',
-            0: 'その他'
+        TERAKOYA_TYPE_MAP: Dict[TERAKOYA_TYPE, str] = {
+            TERAKOYA_TYPE.HIGH_IKE: 'カフェ塾テラコヤ(池袋)',
+            TERAKOYA_TYPE.ONLINE_TAMA: 'オンラインテラコヤ(多摩)',
+            TERAKOYA_TYPE.MID_IKE: 'テラコヤ中等部(池袋)',
+            TERAKOYA_TYPE.MID_SHIBU: 'テラコヤ中等部(渋谷)',
         }
-        ARRIVAL_TIME_MAP = {
-            1: '17:00前',
-            2: '17:00~17:30',
-            3: '17:30~18:00',
-            4: '18:00以降',
-            0: 'その他'
+        ARRIVAL_TIME_MAP: Dict[ARRIVAL_TIME, str] = {
+            ARRIVAL_TIME.BEFORE_1700: '17:00前',
+            ARRIVAL_TIME.BETWEEN_1700_1730: '17:00~17:30',
+            ARRIVAL_TIME.BETWEEN_1730_1800: '17:30~18:00',
+            ARRIVAL_TIME.AFTER_1800: '18:00以降',
         }
-        TERAKOYA_EXPERIENCE_MAP = {
-            1: '今回が初回',
-            2: '過去に参加したことがある',
-            0: 'その他'
+        TERAKOYA_EXPERIENCE_MAP: Dict[TERAKOYA_EXPERIENCE, str] = {
+            TERAKOYA_EXPERIENCE.FIRST_TIME: '今回が初回',
+            TERAKOYA_EXPERIENCE.DONE: '過去に参加したことがある',
         }
         body = f"""
             <p>{self.__name}様</p>
@@ -82,7 +76,7 @@ class BookingRequest:
 
     def book(self) -> None:
         for bk_item in self.booking_item_list:
-            print(f"Booking Item: {str(bk_item.__dict__)}")
+            print(f"Booking Item: {str(bk_item.to_dict())}")
             try:
                 BookingTable.insert_item(bk_item)
             except Exception as e:
@@ -91,8 +85,4 @@ class BookingRequest:
 
 
 def lambda_handler(event, context):
-    # lambda args: return value (ex: lambda n: n * 2, lambda: "Hello World", lambda text: print(text))
-    # https://qiita.com/nagataaaas/items/531b1fc5ce42a791c7df
-    # lambda is anonymous function as arrow function in JavaScript but it can't be used to define a function more than two lines.
-    # https://qiita.com/masaru/items/48ee394640400f0f0d1c
-    return lambda_handler_wrapper(event, lambda: BookingRequest(event["body"]).book())
+    return lambda_handler_wrapper(event, BookingRequest(event["body"]).book)

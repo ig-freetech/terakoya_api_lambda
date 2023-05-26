@@ -28,7 +28,6 @@ jobs:
                 key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
                 restore-keys: |
                   ${{ runner.os }}-pip-
-
             # Run pytest and show the results on Github
             # https://enu23456.hatenablog.com/entry/2022/12/08/194105
             - name: Install dependencies

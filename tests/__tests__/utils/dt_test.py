@@ -21,6 +21,7 @@ class TestDT:
     def test_CURRENT_JST_DATETIME(self):
         assert DT.CURRENT_JST_DATETIME == MOCK_NOW_DATE.astimezone(JST)
         assert DT.CURRENT_JST_DATETIME != MOCK_NOW_DATE  # NG due to timezone
+        assert False
 
     def test_CURRENT_JST_ISO_8601_ONLY_DATE(self):
         assert DT.CURRENT_JST_ISO_8601_ONLY_DATE == self.test_date
