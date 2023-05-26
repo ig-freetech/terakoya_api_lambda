@@ -8,9 +8,9 @@ from utils.const import headers
 ROOT_DIR_PATH = os.path.dirname(os.path.dirname(__file__))
 sys.path.append(ROOT_DIR_PATH)
 
-from functions.utils.dt import DT
-
 print(f"ROOT_DIR_PATH: {ROOT_DIR_PATH}")
+
+from functions.utils.dt import DT
 
 SLACK_ERROR_CH_WEBHOOK_URL = os.getenv("SLACK_ERROR_CH_WEBHOOK_URL")
 
