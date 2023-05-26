@@ -4,12 +4,12 @@ import sys
 import requests
 import json
 
-from utils.const import headers
-
 ROOT_DIR_PATH = os.path.dirname(os.path.dirname(__file__))
 sys.path.append(ROOT_DIR_PATH)
 
 print(f"ROOT_DIR_PATH: {ROOT_DIR_PATH}")
+
+from utils.const import headers
 
 from functions.utils.dt import DT
 
