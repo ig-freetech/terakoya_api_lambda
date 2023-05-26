@@ -1,3 +1,4 @@
+print('importing confest.py')
 import os
 import sys
 import requests

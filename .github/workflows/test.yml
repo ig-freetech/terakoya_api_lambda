@@ -35,7 +35,7 @@ jobs:
                 pip install -r ./tests/requirements.txt
             - name: Run tests
               run: |
-                pytest -s --html=tests/public/report.html --self-contained-html tests
+                pytest -s --html=tests/public/report.html --self-contained-html ./tests
             # Deploy test report html to Github Pages using actions-gh-pages
             # https://blog.ojisan.io/gha-ghpage/
             - name: Deploy to GitHub Pages
