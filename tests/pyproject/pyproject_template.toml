@@ -1,9 +1,0 @@
-# TOML is a new configuration file format that is easy to read due to its simple syntax.
-# https://koirand.github.io/blog/2018/ini-json-yaml-toml/
-# https://qiita.com/Nabetani/items/56f8097b92385ad276fc
-
-# pyproject.toml 
-# https://docs.pytest.org/en/7.1.x/reference/customize.html#pyproject-toml
-
-[tool.pytest.ini_options]
-slack_on_success = false

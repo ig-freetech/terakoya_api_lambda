@@ -37,7 +37,12 @@
           "-s",
           // Run tests in only tests directory
           // https://docs.pytest.org/en/7.1.x/how-to/usage.html#specifying-tests-selecting-tests
-          "tests"
+          "tests",
+          // Output test results in HTML
+          // https://pytest-html.readthedocs.io/en/latest/user_guide.html
+          "--html=tests/tmp/test-report.html",
+          // Output html including css and js in one file
+          "--self-contained-html"
         ],
         "python.testing.unittestEnabled": false,
         "python.testing.pytestEnabled": true,
@@ -50,7 +55,11 @@
         // Swagger viewer extension settings for development on Remote Container
         // https://yatta47.hateblo.jp/entry/2021/03/19/222311
         "swaggerViewer.defaultPort": 18512,
-        "swaggerViewer.previewInBrowser": true
+        "swaggerViewer.previewInBrowser": true,
+        // Disable auto test discovery on save in order to avoid sending empty test results to Slack
+        // https://qiita.com/moshi/items/21a6ff0a20cd840f71ea
+        "python.testing.autoTestDiscoverOnSaveEnabled": false
+
       },
       "extensions": [
         "ms-python.python",

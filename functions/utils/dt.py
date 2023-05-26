@@ -1,6 +1,5 @@
 import os
 import sys
-import re
 from datetime import datetime, timezone, timedelta
 
 ROOT_DIR_PATH = os.path.dirname(os.path.dirname(__file__))
@@ -9,7 +8,7 @@ sys.path.append(ROOT_DIR_PATH)
 from utils.subclass import classproperty
 
 TIME_DIFFERENCE_UTC_JAPAN_HOUR = 9
-JST = timezone(timedelta(hours=TIME_DIFFERENCE_UTC_JAPAN_HOUR), "JST")
+JST_TZ = timezone(timedelta(hours=TIME_DIFFERENCE_UTC_JAPAN_HOUR), "JST")
 
 ISO_DATE_FORMAT = f"%Y-%m-%d"
 
@@ -18,7 +17,7 @@ class DT:
     @classproperty
     @classmethod
     def CURRENT_JST_DATETIME(cls) -> datetime:
-        return datetime.now(JST)
+        return datetime.now(JST_TZ)
 
     @classproperty
     @classmethod

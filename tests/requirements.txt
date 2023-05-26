@@ -1,13 +1,4 @@
 pytest
 pytest-freezegun
+pytest-html
 requests
-
-# pytest-slack enables slack notifications when tests fail
-# https://pypi.org/project/pytest-slack/
-# https://github.com/textshuttle/pytest-slack
-pytest-slack
-toml # for make_pyproject_toml.py
-
-# for slack
-# https://slack.dev/python-slack-sdk/webhook/index.html
-# slack-sdk
