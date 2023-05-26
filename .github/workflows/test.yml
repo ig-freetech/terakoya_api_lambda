@@ -1,14 +1,13 @@
 name: Test
 
 # Run every time a commit is pushed to the repository regardless of branch
-# on: push
+on: push
 # TODO: Run tests to access AWS resources only when pushed to master or develop
 # ? Divide job?
-on: 
-    push:
-        branches:
-            - master
-            - develop
+# on: 
+#     push:
+#         branches:
+#             - develop
 
 jobs:
     test:
@@ -33,5 +32,19 @@ jobs:
             - name: Install dependencies
               run: |
                 python -m pip install --upgrade pip
-                pip install pytest
+                pip install -r ./tests/requirements.txt
+            - name: Run tests
+              run: |
+                pytest -s --html=tests/public/report.html --self-contained-html tests
+            # Deploy test report html to Github Pages using actions-gh-pages
+            # https://blog.ojisan.io/gha-ghpage/
+            - name: Deploy to GitHub Pages
+              uses: peaceiris/actions-gh-pages@v3
+              with:
+                # GITHUB_TOKEN is automatically created by GitHub Actions, and you don't need to create it yourself.
+                # https://docs.github.com/en/actions/reference/authentication-in-a-workflow#about-the-github_token-secret
+                github_token: ${{ secrets.GITHUB_TOKEN }} 
+                # Specify the directory to deploy
+                # https://blog.ojisan.io/gha-ghpage/#github-actions-%E3%81%A8%E3%81%AF
+                publish_dir: ./public
                 

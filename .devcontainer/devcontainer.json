@@ -40,7 +40,7 @@
           "tests",
           // Output test results in HTML
           // https://pytest-html.readthedocs.io/en/latest/user_guide.html
-          "--html=tests/tmp/test-report.html",
+          "--html=tests/public/report.html",
           // Output html including css and js in one file
           "--self-contained-html"
         ],

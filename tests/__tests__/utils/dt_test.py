@@ -21,7 +21,6 @@ class TestDT:
     def test_CURRENT_JST_DATETIME(self):
         assert DT.CURRENT_JST_DATETIME == MOCK_NOW_DATE.astimezone(JST_TZ)
         assert DT.CURRENT_JST_DATETIME != MOCK_NOW_DATE  # NG due to timezone
-        assert False
 
     def test_CURRENT_JST_ISO_8601_ONLY_DATE(self):
         assert DT.CURRENT_JST_ISO_8601_ONLY_DATE == self.test_date
@@ -29,7 +28,7 @@ class TestDT:
     def test_convert_iso_to_slushdate(self):
         # Specify self.prop_name to access class attributes
         assert DT.convert_iso_to_slushdate(self.test_date) == "05/08"
-        assert DT.convert_iso_to_slushdate(self.test_date) == "5/8"  # NG due to zero padding
+        assert DT.convert_iso_to_slushdate(self.test_date) != "5/8"  # NG due to zero padding
 
     def test_convert_iso_to_timestamp(self):
         assert DT.convert_iso_to_timestamp(self.test_date) == 2377814400
