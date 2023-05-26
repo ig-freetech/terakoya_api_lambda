@@ -10,6 +10,8 @@ sys.path.append(ROOT_DIR_PATH)
 
 from functions.utils.dt import DT
 
+print(f"ROOT_DIR_PATH: {ROOT_DIR_PATH}")
+
 SLACK_ERROR_CH_WEBHOOK_URL = os.getenv("SLACK_ERROR_CH_WEBHOOK_URL")
 
 # conftest.py is a file that defines fixtures and plugins for pytest.
@@ -44,7 +46,8 @@ def pytest_sessionfinish(session, exitstatus):
         # https://uxmilk.jp/8680
         for idx, report in enumerate(failed_reports):
             case_number = idx + 1
-            fail_messages.append(f"Failed Test Case {case_number}:\n{report.nodeid}\n\nError Message:\n{str(report.longrepr)}\n")
+            fail_messages.append(
+                f"Failed Test Case {case_number}:\n{report.nodeid}\n\nError Message:\n{str(report.longrepr)}\n")
 
     # TODO: Use replace attachments with blocks
     # https://api.slack.com/block-kit/building#getting_started
