@@ -2,11 +2,12 @@
 boto3
 boto3-stubs
 
-# Json parser and validator for models and request bodies
-# https://docs.pydantic.dev/latest/install/
 # By <package> == <version>, specify the version of the package to install.
 # https://note.nkmk.me/python-pip-install-requirements/
-pydantic == 1.10.7
+
+# Json parser and validator for models and request bodies
+# https://docs.pydantic.dev/latest/install/
+pydantic
 # For pydantic email validation
 # https://github.com/JoshData/python-email-validator
-email-validator
+# email-validator
