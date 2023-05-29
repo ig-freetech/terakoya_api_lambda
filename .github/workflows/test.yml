@@ -59,6 +59,7 @@ jobs:
                 github_token: ${{ secrets.GITHUB_TOKEN }} 
                 # Specify the directory to deploy
                 # https://blog.ojisan.io/gha-ghpage/#github-actions-%E3%81%A8%E3%81%AF
+                # https://docs.github.com/ja/pages/getting-started-with-github-pages/creating-a-github-pages-site
                 publish_dir: ./tests/public
             - name: Fail workflow if tests failed
               run: |

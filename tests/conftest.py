@@ -1,15 +1,12 @@
-print('importing confest.py')
 import os
 import sys
 import requests
 import json
 
+from utils.const import headers
+
 ROOT_DIR_PATH = os.path.dirname(os.path.dirname(__file__))
 sys.path.append(ROOT_DIR_PATH)
-
-print(f"ROOT_DIR_PATH: {ROOT_DIR_PATH}")
-
-from utils.const import headers
 
 from functions.utils.dt import DT
 
@@ -62,6 +59,8 @@ def pytest_sessionfinish(session, exitstatus):
         "attachments": [
             {
                 "pretext": "Test Failed",
+                "title": "Test Result",
+                "title_link": "https://ig-freetech.github.io/terakoya_api_lambda/report.html",
                 "color": '#ff0000' if failed else '#36a64f',
                 "author_icon": "https://platform.slack-edge.com/img/default_application_icon.png",
                 "fields": [
