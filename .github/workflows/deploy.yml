@@ -10,15 +10,15 @@ on:
   # https://docs.github.com/ja/actions/using-workflows/events-that-trigger-workflows#push
   push:
     branches:
-      # - develop
-      # - master
-      - 'feature/**' # Comment out this line without testing the workflow on branchs other than develop and master
+      - develop
+      - master
+      # - 'feature/**' # Comment out this line without testing the workflow on branchs other than develop and master
     # Run actions only when changes happens in functions directory
     # https://blog.35d.jp/2020-09-29-github-actions-path
-    # paths:
-    #   - 'functions/**'
-    #   - '.github/workflows/**'
-    #   - 'serverless.yml'
+    paths:
+      - 'functions/**'
+      - '.github/workflows/**'
+      - 'serverless.yml'
 
 # env is used to set environment variables
 # https://docs.github.com/ja/actions/using-workflows/workflow-syntax-for-github-actions#env
@@ -127,7 +127,7 @@ jobs:
         # if: steps.check_requirements.outputs.SHOULD_UPDATE_LAYER == 'true'
         run: |
           python -m pip install --upgrade pip
-          pip install --no-cache-dir -r ./functions/requirements.txt -t ./functions/python
+          pip install -r ./functions/requirements.txt -t ./functions/python
 
       # https://github.com/serverless/github-action
       # - name: Deploy Lambda Layers
