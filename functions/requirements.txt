@@ -1,3 +1,0 @@
-dataclasses-json
-boto3
-boto3-stubs
