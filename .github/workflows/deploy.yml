@@ -16,9 +16,13 @@ on:
     # Run actions only when changes happens in functions directory
     # https://blog.35d.jp/2020-09-29-github-actions-path
     paths:
-      - 'functions/**'
-      - '.github/workflows/**'
-      - 'serverless.yml'
+      - "functions/**"
+      - ".github/workflows/**"
+      - "serverless.yml"
+
+# Can define a value as a repository variable not secret
+# Can access to the value by ${{ vars.<variable_name> }} in a workflow
+# https://developer.mamezou-tech.com/blogs/2023/01/16/github-actions-configuration-variables/
 
 # env is used to set environment variables
 # https://docs.github.com/ja/actions/using-workflows/workflow-syntax-for-github-actions#env
