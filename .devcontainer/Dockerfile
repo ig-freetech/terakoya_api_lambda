@@ -1,4 +1,4 @@
-# HACK: Lambdaコンテナのベースイメージが 2022 を使っていたので合わせる
+# Lambda container image is amazonlinux:2022
 FROM amazonlinux:2022
 
 RUN yum update -y && \
@@ -11,8 +11,22 @@ RUN yum update -y && \
     rm -f /opt/Python-3.9.12.tgz && \
     python3.9 -m pip install --upgrade pip
 
-# ソースコードでは使用しないが開発環境では必要なライブラリのインストール
-RUN pip install autopep8 pytest
+# Install packages for development and testing that are not needed in production
+# https://docs.pytest.org/en/7.1.x/getting-started.html
+RUN pip install autopep8
+
+# Install packages for testing
+COPY ./tests/requirements.txt ./tests/requirements.txt
+RUN pip install --no-cache-dir -r ./tests/requirements.txt
+
+# moto is a library that allows your python tests to easily mock out the boto library
+# https://obataka.com/moto-dynamodb/
+# https://qiita.com/abemaru/items/7a521a8cf6d755c0f34c
+# RUN pip install autopep8 pytest pytest-freezegun moto
+
+# Copy aws credentials to use AWS toolkit extension
+# https://docs.aws.amazon.com/ja_jp/cli/latest/userguide/cli-configure-files.html
+COPY ./.aws /root/.aws
 
 # Install Nodejs on Amazon Linux 2
 # https://docs.aws.amazon.com/sdk-for-javascript/v2/developer-guide/setting-up-node-on-ec2-instance.html
@@ -43,9 +57,11 @@ RUN pip install autopep8 pytest
 # https://cli.github.com/manual/gh_auth_login
 # https://cli.github.com/manual/
 
-# WARNING: なぜかパッケージがインストールされない。イメージ作成時にはマウントディレクトリにパッケージをインストールできない？ 仕方ないのでパッケージインストールの度にコンテナ側で下記コマンドを打って対応
-# RUN pip install -r requirements.txt -t ./functions/python
+COPY ./functions/requirements.txt ./functions/requirements.txt
+# Use --no-cache-dir to install packages strictly based on requirements.txt without cache every time
+# https://daeudaeu.com/pip-no-cache-dir/
+RUN pip install --no-cache-dir -r ./functions/requirements.txt -t ./functions/python
 ENV PYTHONPATH $PYTHONPATH:./functions/python
 
-# Set environment variables for development
+# Set environment variables for local
 ENV STAGE dev

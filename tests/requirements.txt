@@ -1,0 +1,4 @@
+pytest
+pytest-freezegun
+pytest-html
+requests

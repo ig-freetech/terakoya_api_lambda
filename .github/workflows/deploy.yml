@@ -169,6 +169,7 @@ jobs:
       # - run: npm ci
 
       - name: Deploy
+        # https://github.com/serverless/github-action
         uses: serverless/github-action@v3.1
         with:
           # --verbose shows the log of all stack events during deployment

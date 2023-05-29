@@ -42,6 +42,8 @@ provider:
   # Specify default Environment Variables of Lambda functions
   # https://www.serverless.com/framework/docs/providers/aws/guide/functions#environment-variables
   environment:
+    # Don't use AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY as environment variables of Lambda functions because they are automatically set by the AWS Lambda service
+    # https://www.serverless.com/framework/docs/providers/aws/guide/credentials#use-iam-roles
     ACCESS_KEY: ${env:AWS_ACCESS_KEY_ID}
     SECRET_ACCESS_KEY: ${env:AWS_SECRET_ACCESS_KEY}
     DEFAULT_REGION: ${env:AWS_DEFAULT_REGION}

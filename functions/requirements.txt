@@ -1,3 +1,10 @@
-dataclasses-json
+# AWS
 boto3
 boto3-stubs
+
+# Json parser and validator for models and request bodies
+# https://docs.pydantic.dev/latest/install/
+pydantic
+# For pydantic email validation
+# https://github.com/JoshData/python-email-validator
+email-validator
