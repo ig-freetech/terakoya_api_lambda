@@ -36,6 +36,7 @@ jobs:
                 pip install -r ./tests/requirements.txt
                 pip install -r ./functions/requirements.txt
             - name: Run tests
+              # Setting continue-on-error: true to run the next step even if the tests fail
               continue-on-error: true
               run: |
                 pytest -s --html=tests/public/report.html --self-contained-html ./tests || echo "tests failed" > test-failure-marker
@@ -51,6 +52,7 @@ jobs:
                 STAGE: dev
             # Deploy test report html to Github Pages using actions-gh-pages
             # https://blog.ojisan.io/gha-ghpage/
+            # https://docs.github.com/ja/pages/getting-started-with-github-pages/creating-a-github-pages-site
             - name: Deploy to GitHub Pages
               uses: peaceiris/actions-gh-pages@v3
               with:
@@ -59,8 +61,8 @@ jobs:
                 github_token: ${{ secrets.GITHUB_TOKEN }} 
                 # Specify the directory to deploy
                 # https://blog.ojisan.io/gha-ghpage/#github-actions-%E3%81%A8%E3%81%AF
-                # https://docs.github.com/ja/pages/getting-started-with-github-pages/creating-a-github-pages-site
                 publish_dir: ./tests/public
+            # Set the test result as the output of the job discarding continue-on-error: true in Run tests step
             - name: Fail workflow if tests failed
               run: |
                 if [ -f "test-failure-marker" ]; then

@@ -1,7 +1,7 @@
 import os
 import sys
 
-ROOT_DIR_PATH = os.path.dirname(os.path.dirname(__file__))
+ROOT_DIR_PATH = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
 sys.path.append(ROOT_DIR_PATH)
 
 from functions.conf.env import AWS_DEFAULT_REGION, GATEWAY_ID_DEV
