@@ -17,7 +17,7 @@
           }
         },
         "python.autoComplete.extraPaths": [
-          "/workspaces/terakoya_api_lambda/functions/layer/python/"
+          "/workspaces/terakoya_backend/functions/layer/python/"
         ],
         "editor.formatOnSave": true,
         "python.formatting.provider": "autopep8",
@@ -59,7 +59,6 @@
         // Disable auto test discovery on save in order to avoid sending empty test results to Slack
         // https://qiita.com/moshi/items/21a6ff0a20cd840f71ea
         "python.testing.autoTestDiscoverOnSaveEnabled": false
-
       },
       "extensions": [
         "ms-python.python",
