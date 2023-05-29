@@ -39,6 +39,9 @@ jobs:
               run: |
                 pytest -s --html=tests/public/report.html --self-contained-html ./tests
               env:
+                AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+                AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+                AWS_DEFAULT_REGION: ${{ secrets.AWS_DEFAULT_REGION }}
                 # TODO: Set webhook url to Github Secrets in advance
                 SLACK_ERROR_CH_WEBHOOK_URL: ${{ secrets.SLACK_ERROR_CH_WEBHOOK_URL }}
             # Deploy test report html to Github Pages using actions-gh-pages
