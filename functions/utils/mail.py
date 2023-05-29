@@ -13,6 +13,7 @@ ROOT_DIR_PATH = os.path.dirname(os.path.dirname(__file__))
 sys.path.append(ROOT_DIR_PATH)
 
 from conf.env import AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, AWS_DEFAULT_REGION, TERAKOYA_GMAIL_ADDRESS
+from conf.util import IS_PROD
 
 
 class IMail(metaclass=ABCMeta):
@@ -41,7 +42,7 @@ class IMail(metaclass=ABCMeta):
             </html>
         """
         self.msg.attach(MIMEText(html_body, "html", policy=SMTPUTF8))
-        self.msg["Subject"] = subject
+        self.msg["Subject"] = subject if IS_PROD else f"[Dev] {subject}"
         self.msg["To"] = mail_to
         self.msg["From"] = self.__mail_from
         self.msg["Cc"] = mail_cc

@@ -21,7 +21,7 @@ class TestAPIGateway:
     https://zenn.dev/ymiz/articles/c25dcddfedd7c3
     """
 
-    __target_date = "4000-01-04"
+    __target_date = "3000-01-28"
 
     def __book(self, terakoya_type: TERAKOYA_TYPE) -> requests.Response:
         # Unless specifying Content-Type, the request body is not recognized as JSON and decoded as a string incorrectly in Lambda

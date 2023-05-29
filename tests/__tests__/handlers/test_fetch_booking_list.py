@@ -8,7 +8,7 @@ ROOT_DIR_PATH = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(
 sys.path.append(ROOT_DIR_PATH)
 
 from functions.domain.booking import BookingTable
-from functions.models.booking import BookingItem
+from functions.models.booking import BookingItem, TERAKOYA_TYPE
 
 from tests.samples.booking import booking_item_json
 from tests.utils.const import base_url, headers
@@ -17,10 +17,16 @@ from tests.utils.const import base_url, headers
 class TestAPIGateway:
     def test_fetch_booking_item_list(self):
         """Black-box testing for /booking/list"""
-        target_date = "4000-01-04"
+        target_date = "3000-02-11"
         booking_item_json_list = [
             {**booking_item_json, "date": target_date},
-            {**booking_item_json, "date": target_date, "email": "ikeda@npoterakoya.org"}
+            # Delete key itself from dict with dict comprehension
+            # https://note.nkmk.me/python-dict-clear-pop-popitem-del/
+            {k: v for k, v in {
+                **booking_item_json,
+                "date": target_date,
+                "terakoya_type": TERAKOYA_TYPE.ONLINE_TAMA.value
+            }.items() if k != "sk"},
         ]
         for bk_item_json in booking_item_json_list:
             BookingTable.insert_item(BookingItem(**bk_item_json))

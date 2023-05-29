@@ -3,4 +3,10 @@ pytest-freezegun
 pytest-html
 requests
 
+# moto is used for mocking AWS services
+# https://qiita.com/abemaru/items/7a521a8cf6d755c0f34c
+# moto
+
+# tenacity is used for retrying
+# https://zenn.dev/taroman_zenn/articles/dd0b33a3a37d1e
 tenacity

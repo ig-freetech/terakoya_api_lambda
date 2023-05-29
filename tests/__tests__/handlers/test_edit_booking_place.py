@@ -30,7 +30,7 @@ class TestAPIGateway:
 
     def test_place_after_edit(self):
         """Black-box testing for /booking/edit/place"""
-        target_date = "4000-01-11"
+        target_date = "3000-02-04"
         BookingTable.insert_item(BookingItem(**{
             **booking_item_json, "date": target_date
         }))

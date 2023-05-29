@@ -38,7 +38,6 @@ booking_item_json = {
     "sk": f"#{email}#{terakoya_type_value}",
     "email": email,
     "terakoya_type": terakoya_type_value,
-    "place": PLACE.TBD.value,
     "name": "Test",
     "grade": GRADE.OTHER.value,
     "arrival_time": ARRIVAL_TIME.BETWEEN_1730_1800.value,
@@ -53,9 +52,4 @@ booking_item_json = {
     "like_thing_free": "This is test.\nThis is pytest.",
     "how_to_know_terakoya": HOW_TO_KNOW_TERAKOYA.NULL.value,
     "remarks": "This is test.\nThis is pytest.",
-    "is_reminded": REMIND_STATUS.NOT_SENT.value,
-    "timestamp": 1684585262,
-    "timestamp_iso": "2023-05-20 21:21:02",
-    "date_unix_time": 1641900000,
-    "uid": "b5109adbd4d344d751cdb820f874601b"
 }
