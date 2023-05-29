@@ -9,6 +9,7 @@ ROOT_DIR_PATH = os.path.dirname(os.path.dirname(__file__))
 sys.path.append(ROOT_DIR_PATH)
 
 from functions.utils.dt import DT
+from functions.conf.util import IS_PROD
 
 SLACK_ERROR_CH_WEBHOOK_URL = os.getenv("SLACK_ERROR_CH_WEBHOOK_URL")
 
@@ -58,8 +59,8 @@ def pytest_sessionfinish(session, exitstatus):
     data = {
         "attachments": [
             {
-                "pretext": "Test Failed",
-                "title": "Test Result",
+                "pretext": "Test Failed" if IS_PROD else "Test Failed - Dev",
+                "title": "Test Result" if IS_PROD else "Test Result - Dev",
                 "title_link": "https://ig-freetech.github.io/terakoya_api_lambda/report.html",
                 "color": '#ff0000' if failed else '#36a64f',
                 "author_icon": "https://platform.slack-edge.com/img/default_application_icon.png",

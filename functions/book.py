@@ -1,5 +1,6 @@
 import os
 import sys
+import json
 from typing import Any, Dict
 
 FUNCTIONS_DIR_PATH = os.path.dirname(__file__)
@@ -85,4 +86,4 @@ class BookingRequest:
 
 
 def lambda_handler(event, context):
-    return lambda_handler_wrapper(event, BookingRequest(event["body"]).book)
+    return lambda_handler_wrapper(event, BookingRequest(json.loads(event["body"])).book)

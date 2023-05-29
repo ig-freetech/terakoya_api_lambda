@@ -2,6 +2,9 @@
 boto3
 boto3-stubs
 
+# By <package> == <version>, specify the version of the package to install.
+# https://note.nkmk.me/python-pip-install-requirements/
+
 # Json parser and validator for models and request bodies
 # https://docs.pydantic.dev/latest/install/
 pydantic

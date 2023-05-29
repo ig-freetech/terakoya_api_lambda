@@ -13,4 +13,5 @@ TERAKOYA_GROUP_MAIL_ADDRESS = os.getenv("TERAKOYA_GROUP_MAIL_ADDRESS")
 
 STAGE = os.getenv("STAGE")
 
-GATEWAY_ID_DEV = os.getenv("GATEWAY_ID_DEV")
+# GATEWAY_ID is not defined in local environment, so use GATEWAY_ID_DEV in .env loaded by .devcontainer
+GATEWAY_ID = os.getenv("GATEWAY_ID") if os.getenv("GATEWAY_ID") else os.getenv("GATEWAY_ID_DEV")

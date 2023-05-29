@@ -226,10 +226,14 @@ class BookingItem(__CommonProperties):
     # https://note.nkmk.me/python-args-kwargs-usage/
     def __init__(self, **kwargs: Any) -> None:
         super().__init__(**kwargs)
-        self.place = TERAKOYA_TYPE_TO_PLACE_MAP[self.terakoya_type]
-        self.sk = f"#{self.email}#{self.terakoya_type.value}"
-        self.date_unix_time = DT.convert_iso_to_timestamp(self.date)
-        self.uid = hashlib.md5(f"#{self.date}{self.sk}".encode()).hexdigest()
+        if self.place == PLACE.NULL:
+            self.place = TERAKOYA_TYPE_TO_PLACE_MAP[self.terakoya_type]
+        if self.sk == "":
+            self.sk = f"#{self.email}#{self.terakoya_type.value}"
+        if self.date_unix_time == -1:
+            self.date_unix_time = DT.convert_iso_to_timestamp(self.date)
+        if self.uid == "":
+            self.uid = hashlib.md5(f"#{self.date}{self.sk}".encode()).hexdigest()
 
     def to_dict(self) -> Dict[str, Union[str, int, float, bool]]:
         """Convert the instance to a dictionary, replacing Enum members with their values."""
