@@ -44,6 +44,8 @@ jobs:
                 AWS_DEFAULT_REGION: ${{ secrets.AWS_DEFAULT_REGION }}
                 # TODO: Set webhook url to Github Secrets in advance
                 SLACK_ERROR_CH_WEBHOOK_URL: ${{ secrets.SLACK_ERROR_CH_WEBHOOK_URL }}
+                # TODO: Set gateway id (dev) to Github Secrets in advance
+                GATEWAY_ID_DEV: ${{ secrets.GATEWAY_ID_DEV }}
             # Deploy test report html to Github Pages using actions-gh-pages
             # https://blog.ojisan.io/gha-ghpage/
             - name: Deploy to GitHub Pages
