@@ -38,7 +38,7 @@ jobs:
             - name: Run tests
               continue-on-error: true
               run: |
-                pytest -s --html=tests/public/report.html --self-contained-html ./tests
+                pytest -s --html=tests/public/report.html --self-contained-html ./tests || echo "tests failed" > test-failure-marker
               env:
                 AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
                 AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
@@ -59,5 +59,10 @@ jobs:
                 github_token: ${{ secrets.GITHUB_TOKEN }} 
                 # Specify the directory to deploy
                 # https://blog.ojisan.io/gha-ghpage/#github-actions-%E3%81%A8%E3%81%AF
-                publish_dir: ./public
+                publish_dir: ./tests/public
+            - name: Fail workflow if tests failed
+              run: |
+                if [ -f "test-failure-marker" ]; then
+                  exit 1
+                fi
                 
