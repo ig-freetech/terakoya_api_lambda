@@ -2,3 +2,5 @@ pytest
 pytest-freezegun
 pytest-html
 requests
+
+tenacity
