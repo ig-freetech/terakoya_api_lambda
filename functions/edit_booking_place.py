@@ -1,6 +1,7 @@
 import os
 import sys
 import json
+from boto3 import resource
 from pydantic import BaseModel
 
 FUNCTIONS_DIR_PATH = os.path.dirname(__file__)

@@ -3,8 +3,7 @@ import os
 import sys
 from enum import Enum
 from typing import List, Any, Dict, Union
-# from pydantic import BaseModel, EmailStr
-from pydantic import BaseModel
+from pydantic import BaseModel, EmailStr
 
 ROOT_DIR_PATH = os.path.dirname(os.path.dirname(__file__))
 sys.path.append(ROOT_DIR_PATH)
@@ -150,8 +149,7 @@ class __CommonProperties(BaseModel):
     # https://qiita.com/koralle/items/93b094ddb6d3af917702#emailstr
     # https://docs.pydantic.dev/latest/usage/types/#pydantic-types
     # https://qiita.com/yoshitake_1201/items/40268332cd23f67c504c
-    # email: EmailStr
-    email: str
+    email: EmailStr
     # Validation based on Enum
     # https://qiita.com/sand/items/ca2c7c49e8bd94053b04
     terakoya_type: TERAKOYA_TYPE

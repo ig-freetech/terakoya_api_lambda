@@ -10,4 +10,4 @@ boto3-stubs
 pydantic
 # For pydantic email validation
 # https://github.com/JoshData/python-email-validator
-# email-validator
+email-validator
