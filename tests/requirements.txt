@@ -2,6 +2,3 @@ pytest
 pytest-freezegun
 pytest-html
 requests
-
-# AWS
-boto3

@@ -30,9 +30,11 @@ jobs:
             # Run pytest and show the results on Github
             # https://enu23456.hatenablog.com/entry/2022/12/08/194105
             - name: Install dependencies
+              # Install dependencies for both tests and functions to run black-box tests
               run: |
                 python -m pip install --upgrade pip
                 pip install -r ./tests/requirements.txt
+                pip install -r ./functions/requirements.txt
             - name: Run tests
               run: |
                 pytest -s --html=tests/public/report.html --self-contained-html ./tests
