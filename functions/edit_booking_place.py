@@ -1,7 +1,23 @@
 import os
 import sys
 import json
+
+# ======== debug ========
+
+FUNCTIONS_DIR_PATH = os.path.dirname(__file__)
+sys.path.append(FUNCTIONS_DIR_PATH)
+
+from utils.debug import show_layer_packages_on_lambda
+
+show_layer_packages_on_lambda()
+
 from boto3 import resource
+print("boto3 is imported")
+from pydantic import BaseModel
+print("pydantic is imported")
+
+# =======================
+
 from pydantic import BaseModel
 
 FUNCTIONS_DIR_PATH = os.path.dirname(__file__)

@@ -97,7 +97,7 @@ layers:
     # Maybe it's no choice but to give up deleting the old S3 object including the old Lambda layer zip file after deployment
     # https://forum.serverless.com/t/delete-s3-buckets-after-deployment/5208
     # https://repost.aws/questions/QUYKQHC78_QCG7OeK4i8Rb4g/questions/QUYKQHC78_QCG7OeK4i8Rb4g/a-lambda-function-to-delete-old-archive-files-in-s3-bucket?
-    path: functions/python
+    path: functions/layer
     compatibleRuntimes:
       - python3.9
     compatibleArchitectures:
