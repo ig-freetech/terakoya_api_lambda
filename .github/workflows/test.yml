@@ -5,6 +5,7 @@ on:
     push:
         branches:
             - develop
+            - master
             - 'feature/**'
 
 jobs:
@@ -44,10 +45,9 @@ jobs:
                 AWS_DEFAULT_REGION: ${{ secrets.AWS_DEFAULT_REGION }}
                 # TODO: Set webhook url to Github Secrets in advance
                 SLACK_ERROR_CH_WEBHOOK_URL: ${{ secrets.SLACK_ERROR_CH_WEBHOOK_URL }}
-                # TODO: Set gateway id (dev) to Github Secrets in advance
-                GATEWAY_ID_DEV: ${{ secrets.GATEWAY_ID_DEV }}
-                # Only testing for dynamodb table (dev)
-                STAGE: dev
+                # TODO: Set gateway id to Github Secrets in advance
+                GATEWAY_ID: ${{ github.ref_name == 'master' && secrets.GATEWAY_ID_PROD || secrets.GATEWAY_ID_DEV }}
+                STAGE: ${{ github.ref_name == 'master' && 'prod' || 'dev' }}
             # Deploy test report html to Github Pages using actions-gh-pages
             # https://blog.ojisan.io/gha-ghpage/
             # https://docs.github.com/ja/pages/getting-started-with-github-pages/creating-a-github-pages-site

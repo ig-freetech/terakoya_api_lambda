@@ -13,7 +13,9 @@ class ResponseBody:
 
 
 def lambda_handler_wrapper(event, func: Callable) -> dict:
-    request_body = event['body']
+    # Dict.get('key_name') returns None if the key doesn't exist.
+    # https://note.nkmk.me/python-dict-get/
+    request_body = event.get('body')
     if request_body != None:
         print(f"Request Body: {request_body}")
     response_body: ResponseBody
@@ -32,7 +34,7 @@ def lambda_handler_wrapper(event, func: Callable) -> dict:
 
 
 def lambda_handler_wrapper_with_rtn_value(event, func: Callable[[], dict]) -> dict:
-    request_body = event['body']
+    request_body = event.get('body')
     if request_body != None:
         print(f"Request Body: {request_body}")
     response_body: ResponseBody

@@ -12,7 +12,7 @@ from functions.domain.booking import BookingTable
 from functions.models.booking import BookingItem, TERAKOYA_TYPE, PLACE
 
 from tests.utils.const import base_url, headers
-from tests.samples.booking import book_request_body_json, email
+from tests.samples.booking import booking_item_json, email, terakoya_type_value
 
 
 class TestAPIGateway:
@@ -31,9 +31,8 @@ class TestAPIGateway:
     def test_place_after_edit(self):
         """Black-box testing for /booking/edit/place"""
         target_date = "4000-01-11"
-        terakoya_type_value = TERAKOYA_TYPE.HIGH_IKE.value
-        requests.post(f"{base_url}/book", headers=headers, data=json.dumps({
-            **book_request_body_json, "attendance_date_list": [target_date], "terakoya_type": terakoya_type_value
+        BookingTable.insert_item(BookingItem(**{
+            **booking_item_json, "date": target_date
         }))
         bk_item = self.__get_booked_item(target_date, terakoya_type_value)
         assert bk_item.place.value == PLACE.TBD.value

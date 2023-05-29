@@ -11,7 +11,7 @@ from functions.models.booking import TERAKOYA_TYPE_TO_PLACE_MAP, BookingItem, TE
 from functions.domain.booking import BookingTable, generate_sk
 
 from tests.utils.const import base_url, headers
-from tests.samples.booking import book_request_body_json, email, terakoya_type, attendance_date_list
+from tests.samples.booking import book_request_body_json, email, terakoya_type_value, attendance_date_list
 
 
 class TestAPIGateway:
@@ -57,16 +57,16 @@ def test_func():
     # Some of props are only tested by equivalence partitioning
     # https://e-words.jp/w/%E5%90%8C%E5%80%A4%E5%88%86%E5%89%B2.html
     assert booking_request.booking_item_list[0].email == email
-    assert booking_request.booking_item_list[0].terakoya_type.value == terakoya_type
+    assert booking_request.booking_item_list[0].terakoya_type.value == terakoya_type_value
 
     # White-box testing for BookingItem's __init__()
     assert booking_request.booking_item_list[0].place.value == TERAKOYA_TYPE_TO_PLACE_MAP[TERAKOYA_TYPE(
-        terakoya_type)].value
-    assert booking_request.booking_item_list[0].sk == generate_sk(email, TERAKOYA_TYPE(terakoya_type))
+        terakoya_type_value)].value
+    assert booking_request.booking_item_list[0].sk == generate_sk(email, TERAKOYA_TYPE(terakoya_type_value))
 
     booking_request.book()
 
-    booked_item = BookingTable.get_item(date_list[0], email, TERAKOYA_TYPE(terakoya_type))
+    booked_item = BookingTable.get_item(date_list[0], email, TERAKOYA_TYPE(terakoya_type_value))
     bk_item = BookingItem(**booked_item)
 
     # Test for booking completion
