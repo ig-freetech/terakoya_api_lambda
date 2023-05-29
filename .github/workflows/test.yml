@@ -37,6 +37,7 @@ jobs:
               run: |
                 pytest -s --html=tests/public/report.html --self-contained-html ./tests
               env:
+                # TODO: Set webhook url to Github Secrets in advance
                 SLACK_ERROR_CH_WEBHOOK_URL: ${{ secrets.SLACK_ERROR_CH_WEBHOOK_URL }}
             # Deploy test report html to Github Pages using actions-gh-pages
             # https://blog.ojisan.io/gha-ghpage/
