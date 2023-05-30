@@ -18,6 +18,14 @@
 
 - Open openapi.yml and execute command pallete ">Swagger UI: Preview current file" to [preview the API spec in web browser](https://marketplace.visualstudio.com/items?itemName=Arjun.swagger-viewer)
 
+## uvicorn
+
+- Run command `uvicorn functions.hub:app --reload` (--reload: auto-reload when code changes) to [run the app in development mode](https://fastapi.tiangolo.com/tutorial/first-steps/)
+
+- Open `http://localhost:8000/docs` in browser to [view the API spec in OpenAPI](https://fastapi.tiangolo.com/tutorial/first-steps/#interactive-api-docs)
+
+- Open `http://localhost:8000/redoc` in browser to [view the API spec in ReDoc](https://fastapi.tiangolo.com/tutorial/first-steps/#alternative-api-docs)
+
 ## Platform (prod)
 
 - [Here!](http://terakoya-static-prod.s3-website-ap-northeast-1.amazonaws.com/)
