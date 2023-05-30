@@ -11,7 +11,7 @@ RUN yum update -y && \
     rm -f /opt/Python-3.9.12.tgz && \
     python3.9 -m pip install --upgrade pip
 
-# Install packages for functions
+# Install packages for production
 COPY ./functions/requirements.txt ./functions/requirements.txt
 # Use --no-cache-dir to install packages strictly based on requirements.txt without cache every time
 # https://daeudaeu.com/pip-no-cache-dir/
@@ -23,9 +23,10 @@ ENV PYTHONPATH $PYTHONPATH:./functions/layer/python
 COPY ./tests/requirements.txt ./tests/requirements.txt
 RUN pip install --no-cache-dir -r ./tests/requirements.txt
 
-# Install packages for development and testing that are not needed in production
-# https://docs.pytest.org/en/7.1.x/getting-started.html
-RUN pip install autopep8
+# Install packages for development that are not needed in production
+# uvicorn works as a ASGI server to run FastAPI on local
+# https://www.uvicorn.org/
+RUN pip install autopep8 uvicorn
 
 # Copy aws credentials to use AWS toolkit extension
 # https://docs.aws.amazon.com/ja_jp/cli/latest/userguide/cli-configure-files.html
