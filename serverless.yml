@@ -140,7 +140,7 @@ functions:
   book:
     # https://fresopiya.com/2022/05/12/serverless-framework-2/#serverlessyml
     name: ${self:service}-${self:provider.stage}-book
-    handler: functions/book.lambda_handler
+    handler: functions/handlers/book.lambda_handler
     environment:
       TERAKOYA_GMAIL_ADDRESS: ${env:TERAKOYA_GMAIL_ADDRESS}
       TERAKOYA_GROUP_MAIL_ADDRESS: ${env:TERAKOYA_GROUP_MAIL_ADDRESS}
@@ -152,7 +152,7 @@ functions:
           path: /book
   remind:
     name: ${self:service}-${self:provider.stage}-remind
-    handler: functions/remind.lambda_handler
+    handler: functions/handlers/remind.lambda_handler
     environment:
       TERAKOYA_GMAIL_ADDRESS: ${env:TERAKOYA_GMAIL_ADDRESS}
       TERAKOYA_GROUP_MAIL_ADDRESS: ${env:TERAKOYA_GROUP_MAIL_ADDRESS}
@@ -167,21 +167,21 @@ functions:
           schedule: cron(0 0,7 ? * TUE,SAT *)
   login:
     name: ${self:service}-${self:provider.stage}-login
-    handler: functions/login.lambda_handler
+    handler: functions/handlers/login.lambda_handler
     events:
       - httpApi:
           method: post
           path: /login
   fetch-booking-list:
     name: ${self:service}-${self:provider.stage}-fetch-booking-list
-    handler: functions/fetch_booking_list.lambda_handler
+    handler: functions/handlers/fetch_booking_list.lambda_handler
     events:
       - httpApi:
           method: get
           path: /booking/list
   edit-booking-place:
     name: ${self:service}-${self:provider.stage}-edit-booking-place
-    handler: functions/edit_booking_place.lambda_handler
+    handler: functions/handlers/edit_booking_place.lambda_handler
     events:
       - httpApi:
           method: put
