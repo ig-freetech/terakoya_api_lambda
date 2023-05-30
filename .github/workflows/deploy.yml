@@ -59,12 +59,6 @@ jobs:
         with:
           fetch-depth: 0
 
-      # GitHub CLI is preinstalled on all GitHub Actions runners
-      # https://docs.github.com/en/actions/using-workflows/using-github-cli-in-workflows
-      # - name: Set .env file contents as a secret on Github repo
-      #   run: |
-      #     gh secret set ENV_FILE_CONTENTS -b "$(cat .env)"
-
       # Create .env file to use in serverless.yml because .env file is excluded from the repository by .gitignore and then environemnt variables are not available in serverless.yml on GitHub Actions runner
       # https://stackoverflow.com/questions/60176044/how-do-i-use-an-env-file-with-github-actions
       - name: Create .env file
