@@ -165,13 +165,6 @@ functions:
       - eventBridge:
           name: ${self:service}-${self:provider.stage}-scheduled-remind
           schedule: cron(0 0,7 ? * TUE,SAT *)
-  login:
-    name: ${self:service}-${self:provider.stage}-login
-    handler: functions/handlers/login.lambda_handler
-    events:
-      - httpApi:
-          method: post
-          path: /login
   fetch-booking-list:
     name: ${self:service}-${self:provider.stage}-fetch-booking-list
     handler: functions/handlers/fetch_booking_list.lambda_handler
@@ -186,6 +179,22 @@ functions:
       - httpApi:
           method: put
           path: /booking/edit/place
+  # FastAPI + Mangum + Lambda + API Gateway is defined like below
+  # https://zenn.dev/hayata_yamamoto/articles/781efca1687272#%E3%81%A9%E3%81%86%E3%82%84%E3%81%A3%E3%81%A6%E4%BD%BF%E3%81%86%E3%81%AE%E3%81%8B%EF%BC%9F
+  hub:
+    name: ${self:service}-${self:provider.stage}-hub
+    handler: functions/hub.lambda_handler
+    environment:
+      S3_TERAKOYA_BUCKET_NAME: ${env:S3_TERAKOYA_BUCKET_NAME} 
+    events:
+      - httpApi:
+          # ANY method is used to catch all HTTP methods
+          method: any
+          # /{proxy+} route works as a catch-all route that catches all requests that don't match any other route like /book defined above 
+          # https://dev.classmethod.jp/articles/api-gateway-adds-three-features/
+          # FastAPI returns status code in the range of 400-499 when client sends a request to a route that doesn't exist in FastAPI
+          # https://fastapi.tiangolo.com/tutorial/handling-errors/
+          path: /{proxy+}
   # added-func:
   #   name: ${self:service}-${self:provider.stage}-added-func
   #   handler: functions/added-func.lambda_handler

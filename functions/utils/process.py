@@ -7,9 +7,30 @@ from dataclasses import dataclass, asdict
 
 
 @dataclass
-class ResponseBody:
+class BasicResponseData:
     message: str
     status_code: int
+
+
+def hub_lambda_handler_wrapper(func: Callable) -> dict:
+    try:
+        func()
+        response_data = BasicResponseData("Success", 200)
+    except Exception as e:
+        print(f"Error happend. Error message: {str(e)}")
+        response_data = BasicResponseData(str(e), 500)
+    return asdict(response_data)
+
+
+def hub_lambda_handler_wrapper_with_rtn_value(func: Callable[[], dict]) -> dict:
+    rtn_dict = {}
+    try:
+        rtn_dict = func()
+        response_data = BasicResponseData("Success", 200)
+    except Exception as e:
+        print(f"Error happend. Error message: {str(e)}")
+        response_data = BasicResponseData(str(e), 500)
+    return {**asdict(response_data), **rtn_dict}
 
 
 def lambda_handler_wrapper(event, func: Callable) -> dict:
@@ -18,36 +39,36 @@ def lambda_handler_wrapper(event, func: Callable) -> dict:
     request_body = event.get('body')
     if request_body != None:
         print(f"Request Body: {request_body}")
-    response_body: ResponseBody
+    response_data: BasicResponseData
     try:
         func()
-        response_body = ResponseBody("Success", 200)
+        response_data = BasicResponseData("Success", 200)
     except Exception as e:
         print(f"Error happend. Error message: {str(e)}")
         # re-raise the exception to notify the error to the caller (ex: client)
         # https://docs.python.org/ja/3.9/tutorial/errors.html#raising-exceptions
         # raise e
-        response_body = ResponseBody(str(e), 500)
+        response_data = BasicResponseData(str(e), 500)
     # asdict() is a function to convert a dataclass object to a dictionary.
     # https://1kara-hajimeru.com/2021/02/1691/
-    return asdict(response_body)
+    return asdict(response_data)
 
 
 def lambda_handler_wrapper_with_rtn_value(event, func: Callable[[], dict]) -> dict:
     request_body = event.get('body')
     if request_body != None:
         print(f"Request Body: {request_body}")
-    response_body: ResponseBody
+    response_data: BasicResponseData
     rtn_dict = {}
     try:
         rtn_dict = func()
-        response_body = ResponseBody("Success", 200)
+        response_data = BasicResponseData("Success", 200)
     except Exception as e:
         print(f"Error happend. Error message: {str(e)}")
         # re-raise the exception to notify the error to the caller (ex: client)
         # https://docs.python.org/ja/3.9/tutorial/errors.html#raising-exceptions
         # raise e
-        response_body = ResponseBody(str(e), 500)
+        response_data = BasicResponseData(str(e), 500)
     # asdict() is a function to convert a dataclass object to a dictionary.
     # https://1kara-hajimeru.com/2021/02/1691/
-    return {**asdict(response_body), **rtn_dict}
+    return {**asdict(response_data), **rtn_dict}

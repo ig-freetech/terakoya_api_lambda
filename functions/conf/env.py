@@ -8,6 +8,8 @@ AWS_SECRET_ACCESS_KEY = os.getenv("SECRET_ACCESS_KEY")
 # https://docs.aws.amazon.com/ja_jp/lambda/latest/dg/configuration-envvars.html#configuration-envvars-runtime
 AWS_DEFAULT_REGION = os.getenv("DEFAULT_REGION") if os.getenv("DEFAULT_REGION") else os.getenv("AWS_DEFAULT_REGION")
 
+S3_TERAKOYA_BUCKET_NAME = os.getenv("S3_TERAKOYA_BUCKET_NAME")
+
 TERAKOYA_GMAIL_ADDRESS = os.getenv("TERAKOYA_GMAIL_ADDRESS")
 TERAKOYA_GROUP_MAIL_ADDRESS = os.getenv("TERAKOYA_GROUP_MAIL_ADDRESS")
 

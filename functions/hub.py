@@ -7,4 +7,4 @@ app = FastAPI()
 
 app.include_router(booking_router, prefix="/booking", tags=["booking"])
 
-handler = Mangum(app)
+lambda_handler = Mangum(app)
