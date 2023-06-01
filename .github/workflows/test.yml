@@ -48,6 +48,7 @@ jobs:
                 # TODO: Set gateway id to Github Secrets in advance
                 GATEWAY_ID: ${{ github.ref_name == 'master' && secrets.GATEWAY_ID_PROD || secrets.GATEWAY_ID_DEV }}
                 STAGE: ${{ github.ref_name == 'master' && 'prod' || 'dev' }}
+                S3_TERAKOYA_BUCKET_NAME: ${{ secrets.S3_TERAKOYA_BUCKET_NAME }}
             # Deploy test report html to Github Pages using actions-gh-pages
             # https://blog.ojisan.io/gha-ghpage/
             # https://docs.github.com/ja/pages/getting-started-with-github-pages/creating-a-github-pages-site
