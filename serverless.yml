@@ -127,9 +127,9 @@ package:
     - '!functions/requirements.txt'
     - '!.devcontainer/**'
     - '!.github/**'
-    - '!infrastructure/**'
-    - '!openapi/**'
+    - '!docs/**'
     - '!tests/**'
+    - '!tools/**'
     - '!README.md'
 
 # Lambda function settings
