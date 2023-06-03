@@ -3,7 +3,7 @@ import sys
 import json
 from typing import Any, Dict
 
-FUNCTIONS_DIR_PATH = os.path.dirname(__file__)
+FUNCTIONS_DIR_PATH = os.path.dirname(os.path.dirname(__file__))
 sys.path.append(FUNCTIONS_DIR_PATH)
 
 from conf.env import TERAKOYA_GMAIL_ADDRESS, TERAKOYA_GROUP_MAIL_ADDRESS

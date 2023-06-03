@@ -16,9 +16,13 @@ on:
     # Run actions only when changes happens in functions directory
     # https://blog.35d.jp/2020-09-29-github-actions-path
     paths:
-      - 'functions/**'
-      - '.github/workflows/**'
-      - 'serverless.yml'
+      - "functions/**"
+      - ".github/workflows/**"
+      - "serverless.yml"
+
+# Can define a value as a repository variable not secret
+# Can access to the value by ${{ vars.<variable_name> }} in a workflow
+# https://developer.mamezou-tech.com/blogs/2023/01/16/github-actions-configuration-variables/
 
 # env is used to set environment variables
 # https://docs.github.com/ja/actions/using-workflows/workflow-syntax-for-github-actions#env
@@ -54,12 +58,6 @@ jobs:
         # https://github.com/actions/checkout/issues/265#issuecomment-636597844
         with:
           fetch-depth: 0
-
-      # GitHub CLI is preinstalled on all GitHub Actions runners
-      # https://docs.github.com/en/actions/using-workflows/using-github-cli-in-workflows
-      # - name: Set .env file contents as a secret on Github repo
-      #   run: |
-      #     gh secret set ENV_FILE_CONTENTS -b "$(cat .env)"
 
       # Create .env file to use in serverless.yml because .env file is excluded from the repository by .gitignore and then environemnt variables are not available in serverless.yml on GitHub Actions runner
       # https://stackoverflow.com/questions/60176044/how-do-i-use-an-env-file-with-github-actions

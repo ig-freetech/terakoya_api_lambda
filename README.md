@@ -4,7 +4,7 @@
 
 ## AWS boto3 intellisense
 
-- Execute command pallete ">AWS boto3: Auto-discover boto3 services in current project" to [enable intellisense for boto3](https://dev.classmethod.jp/articles/try-boto3-stubs/)
+- Run command pallete ">AWS boto3: Auto-discover boto3 services in current project" to [enable intellisense for boto3](https://dev.classmethod.jp/articles/try-boto3-stubs/)
 
 ## Test
 
@@ -17,6 +17,14 @@
 - Execute openapi/make_openapi_spec.py to generate openapi.yml replacing environment variables with actual values loaded from .env file
 
 - Open openapi.yml and execute command pallete ">Swagger UI: Preview current file" to [preview the API spec in web browser](https://marketplace.visualstudio.com/items?itemName=Arjun.swagger-viewer)
+
+## uvicorn
+
+- Run command `uvicorn functions.hub:app --reload` (--reload: auto-reload when code changes) to [run the app in development mode](https://fastapi.tiangolo.com/tutorial/first-steps/)
+
+- Open `http://localhost:8000/docs` in browser to [view the API spec in OpenAPI](https://fastapi.tiangolo.com/tutorial/first-steps/#interactive-api-docs)
+
+- Open `http://localhost:8000/redoc` in browser to [view the API spec in ReDoc](https://fastapi.tiangolo.com/tutorial/first-steps/#alternative-api-docs)
 
 ## Platform (prod)
 

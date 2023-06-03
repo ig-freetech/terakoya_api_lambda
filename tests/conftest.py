@@ -61,7 +61,7 @@ def pytest_sessionfinish(session, exitstatus):
             {
                 "pretext": "Test Failed" if IS_PROD else "Test Failed - Dev",
                 "title": "Test Result" if IS_PROD else "Test Result - Dev",
-                "title_link": "https://ig-freetech.github.io/terakoya_api_lambda/report.html",
+                "title_link": "https://ig-freetech.github.io/terakoya_backend/report.html",
                 "color": '#ff0000' if failed else '#36a64f',
                 "author_icon": "https://platform.slack-edge.com/img/default_application_icon.png",
                 "fields": [

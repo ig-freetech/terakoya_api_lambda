@@ -1,9 +1,15 @@
+# https://docs.pytest.org/en/7.1.x/getting-started.html
 pytest
+# pytest-freezegun is a pytest plugin that allows you to freeze time for your tests.
 pytest-freezegun
+# pytest-html is a plugin for pytest that generates a HTML report for your tests.
 pytest-html
+
+# requests is required to send HTTP requests to the API Gateways as combined testing
 requests
 
-# moto is used for mocking AWS services
+# moto is a library that allows your python tests to easily mock out the boto library
+# https://obataka.com/moto-dynamodb/
 # https://qiita.com/abemaru/items/7a521a8cf6d755c0f34c
 # moto
 
