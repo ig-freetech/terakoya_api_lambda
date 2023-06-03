@@ -12,11 +12,17 @@ on:
     branches:
       - develop
       - master
-      # - 'feature/**' # test
+      # - 'feature/**' # Comment out this line without testing the workflow on branchs other than develop and master
     # Run actions only when changes happens in functions directory
     # https://blog.35d.jp/2020-09-29-github-actions-path
-    # paths:
-    #   - 'functions/**'
+    paths:
+      - "functions/**"
+      - ".github/workflows/**"
+      - "serverless.yml"
+
+# Can define a value as a repository variable not secret
+# Can access to the value by ${{ vars.<variable_name> }} in a workflow
+# https://developer.mamezou-tech.com/blogs/2023/01/16/github-actions-configuration-variables/
 
 # env is used to set environment variables
 # https://docs.github.com/ja/actions/using-workflows/workflow-syntax-for-github-actions#env
@@ -53,12 +59,6 @@ jobs:
         with:
           fetch-depth: 0
 
-      # GitHub CLI is preinstalled on all GitHub Actions runners
-      # https://docs.github.com/en/actions/using-workflows/using-github-cli-in-workflows
-      # - name: Set .env file contents as a secret on Github repo
-      #   run: |
-      #     gh secret set ENV_FILE_CONTENTS -b "$(cat .env)"
-
       # Create .env file to use in serverless.yml because .env file is excluded from the repository by .gitignore and then environemnt variables are not available in serverless.yml on GitHub Actions runner
       # https://stackoverflow.com/questions/60176044/how-do-i-use-an-env-file-with-github-actions
       - name: Create .env file
@@ -70,24 +70,6 @@ jobs:
       #   uses: serverless/github-action@v3.1
       #   with:
       #     args: remove --verbose --stage ${{ github.ref_name == 'master' && 'prod' || 'dev' }}
-
-      # Set the result of the step as an output parameter to use in the next step
-      # https://docs.github.com/ja/actions/using-workflows/workflow-commands-for-github-actions#setting-an-output-parameter
-      # - name: Check if requirements.txt has changed
-      #   id: check_requirements
-      #   # Get the name of the branch using ${{ github.ref_name }} in a run command
-      #   # https://dev.classmethod.jp/articles/how-to-get-a-ref-branch-within-a-workflow-execution-in-github-actions/
-      #   # Github context's content example is below
-      #   # https://docs.github.com/ja/actions/learn-github-actions/contexts#example-contents-of-the-github-context
-      #   # Compare the current merge commit with the HEAD commit of the target branch
-      #   # https://qiita.com/shibukk/items/8c9362a5bd399b9c56be
-      #   # https://qiita.com/shizen-shin/items/ddc0e5bf658bf02fbc3c
-      #   run: |
-      #     if git diff --name-only HEAD^ HEAD -- functions/requirements.txt | grep "requirements.txt"; then
-      #       echo "SHOULD_UPDATE_LAYER=true" >> "$GITHUB_OUTPUT"
-      #     else
-      #       echo "SHOULD_UPDATE_LAYER=false" >> "$GITHUB_OUTPUT"
-      #     fi
 
       # Deploy the layer only when requirements.txt has changed
       # https://github.com/actions/setup-python#basic-usage
@@ -122,51 +104,14 @@ jobs:
       # pip first checks the local cache and doesn't download packages if they are already stored in the cache directory
       # https://pip.pypa.io/en/stable/topics/caching/
       - name: Install pip packages in python directory
-        # if: steps.check_requirements.outputs.SHOULD_UPDATE_LAYER == 'true'
+        # File construction of the layer after the zip file is unzipped must be /opt/python/<package> (ex: /opt/python/pydantic)
+        # https://docs.aws.amazon.com/lambda/latest/dg/configuration-layers.html#configuration-layers-path
         run: |
           python -m pip install --upgrade pip
-          pip install -r ./functions/requirements.txt -t ./functions/python
-
-      # https://github.com/serverless/github-action
-      # - name: Deploy Lambda Layers
-      #   if: steps.check_requirements.outputs.SHOULD_UPDATE_LAYER == 'true'
-      #   uses: serverless/github-action@v3.1
-      #   with:
-      #     # sls deploy --config /path/to/serverless.any.yml
-      #     # https://ema-hiro.hatenablog.com/entry/2021/09/19/203541
-      #     # https://www.serverless.com/framework/docs/providers/aws/cli-reference/deploy
-      #     # https://zenn.dev/burizae/articles/c811cae767965a
-      #     # Multiple arguments can be passed by using the following format
-      #     # https://stackoverflow.com/questions/71208276/github-workflow-uses-with-multiple-args
-      #     args: deploy --verbose --config serverless.layer.yml --stage ${{ github.ref_name == 'master' && 'prod' || 'dev' }}
-
-      # Set up Serverless Framework on Github Actions runner
-      # https://github.com/serverless/github-action#usage
-      # - name: Set up Node.js
-      #   uses: actions/setup-node@v3
-      #   with:
-      #     node-version: 18
-
-      # Save and restore npm packages' cache to reduce the time to install them
-      # https://github.com/actions/cache/blob/main/examples.md#node---npm
-      # - name: Cache npm packages
-      #   id: npm-cache-dir
-      #   shell: bash
-      #   run: echo "dir=$(npm config get cache)" >> ${GITHUB_OUTPUT}
-      # - uses: actions/cache@v3
-      #   id: npm-cache
-      #   with:
-      #     path: ${{ steps.npm-cache-dir.outputs.dir }}
-      #     key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
-      #     restore-keys: |
-      #       ${{ runner.os }}-node-
-
-      # npm ci is unnecessary because the packages are not node_modules in JavaScript but python modules
-      # npm ci means that npm install is executed with package-lock.json deleting node_modules before installing packages without resolving　dependencies　of packages and saving them to package-lock.json
-      # https://qiita.com/mstssk/items/8759c71f328cab802670
-      # - run: npm ci
+          pip install -r ./functions/requirements.txt -t ./functions/layer/python
 
       - name: Deploy
+        # https://github.com/serverless/github-action
         uses: serverless/github-action@v3.1
         with:
           # --verbose shows the log of all stack events during deployment
@@ -176,34 +121,3 @@ jobs:
         #   # Set the name of the stage to deploy based on the branch name using ternary operator
         #   # https://qiita.com/technote-space/items/cbeed6ddd0488499afaa
         #   STAGE: ${{ github.ref_name == 'master' && 'prod' || 'dev' }}
-
-
-      # - name: Deploy to Dev
-      #   # Using if to specify the condition, only run a step if the condition is met
-      #   # https://docs.github.com/ja/actions/using-workflows/workflow-syntax-for-github-actions#jobsjob_idstepsif
-      #   if: contains(toJSON(github.ref), 'develop')
-      #   run: |
-      #     zip -r functions_dev.zip ./functions -x '*python*'
-      #     aws s3 cp ./functions_dev.zip s3://${{ secrets.AWS_S3_TERAKOYA_BUCKET_NAME }}/lambda/booking/
-      #     aws lambda update-function-code --function-name terakoya-booking-dev-book --s3-bucket terakoya-bucket --s3-key lambda/booking/functions_dev.zip
-      #     aws lambda update-function-code --function-name terakoya-booking-dev-remind --s3-bucket terakoya-bucket --s3-key lambda/booking/functions_dev.zip
-      #     aws lambda update-function-code --function-name terakoya-booking-dev-login --s3-bucket terakoya-bucket --s3-key lambda/booking/functions_dev.zip
-      #     aws lambda update-function-code --function-name terakoya-booking-dev-book-list --s3-bucket terakoya-bucket --s3-key lambda/booking/functions_dev.zip
-      #     aws lambda update-function-code --function-name terakoya-booking-dev-book-edit-place --s3-bucket terakoya-bucket --s3-key lambda/booking/functions_dev.zip
-
-      # - name: Deploy to Prod
-      #   if: contains(toJSON(github.ref), 'master')
-      #   run: |
-      #     zip -r functions_prod.zip ./functions -x '*python*'
-      #     aws s3 cp ./functions_prod.zip s3://${{ secrets.AWS_S3_TERAKOYA_BUCKET_NAME }}/lambda/booking/
-      #     aws lambda update-function-code --function-name terakoya-booking-prod-book --s3-bucket terakoya-bucket --s3-key lambda/booking/functions_prod.zip
-      #     aws lambda update-function-code --function-name terakoya-booking-prod-remind --s3-bucket terakoya-bucket --s3-key lambda/booking/functions_prod.zip
-      #     aws lambda update-function-code --function-name terakoya-booking-prod-login --s3-bucket terakoya-bucket --s3-key lambda/booking/functions_prod.zip
-      #     aws lambda update-function-code --function-name terakoya-booking-prod-book-list --s3-bucket terakoya-bucket --s3-key lambda/booking/functions_prod.zip
-      #     aws lambda update-function-code --function-name terakoya-booking-prod-book-edit-place --s3-bucket terakoya-bucket --s3-key lambda/booking/functions_prod.zip
-
-      # TODO: Manually set a new source code deployed above in settings of each Lambda functions
-      # or execute the same number of commands as Lambda Functions like below
-      # aws lambda update-function-code --function-name <func_name> --s3-bucket <bucket_name> --s3-key <zip_file_path>
-      # aws lambda update-function-code --function-name <func_name> --s3-bucket <bucket_name> --s3-key <zip_file_path>
-      # ...

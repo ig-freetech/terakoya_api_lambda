@@ -1,0 +1,70 @@
+name: Test
+
+# Run black-box tests to access AWS resources via HTTP request only when pushed to develop or feature/** branch
+on: 
+    push:
+        branches:
+            - develop
+            - master
+            - 'feature/**'
+
+jobs:
+    test:
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v3
+              with:
+                fetch-depth: 0
+            - name: Set up Python 3.9
+              uses: actions/setup-python@v3
+              with:
+                python-version: 3.9
+            - name: Cache pip packages
+              uses: actions/cache@v3
+              with:
+                path: ~/.cache/pip
+                key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
+                restore-keys: |
+                  ${{ runner.os }}-pip-
+            # Run pytest and show the results on Github
+            # https://enu23456.hatenablog.com/entry/2022/12/08/194105
+            - name: Install dependencies
+              # Install dependencies for both tests and functions to run black-box tests
+              run: |
+                python -m pip install --upgrade pip
+                pip install -r ./tests/requirements.txt
+                pip install -r ./functions/requirements.txt
+            - name: Run tests
+              # Setting continue-on-error: true to run the next step even if the tests fail
+              continue-on-error: true
+              run: |
+                pytest -s --html=tests/public/report.html --self-contained-html ./tests || echo "tests failed" > test-failure-marker
+              env:
+                AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+                AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+                AWS_DEFAULT_REGION: ${{ secrets.AWS_DEFAULT_REGION }}
+                # TODO: Set webhook url to Github Secrets in advance
+                SLACK_ERROR_CH_WEBHOOK_URL: ${{ secrets.SLACK_ERROR_CH_WEBHOOK_URL }}
+                # TODO: Set gateway id to Github Secrets in advance
+                GATEWAY_ID: ${{ github.ref_name == 'master' && secrets.GATEWAY_ID_PROD || secrets.GATEWAY_ID_DEV }}
+                STAGE: ${{ github.ref_name == 'master' && 'prod' || 'dev' }}
+                S3_TERAKOYA_BUCKET_NAME: ${{ secrets.S3_TERAKOYA_BUCKET_NAME }}
+            # Deploy test report html to Github Pages using actions-gh-pages
+            # https://blog.ojisan.io/gha-ghpage/
+            # https://docs.github.com/ja/pages/getting-started-with-github-pages/creating-a-github-pages-site
+            - name: Deploy to GitHub Pages
+              uses: peaceiris/actions-gh-pages@v3
+              with:
+                # GITHUB_TOKEN is automatically created by GitHub Actions, and you don't need to create it yourself.
+                # https://docs.github.com/en/actions/reference/authentication-in-a-workflow#about-the-github_token-secret
+                github_token: ${{ secrets.GITHUB_TOKEN }} 
+                # Specify the directory to deploy
+                # https://blog.ojisan.io/gha-ghpage/#github-actions-%E3%81%A8%E3%81%AF
+                publish_dir: ./tests/public
+            # Set the test result as the output of the job discarding continue-on-error: true in Run tests step
+            - name: Fail workflow if tests failed
+              run: |
+                if [ -f "test-failure-marker" ]; then
+                  exit 1
+                fi
+                

@@ -13,4 +13,13 @@ python
 # Serverless framework
 .serverless
 
+# AWS
+.aws
+
+# OpenAPI
+openapi.yml
+
+# pytest
+public
+
 MEMO.md

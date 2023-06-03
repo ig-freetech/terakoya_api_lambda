@@ -1,3 +1,32 @@
-dataclasses-json
+# AWS
 boto3
 boto3-stubs
+
+# By <package> == <version>, specify the version of the package to install.
+# https://note.nkmk.me/python-pip-install-requirements/
+
+# Json parser and validator for models and request bodies
+# https://docs.pydantic.dev/latest/install/
+# pydantic # pydantic is automatically installed by FastAPI
+# For pydantic email validation
+# https://github.com/JoshData/python-email-validator
+email-validator
+
+# Python is suitable for IO-bound process rather than CPU-bound process as a language feature
+# Because Python has GIL (Global Interpreter Lock), it can't use multi-threading
+# https://qiita.com/ttiger55/items/5e1d5a3405d2b3ef8f40
+# I/O bound process is a process that spends most of the time waiting for I/O such as file reading and writing, network communication, and database access
+# https://qiita.com/nyax/items/659b07cd755f2ced563f#i--o%E3%83%90%E3%82%A6%E3%83%B3%E3%83%89
+# Fast API is ASGI (Asynchronous Server Gateway Interface) framework, on the other hand, Flask and Django are WSGI (Web Server Gateway Interface) framework
+# WSGI is Django and Flask's interface connect with web server that supports WSGI such as Gunicorn and uWSGI
+# ASGI is a successor of WSGI and FastAPI's interface connect with web server that supports ASGI such as Uvicorn and Hypercorn
+# https://okiyasi.hatenablog.com/entry/2020/08/10/211804
+
+# FastAPI can automatically generate API documents using OpenAPI and install pydantic dependencies by default
+# https://fastapi.tiangolo.com/ja/features/
+# FastAPI is suitable for IO-bound process because it supports asynchronous request handling unlike Flask and Django
+# https://fastapi.tiangolo.com/ja/
+fastapi
+# Mangum converts a request and response of FastAPI into event and context of AWS Lambda
+# https://mangum.io/
+mangum
