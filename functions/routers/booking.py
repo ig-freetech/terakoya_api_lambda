@@ -1,6 +1,7 @@
 import os
 import sys
 from fastapi import APIRouter
+from pydantic import BaseModel
 
 FUNCTIONS_DIR_PATH = os.path.dirname(os.path.dirname(__file__))
 sys.path.append(FUNCTIONS_DIR_PATH)
@@ -55,6 +56,12 @@ def update_excluded_dates(dates: list[str], excluded_dates_csv_fkey: str = EXCLU
     s3_client.put_object(Bucket=S3_TERAKOYA_BUCKET_NAME, Key=excluded_dates_csv_fkey, Body=csv_text.encode("utf-8"))
 
 
+# You must define a class that inherits BaseModel to recieve a request body from Mangum that works as a bridge between API Gateway and FastAPI.
+# https://fastapi.tiangolo.com/tutorial/body/
+class PutExcludedDatesRequestBody(BaseModel):
+    dates: list[str]
+
+
 @booking_router.put("/excluded-dates")
-def put_excluded_dates(dates: list[str]):
-    return hub_lambda_handler_wrapper(lambda: update_excluded_dates(dates))
+def put_excluded_dates(requestBody: PutExcludedDatesRequestBody):
+    return hub_lambda_handler_wrapper(lambda: update_excluded_dates(requestBody.dates))
