@@ -2,7 +2,6 @@ from fastapi import FastAPI, APIRouter, Request
 from fastapi.routing import APIRoute
 from fastapi.middleware.cors import CORSMiddleware
 from mangum import Mangum
-import logging
 from typing import Callable
 
 from .routers import booking_router
@@ -13,15 +12,13 @@ app = FastAPI()
 # Define a common log process to distinguish which route is called using Custom APIRoute like below
 # https://hawksnowlog.blogspot.com/2022/10/fastapi-logging-request-and-response-with-custom.html
 
-logger = logging.getLogger(__name__)
-
 
 class LoggingRoute(APIRoute):
     def get_route_handler(self) -> Callable:
         original_route_handler = super().get_route_handler()
 
         async def custom_route_handler(request: Request):
-            logger.info(f"================= {request.url.path} =================")
+            print(f"================= {request.url.path} =================")
             response = await original_route_handler(request)
             return response
 
