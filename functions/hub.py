@@ -1,8 +1,6 @@
-from fastapi import FastAPI, APIRouter, Request
-from fastapi.routing import APIRoute
+from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from mangum import Mangum
-from typing import Callable
 
 from .routers import booking_router
 
