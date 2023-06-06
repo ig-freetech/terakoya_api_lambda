@@ -48,6 +48,7 @@ provider:
     SECRET_ACCESS_KEY: ${env:AWS_SECRET_ACCESS_KEY}
     DEFAULT_REGION: ${env:AWS_DEFAULT_REGION}
     STAGE: ${self:provider.stage}
+    SLACK_ERROR_CH_WEBHOOK_URL: ${env:SLACK_ERROR_CH_WEBHOOK_URL}
   # Specify default IAM role of Lambda functions
   # https://www.serverless.com/framework/docs/providers/aws/guide/iam
   # IAM role arn syntax

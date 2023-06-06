@@ -17,3 +17,5 @@ STAGE = os.getenv("STAGE")
 
 # GATEWAY_ID is not defined in local environment, so use GATEWAY_ID_DEV in .env loaded by .devcontainer
 GATEWAY_ID = os.getenv("GATEWAY_ID") if os.getenv("GATEWAY_ID") else os.getenv("GATEWAY_ID_DEV")
+
+SLACK_ERROR_CH_WEBHOOK_URL = os.getenv("SLACK_ERROR_CH_WEBHOOK_URL")

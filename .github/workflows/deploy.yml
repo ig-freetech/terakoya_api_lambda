@@ -117,7 +117,8 @@ jobs:
           # --verbose shows the log of all stack events during deployment
           # https://www.serverless.com/framework/docs/providers/aws/cli-reference/deploy#options
           args: deploy --verbose --stage ${{ github.ref_name == 'master' && 'prod' || 'dev' }}
-        # env:
-        #   # Set the name of the stage to deploy based on the branch name using ternary operator
-        #   # https://qiita.com/technote-space/items/cbeed6ddd0488499afaa
-        #   STAGE: ${{ github.ref_name == 'master' && 'prod' || 'dev' }}
+        env:
+          # Set the name of the stage to deploy based on the branch name using ternary operator
+          # https://qiita.com/technote-space/items/cbeed6ddd0488499afaa
+          # STAGE: ${{ github.ref_name == 'master' && 'prod' || 'dev' }}
+          SLACK_ERROR_CH_WEBHOOK_URL: ${{ secrets.SLACK_ERROR_CH_WEBHOOK_URL }}
