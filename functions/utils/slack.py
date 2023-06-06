@@ -8,6 +8,7 @@ FUNCTIONS_DIR_PATH = os.path.dirname(os.path.dirname(__file__))
 sys.path.append(FUNCTIONS_DIR_PATH)
 
 from conf.env import SLACK_ERROR_CH_WEBHOOK_URL, STAGE
+from conf.util import IS_PROD
 
 
 class SlackErrorNotification:
@@ -25,13 +26,6 @@ class SlackErrorNotification:
         # https://api.slack.com/reference/messaging/attachments
         payload = {
             "blocks": [
-                {
-                    "type": "section",
-                    "text": {
-                        "type": "mrkdwn",
-                        "text": "<!channel>"
-                    }
-                },
                 {
                     "type": "header",
                     "text": {
@@ -63,6 +57,16 @@ class SlackErrorNotification:
                 },
             ]
         }
+        if IS_PROD:
+            payload["blocks"].insert(0, {
+                "type": "section",
+                "text": {
+                    "type": "mrkdwn",
+                    # <!channel> is a Slack command to notify all members in the channel.
+                    # https://qiita.com/ryo-yamaoka/items/7677ee4486cf395ce9bc
+                    "text": "<!channel>"
+                }
+            })
         headers = {'Content-Type': 'application/json'}
         response = requests.post(self.webhook_url, headers=headers, data=json.dumps(payload))
         return response
