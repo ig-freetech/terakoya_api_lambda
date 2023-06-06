@@ -51,7 +51,7 @@ def lambda_handler_wrapper(event, func: Callable) -> dict:
         response_data = BasicResponseData("Success", 200)
     except Exception as e:
         print(f"Error happend. Error message: {str(e)}")
-        slack_error_notifier.notify(path=event.get('path'), msg=str(e), request_data=request_body)
+        slack_error_notifier.notify(path=event.get('routeKey'), msg=str(e), request_data=request_body)
         # re-raise the exception to notify the error to the caller (ex: client)
         # https://docs.python.org/ja/3.9/tutorial/errors.html#raising-exceptions
         # raise e
@@ -72,7 +72,7 @@ def lambda_handler_wrapper_with_rtn_value(event, func: Callable[[], dict]) -> di
         response_data = BasicResponseData("Success", 200)
     except Exception as e:
         print(f"Error happend. Error message: {str(e)}")
-        slack_error_notifier.notify(path=event.get('path'), msg=str(e), request_data=request_body)
+        slack_error_notifier.notify(path=event.get('routeKey'), msg=str(e), request_data=request_body)
         # re-raise the exception to notify the error to the caller (ex: client)
         # https://docs.python.org/ja/3.9/tutorial/errors.html#raising-exceptions
         # raise e
