@@ -26,6 +26,13 @@ class SlackErrorNotification:
         payload = {
             "blocks": [
                 {
+                    "type": "section",
+                    "text": {
+                        "type": "mrkdwn",
+                        "text": "<!channel>"
+                    }
+                },
+                {
                     "type": "header",
                     "text": {
                         "type": "plain_text",
