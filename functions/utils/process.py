@@ -1,6 +1,6 @@
 from typing import Callable
 from dataclasses import dataclass, asdict
-from slack import SlackErrorNotifier
+from .slack import SlackErrorNotifier
 
 # Using dataclass, __init__ method is automatically generated.
 # https://yumarublog.com/python/dataclass/
