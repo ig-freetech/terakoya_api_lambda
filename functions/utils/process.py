@@ -19,24 +19,31 @@ class BasicResponseData:
 
 
 def hub_lambda_handler_wrapper(func: Callable, request: Request, request_data: Optional[dict]) -> dict:
+    # FastAPI + Lambda has only one log group in CloudWatch Logs for all routes, so it's difficult to distinguish which route is called
+    # Define a common log process to distinguish which route is called
+    # https://hawksnowlog.blogspot.com/2022/10/fastapi-logging-request-and-response-with-custom.html
+    path = f"{request.method}: {request.url.path}"
+    print(f"================= {path} =================")
     try:
         func()
         response_data = BasicResponseData("Success", 200)
     except Exception as e:
         print(f"Error happend. Error message: {str(e)}")
-        slack_error_notifier.notify(path=f"{request.method}: {request.url.path}", msg=str(e), request_data=request_data)
+        slack_error_notifier.notify(path=path, msg=str(e), request_data=request_data)
         response_data = BasicResponseData(str(e), 500)
     return asdict(response_data)
 
 
 def hub_lambda_handler_wrapper_with_rtn_value(func: Callable[[], dict], request: Request, request_data: Optional[dict]) -> dict:
+    path = f"{request.method}: {request.url.path}"
+    print(f"================= {path} =================")
     rtn_dict = {}
     try:
         rtn_dict = func()
         response_data = BasicResponseData("Success", 200)
     except Exception as e:
         print(f"Error happend. Error message: {str(e)}")
-        slack_error_notifier.notify(path=f"{request.method}: {request.url.path}", msg=str(e), request_data=request_data)
+        slack_error_notifier.notify(path=path, msg=str(e), request_data=request_data)
         response_data = BasicResponseData(str(e), 500)
     return {**asdict(response_data), **rtn_dict}
 
