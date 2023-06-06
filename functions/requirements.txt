@@ -32,4 +32,4 @@ fastapi
 mangum
 
 # Slack notification
-slackweb
+requests
