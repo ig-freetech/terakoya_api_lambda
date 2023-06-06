@@ -9,8 +9,8 @@ from email.policy import SMTPUTF8
 import boto3
 from botocore.exceptions import ClientError
 
-ROOT_DIR_PATH = os.path.dirname(os.path.dirname(__file__))
-sys.path.append(ROOT_DIR_PATH)
+FUNCTIONS_DIR_PATH = os.path.dirname(os.path.dirname(__file__))
+sys.path.append(FUNCTIONS_DIR_PATH)
 
 from conf.env import AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, AWS_DEFAULT_REGION, TERAKOYA_GMAIL_ADDRESS
 from conf.util import IS_PROD

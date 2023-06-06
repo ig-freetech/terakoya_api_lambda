@@ -30,3 +30,6 @@ fastapi
 # Mangum converts a request and response of FastAPI into event and context of AWS Lambda
 # https://mangum.io/
 mangum
+
+# Slack notification
+slackweb
