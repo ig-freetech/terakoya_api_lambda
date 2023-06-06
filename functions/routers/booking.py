@@ -38,7 +38,8 @@ def fetch_excluded_dates(excluded_dates_csv_fkey: str = EXCLUDED_DATES_CSV_FKEY)
 # https://christina04.hatenablog.com/entry/fastapi-def-vs-async-def
 @booking_router.get("/excluded-dates")
 def get_excluded_dates(request: Request):
-    return hub_lambda_handler_wrapper_with_rtn_value(fetch_excluded_dates, request.url.path, {"query_params": request.query_params})
+    # There are no parameters in the URL and the request body
+    return hub_lambda_handler_wrapper_with_rtn_value(fetch_excluded_dates, request.url.path, None)
 
 
 def update_excluded_dates(dates: list[str], excluded_dates_csv_fkey: str = EXCLUDED_DATES_CSV_FKEY):
