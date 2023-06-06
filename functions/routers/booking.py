@@ -39,7 +39,7 @@ def fetch_excluded_dates(excluded_dates_csv_fkey: str = EXCLUDED_DATES_CSV_FKEY)
 @booking_router.get("/excluded-dates")
 def get_excluded_dates(request: Request):
     # There are no parameters in the URL and the request body
-    return hub_lambda_handler_wrapper_with_rtn_value(fetch_excluded_dates, request.url.path, None)
+    return hub_lambda_handler_wrapper_with_rtn_value(fetch_excluded_dates, request, None)
 
 
 def update_excluded_dates(dates: list[str], excluded_dates_csv_fkey: str = EXCLUDED_DATES_CSV_FKEY):
@@ -69,4 +69,4 @@ def put_excluded_dates(request_body: PutExcludedDatesRequestBody, request: Reque
     Request object can be accessed by using the parameter "request" of the function.
     https://fastapi.tiangolo.com/advanced/using-request-directly/#use-the-request-object-directly
     """
-    return hub_lambda_handler_wrapper(lambda: update_excluded_dates(request_body.dates), request.url.path, request_body.dict())
+    return hub_lambda_handler_wrapper(lambda: update_excluded_dates(request_body.dates), request, request_body.dict())

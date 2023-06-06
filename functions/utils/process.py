@@ -1,6 +1,8 @@
 from typing import Callable
 from dataclasses import dataclass, asdict
 from typing import Optional
+from fastapi import Request
+
 from .slack import SlackErrorNotification
 
 # Using dataclass, __init__ method is automatically generated.
@@ -16,25 +18,25 @@ class BasicResponseData:
     status_code: int
 
 
-def hub_lambda_handler_wrapper(func: Callable, request_path: str, request_data: Optional[dict]) -> dict:
+def hub_lambda_handler_wrapper(func: Callable, request: Request, request_data: Optional[dict]) -> dict:
     try:
         func()
         response_data = BasicResponseData("Success", 200)
     except Exception as e:
         print(f"Error happend. Error message: {str(e)}")
-        slack_error_notifier.notify(path=request_path, msg=str(e), request_data=request_data)
+        slack_error_notifier.notify(path=f"{request.method}: {request.url.path}", msg=str(e), request_data=request_data)
         response_data = BasicResponseData(str(e), 500)
     return asdict(response_data)
 
 
-def hub_lambda_handler_wrapper_with_rtn_value(func: Callable[[], dict], request_path: str, request_data: Optional[dict]) -> dict:
+def hub_lambda_handler_wrapper_with_rtn_value(func: Callable[[], dict], request: Request, request_data: Optional[dict]) -> dict:
     rtn_dict = {}
     try:
         rtn_dict = func()
         response_data = BasicResponseData("Success", 200)
     except Exception as e:
         print(f"Error happend. Error message: {str(e)}")
-        slack_error_notifier.notify(path=request_path, msg=str(e), request_data=request_data)
+        slack_error_notifier.notify(path=f"{request.method}: {request.url.path}", msg=str(e), request_data=request_data)
         response_data = BasicResponseData(str(e), 500)
     return {**asdict(response_data), **rtn_dict}
 
