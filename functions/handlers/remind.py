@@ -125,4 +125,7 @@ def remind() -> None:
 
 
 def lambda_handler(event, context):
-    return lambda_handler_wrapper(event, remind)
+    print(f"Event: {str(event)}")
+    # AWS_LAMBDA_FUNCTION_NAME is the function name of the current function
+    # https://docs.aws.amazon.com/ja_jp/lambda/latest/dg/configuration-envvars.html#configuration-envvars-runtime
+    return lambda_handler_wrapper(event, remind, os.environ['AWS_LAMBDA_FUNCTION_NAME'])

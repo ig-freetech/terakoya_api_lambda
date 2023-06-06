@@ -41,7 +41,7 @@ def hub_lambda_handler_wrapper_with_rtn_value(func: Callable[[], dict], request:
     return {**asdict(response_data), **rtn_dict}
 
 
-def lambda_handler_wrapper(event, func: Callable) -> dict:
+def lambda_handler_wrapper(event, func: Callable, func_name: Optional[str] = None) -> dict:
     # Dict.get('key_name') returns None if the key doesn't exist.
     # https://note.nkmk.me/python-dict-get/
     request_body = event.get('body')
@@ -53,7 +53,8 @@ def lambda_handler_wrapper(event, func: Callable) -> dict:
         response_data = BasicResponseData("Success", 200)
     except Exception as e:
         print(f"Error happend. Error message: {str(e)}")
-        slack_error_notifier.notify(path=event.get('routeKey'), msg=str(e), request_data=request_body)
+        path = func_name if func_name != None else event.get('routeKey')
+        slack_error_notifier.notify(path=path, msg=str(e), request_data=request_body)
         # re-raise the exception to notify the error to the caller (ex: client)
         # https://docs.python.org/ja/3.9/tutorial/errors.html#raising-exceptions
         # raise e
@@ -63,7 +64,7 @@ def lambda_handler_wrapper(event, func: Callable) -> dict:
     return asdict(response_data)
 
 
-def lambda_handler_wrapper_with_rtn_value(event, func: Callable[[], dict]) -> dict:
+def lambda_handler_wrapper_with_rtn_value(event, func: Callable[[], dict], func_name: Optional[str] = None) -> dict:
     request_body = event.get('body')
     if request_body != None:
         print(f"Request Body: {request_body}")
@@ -74,7 +75,8 @@ def lambda_handler_wrapper_with_rtn_value(event, func: Callable[[], dict]) -> di
         response_data = BasicResponseData("Success", 200)
     except Exception as e:
         print(f"Error happend. Error message: {str(e)}")
-        slack_error_notifier.notify(path=event.get('routeKey'), msg=str(e), request_data=request_body)
+        path = func_name if func_name != None else event.get('routeKey')
+        slack_error_notifier.notify(path=path, msg=str(e), request_data=request_body)
         # re-raise the exception to notify the error to the caller (ex: client)
         # https://docs.python.org/ja/3.9/tutorial/errors.html#raising-exceptions
         # raise e
