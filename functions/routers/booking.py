@@ -1,6 +1,6 @@
 import os
 import sys
-from fastapi import APIRouter
+from fastapi import APIRouter, Request
 from pydantic import BaseModel
 
 FUNCTIONS_DIR_PATH = os.path.dirname(os.path.dirname(__file__))
@@ -37,8 +37,9 @@ def fetch_excluded_dates(excluded_dates_csv_fkey: str = EXCLUDED_DATES_CSV_FKEY)
 # async def is useful when you use await in the function
 # https://christina04.hatenablog.com/entry/fastapi-def-vs-async-def
 @booking_router.get("/excluded-dates")
-def get_excluded_dates():
-    return hub_lambda_handler_wrapper_with_rtn_value(fetch_excluded_dates)
+def get_excluded_dates(request: Request):
+    # There are no parameters in the URL and the request body
+    return hub_lambda_handler_wrapper_with_rtn_value(fetch_excluded_dates, request, None)
 
 
 def update_excluded_dates(dates: list[str], excluded_dates_csv_fkey: str = EXCLUDED_DATES_CSV_FKEY):
@@ -63,5 +64,9 @@ class PutExcludedDatesRequestBody(BaseModel):
 
 
 @booking_router.put("/excluded-dates")
-def put_excluded_dates(requestBody: PutExcludedDatesRequestBody):
-    return hub_lambda_handler_wrapper(lambda: update_excluded_dates(requestBody.dates))
+def put_excluded_dates(request_body: PutExcludedDatesRequestBody, request: Request):
+    """
+    Request object can be accessed by using the parameter "request" of the function.
+    https://fastapi.tiangolo.com/advanced/using-request-directly/#use-the-request-object-directly
+    """
+    return hub_lambda_handler_wrapper(lambda: update_excluded_dates(request_body.dates), request, request_body.dict())

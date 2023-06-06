@@ -2,8 +2,8 @@ import os
 import sys
 from datetime import datetime, timezone, timedelta
 
-ROOT_DIR_PATH = os.path.dirname(os.path.dirname(__file__))
-sys.path.append(ROOT_DIR_PATH)
+FUNCTIONS_DIR_PATH = os.path.dirname(os.path.dirname(__file__))
+sys.path.append(FUNCTIONS_DIR_PATH)
 
 from utils.subclass import classproperty
 
