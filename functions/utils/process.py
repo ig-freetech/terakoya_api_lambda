@@ -42,6 +42,13 @@ def hub_lambda_handler_wrapper_with_rtn_value(func: Callable[[], dict], request:
 
 
 def lambda_handler_wrapper(event, func: Callable, func_name: Optional[str] = None) -> dict:
+    """
+    Parameters
+    ----------
+    func_name : Optional[str]
+        The name of the function to be executed. This is used for the error notification.\n
+        Required if event.get('routeKey') is None when calling this function from the triggers without API Gateway such as EventBridge or test from the AWS console in Lambda.
+    """
     # Dict.get('key_name') returns None if the key doesn't exist.
     # https://note.nkmk.me/python-dict-get/
     request_body = event.get('body')
@@ -65,6 +72,13 @@ def lambda_handler_wrapper(event, func: Callable, func_name: Optional[str] = Non
 
 
 def lambda_handler_wrapper_with_rtn_value(event, func: Callable[[], dict], func_name: Optional[str] = None) -> dict:
+    """
+    Parameters
+    ----------
+    func_name : Optional[str]
+        The name of the function to be executed. This is used for the error notification.\n
+        Required if event.get('routeKey') is None when calling this function from the triggers without API Gateway such as EventBridge or test from the AWS console in Lambda.
+    """
     request_body = event.get('body')
     if request_body != None:
         print(f"Request Body: {request_body}")
