@@ -6,7 +6,7 @@ import requests
 ROOT_DIR_PATH = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
 sys.path.append(ROOT_DIR_PATH)
 
-from functions.handlers.book import BookingRequest
+from functions.handlers.booking.book import BookingRequest
 from functions.models.booking import TERAKOYA_TYPE_TO_PLACE_MAP, BookingItem, TERAKOYA_TYPE
 from functions.domain.booking import BookingTable, generate_sk
 
