@@ -305,7 +305,7 @@ resources:
           EmailSendingAccount: DEVELOPER
           # SourceArn is ARN of SES email address that is used as FromEmailAddress
           # SES ARN pattern is arn:aws:ses:<region>:<account_id>:identity/<email>
-          SourceArn: arn:aws:ses:${env:AWS_DEFAULT_REGION}:${env.AWS_ACCOUNT_ID}:identity/${env:TERAKOYA_GMAIL_ADDRESS}
+          SourceArn: arn:aws:ses:${env:AWS_DEFAULT_REGION}:${env:AWS_ACCOUNT_ID}:identity/${env:TERAKOYA_GMAIL_ADDRESS}
         # https://docs.aws.amazon.com/ja_jp/AWSCloudFormation/latest/UserGuide/aws-properties-cognito-userpool-verificationmessagetemplate.html
         VerificationMessageTemplate:
           # In the actual email, {####} is replaced with a verification code

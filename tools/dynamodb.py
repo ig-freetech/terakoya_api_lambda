@@ -9,8 +9,6 @@ sys.path.append(ROOT_DIR_PATH)
 
 from functions.conf.env import AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, AWS_DEFAULT_REGION
 
-stored_json_fpath = os.path.join(os.path.dirname(__file__), 'tmp', 'copied_items.json')
-
 
 class DecimalEncoder(json.JSONEncoder):
     """
@@ -30,6 +28,7 @@ def cp_data_between_tables(table_name_from: str, table_name_to: str):
                               aws_secret_access_key=AWS_SECRET_ACCESS_KEY, region_name=AWS_DEFAULT_REGION)
     table_from = dynamodb.Table(table_name_from)
     table_to = dynamodb.Table(table_name_to)
+    stored_json_fpath = os.path.join(os.path.dirname(__file__), 'tmp', f'copied_items_{table_name_from}.json')
 
     response = table_from.scan()
     items = response['Items']
