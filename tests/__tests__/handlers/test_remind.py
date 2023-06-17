@@ -6,7 +6,7 @@ from datetime import datetime
 ROOT_DIR_PATH = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
 sys.path.append(ROOT_DIR_PATH)
 
-from functions.handlers.remind import remind
+from functions.handlers.booking.remind import remind
 from functions.domain.booking import BookingTable
 from functions.models.booking import BookingItem, TERAKOYA_TYPE, REMIND_STATUS, PLACE
 from functions.utils.dt import DT

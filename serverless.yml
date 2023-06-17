@@ -2,7 +2,7 @@
 # https://www.serverless.com/framework/docs/providers/aws/guide/serverless.yml#root-properties
 
 # Set the arbitary service name
-service: terakoya-booking-renewal
+service: terakoya
 # frameworkVersion is the version of the Serverless framework that you want to use
 frameworkVersion: '3'
 # Enable dotenv plugin to load environment variables from .env file
@@ -141,7 +141,7 @@ functions:
   book:
     # https://fresopiya.com/2022/05/12/serverless-framework-2/#serverlessyml
     name: ${self:service}-${self:provider.stage}-book
-    handler: functions/handlers/book.lambda_handler
+    handler: functions/handlers/booking/book.lambda_handler
     environment:
       TERAKOYA_GMAIL_ADDRESS: ${env:TERAKOYA_GMAIL_ADDRESS}
       TERAKOYA_GROUP_MAIL_ADDRESS: ${env:TERAKOYA_GROUP_MAIL_ADDRESS}
@@ -152,8 +152,8 @@ functions:
           method: post
           path: /book
   remind:
-    name: ${self:service}-${self:provider.stage}-remind
-    handler: functions/handlers/remind.lambda_handler
+    name: ${self:service}-${self:provider.stage}-booking-remind
+    handler: functions/handlers/booking/remind.lambda_handler
     environment:
       TERAKOYA_GMAIL_ADDRESS: ${env:TERAKOYA_GMAIL_ADDRESS}
       TERAKOYA_GROUP_MAIL_ADDRESS: ${env:TERAKOYA_GROUP_MAIL_ADDRESS}
@@ -164,22 +164,25 @@ functions:
     # https://www.serverless.com/framework/docs/providers/aws/events/event-bridge
     events:
       - eventBridge:
-          name: ${self:service}-${self:provider.stage}-scheduled-remind
+          name: ${self:service}-${self:provider.stage}-booking-scheduled-remind
           schedule: cron(0 0,7 ? * TUE,SAT *)
   fetch-booking-list:
     name: ${self:service}-${self:provider.stage}-fetch-booking-list
-    handler: functions/handlers/fetch_booking_list.lambda_handler
+    handler: functions/handlers/booking/fetch_booking_list.lambda_handler
     events:
       - httpApi:
           method: get
           path: /booking/list
   edit-booking-place:
     name: ${self:service}-${self:provider.stage}-edit-booking-place
-    handler: functions/handlers/edit_booking_place.lambda_handler
+    handler: functions/handlers/booking/edit_booking_place.lambda_handler
     events:
       - httpApi:
           method: put
           path: /booking/edit/place
+  postConfirmation:
+    name: ${self:service}-${self:provider.stage}-auth-post-confirmation
+    handler: functions/handlers/auth/post_confirmation.lambda_handler
   # FastAPI + Mangum + Lambda + API Gateway is defined like below
   # https://zenn.dev/hayata_yamamoto/articles/781efca1687272#%E3%81%A9%E3%81%86%E3%82%84%E3%81%A3%E3%81%A6%E4%BD%BF%E3%81%86%E3%81%AE%E3%81%8B%EF%BC%9F
   hub:
@@ -230,7 +233,7 @@ resources:
       Type: AWS::DynamoDB::Table
       # https://docs.aws.amazon.com/ja_jp/AWSCloudFormation/latest/UserGuide/aws-resource-dynamodb-table.html#aws-resource-dynamodb-table-properties
       Properties:
-        TableName: ${self:service}-${self:provider.stage}
+        TableName: ${self:service}-${self:provider.stage}-booking
         # Define attributes used at KeySchema
         AttributeDefinitions:
           - AttributeName: date
@@ -249,6 +252,129 @@ resources:
         # PAY_PER_REQUEST is on-demand mode
         # https://dev.classmethod.jp/articles/dynamodb-cfn-ondemand-reinvent-2018/
         BillingMode: PAY_PER_REQUEST
+    # Cognito User Pool is like a database that stores user authentication information
+    # https://zenn.dev/naok_1207/articles/d66a4a1d914000#userpool-%E3%81%AE%E3%82%AA%E3%83%97%E3%82%B7%E3%83%A7%E3%83%B3%E3%81%AB%E3%81%A4%E3%81%84%E3%81%A6
+    CognitoUserPool:
+      Type: AWS::Cognito::UserPool
+      Properties:
+        UserPoolName: ${self:service}-${self:provider.stage}-user-pool
+        Policies:
+          # Define password policy that users can set their password based on when they sign up
+          # https://docs.aws.amazon.com/ja_jp/cognito/latest/developerguide/user-pool-settings-policies.html
+          PasswordPolicy:
+            # Passwords must be at least 8 characters long and contain at least one number and one lowercase letter.
+            # https://docs.aws.amazon.com/ja_jp/cognito/latest/developerguide/user-pool-settings-policies.html#user-pool-settings-password-policies
+            MinimumLength: 8
+            RequireLowercase: true
+            RequireNumbers: true
+            RequireUppercase: false
+            RequireSymbols: false
+        # Define required attributes when users sign up
+        # https://dev.classmethod.jp/articles/quickly-create-an-authentication-function-with-amazon-cognito-userpool-with-the-aws-cli/
+        # https://docs.aws.amazon.com/ja_jp/AWSCloudFormation/latest/UserGuide/aws-properties-cognito-userpool-schemaattribute.html
+        Schema:
+          # Require　email to sign up
+          - AttributeDataType: String
+            Name: email
+            Required: true
+        # Specify self-verification methods when users sign up (ex: email, phone number, etc.)
+        # https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-resource-cognito-userpool.html#cfn-cognito-userpool-autoverifiedattributes
+        AutoVerifiedAttributes:
+          - email
+        # Specify attributes as username that users can use to sign in (ex: email, phone number, etc.)
+        # https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-resource-cognito-userpool.html#cfn-cognito-userpool-usernameattributes
+        UsernameAttributes:
+          - email
+        # Define password recovery methods
+        # https://blog.usize-tech.com/aws-amplify-storage-by-cfn/
+        # https://docs.aws.amazon.com/ja_jp/AWSCloudFormation/latest/UserGuide/aws-properties-cognito-userpool-accountrecoverysetting.html
+        AccountRecoverySetting:
+          RecoveryMechanisms:
+            # Name is the name of password recovery method (ex: verified_email, verified_phone_number, admin_only)
+            # https://docs.aws.amazon.com/ja_jp/AWSCloudFormation/latest/UserGuide/aws-properties-cognito-userpool-recoveryoption.html
+            - Name: verified_email
+              Priority: 1 # Priority is the order of password recovery methods (ex: 1 or 2)
+        # Define email configuration (ex: from SES email address, reply-to email address, etc.)
+        # https://docs.aws.amazon.com/ja_jp/AWSCloudFormation/latest/UserGuide/aws-properties-cognito-userpool-emailconfiguration.html
+        # https://blog.usize-tech.com/mailaddress-check-in-amazon-cognito/
+        EmailConfiguration:
+          # ReplyToEmailAddress is ok to not be SES email ARN unlike FromEmailAddress
+          ReplyToEmailAddress: ${env:TERAKOYA_GROUP_MAIL_ADDRESS}
+          # COGNITO_DEFAULT is default email sending account that is managed by AWS
+          # DEVELOPER is to use SES email address to send a verification email
+          EmailSendingAccount: DEVELOPER
+          # SourceArn is ARN of SES email address that is used as FromEmailAddress
+          # SES ARN pattern is arn:aws:ses:<region>:<account_id>:identity/<email>
+          SourceArn: arn:aws:ses:${env:AWS_DEFAULT_REGION}:${env:AWS_ACCOUNT_ID}:identity/${env:TERAKOYA_GMAIL_ADDRESS}
+        # https://docs.aws.amazon.com/ja_jp/AWSCloudFormation/latest/UserGuide/aws-properties-cognito-userpool-verificationmessagetemplate.html
+        VerificationMessageTemplate:
+          # In the actual email, {####} is replaced with a verification code
+          EmailMessage: "Your verification code is {####}."
+          EmailSubject: "${env:VERIFICATION_EMAI_SUBJECT_PREFIX}Verify your account"
+          # Send a link to verify email address
+          # https://dev.classmethod.jp/articles/amazon-cognito-user-pool-user-sign-up-for-an-error-was-encountered-with-the-requested-page/
+          DefaultEmailOption: CONFIRM_WITH_LINK
+        # https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-cognito-userpool-lambdaconfig.html
+        LambdaConfig:
+          # Specify a lambda function to be executed when a user verifies their email address.
+          # https://docs.aws.amazon.com/ja_jp/cognito/latest/developerguide/user-pool-lambda-post-confirmation.html
+          PostConfirmation: 
+            # Fn::GetAtt: [logicalNameOfResource, attributeName] is to get an attribute value of a resource
+            # https://docs.aws.amazon.com/ja_jp/AWSCloudFormation/latest/UserGuide/intrinsic-function-reference-getatt.html
+            # Define a lambda function in the shape of <funcName in PascalCase>LambdaFunction.
+            # For example, if the function name is not postConfirmation but verifiedEmail, the logical name is VerifiedEmailLambdaFunction.
+            Fn::GetAtt: [PostConfirmationLambdaFunction, Arn]
+    # Cognito User Pool Client has a client ID and client secret that are used to access UserPool and authenticate a user.
+    # https://docs.aws.amazon.com/ja_jp/cognito/latest/developerguide/user-pool-settings-client-apps.html
+    # https://qiita.com/maaaashin324/items/04c395eb4a2764480f0c#cognito-user-pool-1
+    CognitoUserPoolClient:
+      Type: AWS::Cognito::UserPoolClient
+      Properties:
+        ClientName: ${self:service}-${self:provider.stage}-user-pool-client
+        UserPoolId:
+          Ref: CognitoUserPool
+        # Allow authentification flows to be used
+        # https://qiita.com/KWS_0901/items/083c6e903616b3c5e838#cognito-identity-provider-api%E5%88%A9%E7%94%A8
+        # https://docs.aws.amazon.com/cognito-user-identity-pools/latest/APIReference/API_UserPoolClientType.html#CognitoUserPools-Type-UserPoolClientType-ExplicitAuthFlows
+        ExplicitAuthFlows: 
+          # Once authentication is successful, Cognito issues three JWTs (JSON Web Tokens): an ID token, an access token, and a refresh token. 
+          # The access token and ID token have an expiration date (1 hour by default), and when they expire, the user is asked to authenticate again.
+          # However, with a refresh token, the user can obtain a new ID token and access token without having to authenticate again.
+          # Refresh tokens are valid for 30 days by default.
+          # https://zenn.dev/takamin55/articles/8442a7583fe5fa
+          
+          # ID token: Contains user profile attributes (such as username, email, and phone number) in the form of claims and represents who the user is.
+          # Access token: indicates what the user can do, i.e., what operations can be performed on which resources.
+
+          # ALLOW_REFRESH_TOKEN_AUTH is to allow users to get a new ID token and access token without having to authenticate again.
+          - ALLOW_REFRESH_TOKEN_AUTH
+          # ALLOW_ADMIN_USER_PASSWORD_AUTH is to allow admin users to sign in with a password to get a new ID token and access token instead of the user.
+          # For example, this flow is used when the system manually creates accounts for some users and sets initial passwords.
+          # Administrators can use the AdminInitiateAuth API to send a username and password and obtain a token for the user.
+          # This flow is useful when an administrator signs in to the system on behalf of a user, or when the administrator needs to perform certain operations on a user's account.
+          # But the use of this flow is must be limited as less as possible at the security point of view.
+          # https://dev.classmethod.jp/articles/obtain-access-tokens-for-cognito-users-using-aws-cli/
+          - ALLOW_ADMIN_USER_PASSWORD_AUTH
+          # ALLOW_USER_PASSWORD_AUTH is to send password to server via network directly as plain text, so it's not secure than sending password via SRP.
+          # But password is encrypted by SSL in HTTPS communication, so it's not a big problem.
+          # However, browser (ex: F12 > Network > Headers) and server (ex: CloudWatch Logs) can see password as plain text because these endpoints are not encrypted by SSL.
+          # https://www.kagoya.jp/howto/rentalserver/beginner/https/
+          # https://developer.mozilla.org/ja/docs/Glossary/HTTPS
+          - ALLOW_USER_PASSWORD_AUTH
+          # SRP (Secure Remote Password) is not to send password to server via network directly, so it's more secure than sending password directly.
+          # It's difficult to implement SRP, so it's better to use ALLOW_USER_PASSWORD_AUTH and send password directly to server so that it's easier to implement　at first.
+          # https://qiita.com/ishiyama0530/items/426dc3f76f68bf586c28#user_srp_auth
+          # - ALLOW_USER_SRP_AUTH
+        # Pros of using a client secret
+        # 1. Having both a client ID and a client secret allows the system to verify that the client is authenticated. This is a type of two-step authentication, which provides greater security than one-step.
+        # 2. By issuing a different client ID and secret to each client (application), you can manage permissions for each application.
+
+        # GenerateSecret is to generate a client secret to access UserPool from a client (Client authentication flow).
+        # But it's not recommended to use a client secret because it's difficult to manage. So, it's better to set false.
+        # A client secret is not required if Cognito authencation is performed on Sever-side.
+        # If a client secret is not generated, parts of OAuth 2.0 flows will not work.
+        # https://docs.aws.amazon.com/ja_jp/cognito/latest/developerguide/user-pool-settings-client-apps.html
+        GenerateSecret: false
     # Define S3 bucket
     # bucketForLambda:
     #   # https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-s3-bucket.html#aws-properties-s3-bucket--examples
@@ -256,6 +382,3 @@ resources:
     #   DeletionPolicy: Retain
     #   Properties:
     #     BucketName: ${self:custom.deploymentBucketName}
-
-
-
