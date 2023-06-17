@@ -365,9 +365,14 @@ resources:
           # It's difficult to implement SRP, so it's better to use ALLOW_USER_PASSWORD_AUTH and send password directly to server so that it's easier to implement　at first.
           # https://qiita.com/ishiyama0530/items/426dc3f76f68bf586c28#user_srp_auth
           # - ALLOW_USER_SRP_AUTH
+        # Pros of using a client secret
+        # 1. Having both a client ID and a client secret allows the system to verify that the client is authenticated. This is a type of two-step authentication, which provides greater security than one-step.
+        # 2. By issuing a different client ID and secret to each client (application), you can manage permissions for each application.
+
         # GenerateSecret is to generate a client secret to access UserPool from a client (Client authentication flow).
         # But it's not recommended to use a client secret because it's difficult to manage. So, it's better to set false.
         # A client secret is not required if Cognito authencation is performed on Sever-side.
+        # If a client secret is not generated, parts of OAuth 2.0 flows will not work.
         # https://docs.aws.amazon.com/ja_jp/cognito/latest/developerguide/user-pool-settings-client-apps.html
         GenerateSecret: false
     # Define S3 bucket
