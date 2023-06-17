@@ -10,15 +10,15 @@ on:
   # https://docs.github.com/ja/actions/using-workflows/events-that-trigger-workflows#push
   push:
     branches:
-      - develop
-      - master
-      # - 'feature/**' # Comment out this line without testing the workflow on branchs other than develop and master
+      # - develop
+      # - master
+      - 'feature/**' # Comment out this line without testing the workflow on branchs other than develop and master
     # Run actions only when changes happens in functions directory
     # https://blog.35d.jp/2020-09-29-github-actions-path
-    paths:
-      - "functions/**"
-      - ".github/workflows/**"
-      - "serverless.yml"
+    # paths:
+    #   - "functions/**"
+    #   - ".github/workflows/**"
+    #   - "serverless.yml"
 
 # Can define a value as a repository variable not secret
 # Can access to the value by ${{ vars.<variable_name> }} in a workflow
@@ -122,3 +122,4 @@ jobs:
           # https://qiita.com/technote-space/items/cbeed6ddd0488499afaa
           # STAGE: ${{ github.ref_name == 'master' && 'prod' || 'dev' }}
           SLACK_ERROR_CH_WEBHOOK_URL: ${{ secrets.SLACK_ERROR_CH_WEBHOOK_URL }}
+          VERIFICATION_EMAI_SUBJECT_PREFIX: ${{ github.ref_name == 'master' && '' || '[DEV] ' }}
