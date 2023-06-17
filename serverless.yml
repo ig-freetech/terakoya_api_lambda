@@ -91,7 +91,7 @@ provider:
 layers:
   # Set arbitary name
   # this name becomes zip file to be uploaded to S3
-  booking:
+  terakoya-layer:
     # Specify the name of the layer that will be created and deployed
     name: ${self:service}-${self:provider.stage}-layer
     # Specify the path of the layer
