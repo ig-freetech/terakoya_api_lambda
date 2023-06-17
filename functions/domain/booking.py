@@ -10,7 +10,7 @@ from utils.dt import DT
 from models.booking import REMIND_STATUS, BookingItem, TERAKOYA_TYPE, PLACE
 from conf.env import AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, AWS_DEFAULT_REGION, STAGE
 
-BOOKING_TABLE_NAME = f"terakoya-{STAGE}-dev"
+BOOKING_TABLE_NAME = f"terakoya-{STAGE}-booking"
 
 
 def generate_sk(email: str, terakoya_type: TERAKOYA_TYPE) -> str:
