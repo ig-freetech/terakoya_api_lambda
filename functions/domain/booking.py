@@ -10,6 +10,8 @@ from utils.dt import DT
 from models.booking import REMIND_STATUS, BookingItem, TERAKOYA_TYPE, PLACE
 from conf.env import AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, AWS_DEFAULT_REGION, STAGE
 
+BOOKING_TABLE_NAME = f"terakoya-{STAGE}-dev"
+
 
 def generate_sk(email: str, terakoya_type: TERAKOYA_TYPE) -> str:
     return f"#{email}#{terakoya_type.value}"
@@ -21,7 +23,7 @@ class BookingTable:
         aws_access_key_id=AWS_ACCESS_KEY_ID,
         aws_secret_access_key=AWS_SECRET_ACCESS_KEY,
         region_name=AWS_DEFAULT_REGION
-    ).Table(f"terakoya-booking-renewal-{STAGE}")
+    ).Table(BOOKING_TABLE_NAME)
 
     @classmethod
     def insert_item(cls, item: BookingItem):
