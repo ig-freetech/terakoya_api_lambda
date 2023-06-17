@@ -3,7 +3,7 @@ import sys
 import json
 from pydantic import BaseModel
 
-FUNCTIONS_DIR_PATH = os.path.dirname(os.path.dirname(__file__))
+FUNCTIONS_DIR_PATH = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
 sys.path.append(FUNCTIONS_DIR_PATH)
 
 from domain.booking import BookingTable, generate_sk

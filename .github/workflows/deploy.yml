@@ -122,3 +122,4 @@ jobs:
           # https://qiita.com/technote-space/items/cbeed6ddd0488499afaa
           # STAGE: ${{ github.ref_name == 'master' && 'prod' || 'dev' }}
           SLACK_ERROR_CH_WEBHOOK_URL: ${{ secrets.SLACK_ERROR_CH_WEBHOOK_URL }}
+          VERIFICATION_EMAI_SUBJECT_PREFIX: ${{ github.ref_name == 'master' && '' || '[DEV] ' }}
