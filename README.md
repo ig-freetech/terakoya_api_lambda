@@ -1,4 +1,11 @@
+## Environments
+
+- [Web (prod)](https://terakoyaweb.com/)
+- [Web (dev)](https://dev.terakoyaweb.com/)
+
 ## TODO
+
+- First, [run command]((https://linuxfan.info/post-1486)) `bash init.sh` to initialize the project (ex: package installation etc.)
 
 - Update .env file contents to Github Action's secrets when local .env changes
 
@@ -26,6 +33,10 @@
 
 - Open `http://localhost:8000/redoc` in browser to [view the API spec in ReDoc](https://fastapi.tiangolo.com/tutorial/first-steps/#alternative-api-docs)
 
-## Platform (prod)
+## Set a secret for GitHub Actions
 
-- [Here!](http://terakoya-static-prod.s3-website-ap-northeast-1.amazonaws.com/)
+1. `gh auth login`
+2. `gh secret set ENV_FILE_CONTENTS -b "$(cat .env)"`
+
+- https://cli.github.com/manual/gh_secret_set
+- https://github.com/cli/cli/pull/4534

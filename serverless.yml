@@ -49,7 +49,7 @@ provider:
     DEFAULT_REGION: ${env:AWS_DEFAULT_REGION}
     STAGE: ${self:provider.stage}
     SLACK_ERROR_CH_WEBHOOK_URL: ${env:SLACK_ERROR_CH_WEBHOOK_URL}
-  # Specify default IAM role of Lambda functions
+  # Specify default IAM role of all Lambda functions
   # https://www.serverless.com/framework/docs/providers/aws/guide/iam
   # IAM role arn syntax
   # https://docs.aws.amazon.com/ja_jp/IAM/latest/UserGuide/reference_identifiers.html#identifiers-arns
@@ -183,13 +183,17 @@ functions:
   postConfirmation:
     name: ${self:service}-${self:provider.stage}-auth-post-confirmation
     handler: functions/handlers/auth/post_confirmation.lambda_handler
+    # PostConfirmationLambdaRole overrides the default role defined in provider.iam.role because a role to be attached to each Lambda is only one.
+    role: PostConfirmationLambdaRole
   # FastAPI + Mangum + Lambda + API Gateway is defined like below
   # https://zenn.dev/hayata_yamamoto/articles/781efca1687272#%E3%81%A9%E3%81%86%E3%82%84%E3%81%A3%E3%81%A6%E4%BD%BF%E3%81%86%E3%81%AE%E3%81%8B%EF%BC%9F
   hub:
     name: ${self:service}-${self:provider.stage}-hub
     handler: functions/hub.lambda_handler
     environment:
-      S3_TERAKOYA_BUCKET_NAME: ${env:S3_TERAKOYA_BUCKET_NAME} 
+      S3_TERAKOYA_BUCKET_NAME: ${env:S3_TERAKOYA_BUCKET_NAME}
+      COGNITO_USER_POOL_ID: ${env:COGNITO_USER_POOL_ID}
+      COGNITO_USER_POOL_CLIENT_ID: ${env:COGNITO_USER_POOL_CLIENT_ID}
     events:
       - httpApi:
           # ANY method is used to catch all HTTP methods
@@ -294,6 +298,8 @@ resources:
             # https://docs.aws.amazon.com/ja_jp/AWSCloudFormation/latest/UserGuide/aws-properties-cognito-userpool-recoveryoption.html
             - Name: verified_email
               Priority: 1 # Priority is the order of password recovery methods (ex: 1 or 2)
+        # https://docs.aws.amazon.com/ja_jp/AWSCloudFormation/latest/UserGuide/aws-resource-cognito-userpool.html#cfn-cognito-userpool-emailverificationsubject
+        EmailVerificationSubject: "${env:VERIFICATION_EMAI_SUBJECT_PREFIX}Verify your account"
         # Define email configuration (ex: from SES email address, reply-to email address, etc.)
         # https://docs.aws.amazon.com/ja_jp/AWSCloudFormation/latest/UserGuide/aws-properties-cognito-userpool-emailconfiguration.html
         # https://blog.usize-tech.com/mailaddress-check-in-amazon-cognito/
@@ -306,14 +312,20 @@ resources:
           # SourceArn is ARN of SES email address that is used as FromEmailAddress
           # SES ARN pattern is arn:aws:ses:<region>:<account_id>:identity/<email>
           SourceArn: arn:aws:ses:${env:AWS_DEFAULT_REGION}:${env:AWS_ACCOUNT_ID}:identity/${env:TERAKOYA_GMAIL_ADDRESS}
+        # VerificationMessageTemplate don't work
         # https://docs.aws.amazon.com/ja_jp/AWSCloudFormation/latest/UserGuide/aws-properties-cognito-userpool-verificationmessagetemplate.html
-        VerificationMessageTemplate:
+        # VerificationMessageTemplate:
           # In the actual email, {####} is replaced with a verification code
-          EmailMessage: "Your verification code is {####}."
-          EmailSubject: "${env:VERIFICATION_EMAI_SUBJECT_PREFIX}Verify your account"
+          # EmailMessage: "Your verification code is {####}." # this don't work
+          # EmailSubject: "${env:VERIFICATION_EMAI_SUBJECT_PREFIX}Verify your account" # this don't work
+          # After User Pool is created, you need to manually create a domain to send a verification email because User Pool uses the domain when a user when users sign up or reset password.
+          # Serverless Framework can't create a domain for User Pool automatically. So you need to do on AWS console or via AWS CLI.
+          # aws cognito-idp create-user-pool-domain --user-pool-id <UserPoolId> --domain <Domain> (ex: <Domain> is terakoya-dev or terakoya-prod)
+          # https://docs.aws.amazon.com/ja_jp/cognito/latest/developerguide/cognito-user-pools-assign-domain.html
+
           # Send a link to verify email address
           # https://dev.classmethod.jp/articles/amazon-cognito-user-pool-user-sign-up-for-an-error-was-encountered-with-the-requested-page/
-          DefaultEmailOption: CONFIRM_WITH_LINK
+          # DefaultEmailOption: CONFIRM_WITH_LINK
         # https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-cognito-userpool-lambdaconfig.html
         LambdaConfig:
           # Specify a lambda function to be executed when a user verifies their email address.
@@ -375,6 +387,43 @@ resources:
         # If a client secret is not generated, parts of OAuth 2.0 flows will not work.
         # https://docs.aws.amazon.com/ja_jp/cognito/latest/developerguide/user-pool-settings-client-apps.html
         GenerateSecret: false
+    # The Lambda Trigger is executed by setting the Lambda function assigned this Role as PostConfirmation in the Cognito User Pool.
+    PostConfirmationLambdaRole:
+      Type: AWS::IAM::Role
+      Properties:
+        RoleName: PostConfirmationLambdaRole
+        # Define target service (Principal) to be allowed to assume this Role and actions (Action) of the IAM Role.
+        # https://dev.classmethod.jp/articles/iam-role-and-assumerole/
+        AssumeRolePolicyDocument:
+          Version: '2012-10-17'
+          Statement:
+            - Effect: 'Allow'
+              Principal:
+                Service:
+                  # Attach this Role to Lambda function.
+                  - 'lambda.amazonaws.com'
+              Action:
+                # sts:AssumeRole is the action to allow the service to assume any IAM Role.
+                - 'sts:AssumeRole'
+        # Define policies to be attached to this Role.
+        Policies:
+          - PolicyName: 'postConfirmationLambdaPolicy'
+            PolicyDocument:
+              Version: '2012-10-17'
+              Statement:
+                # Allow Lambda function to write logs to CloudWatch Logs so that it can be run.
+                - Effect: 'Allow'
+                  Action:
+                    - 'logs:CreateLogGroup'
+                    - 'logs:CreateLogStream'
+                    - 'logs:PutLogEvents'
+                  # Resource is the target resource to be allowed to perform the action.
+                  Resource: '*'
+                # This policy is to indirectly allow Cognito User Pool to invoke Lambda function (PostConfirmation trigger) when a user (email) is confirmed.
+                - Effect: 'Allow'
+                  Action:
+                    - 'lambda:InvokeFunction'
+                  Resource: '*'
     # Define S3 bucket
     # bucketForLambda:
     #   # https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-s3-bucket.html#aws-properties-s3-bucket--examples
