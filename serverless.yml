@@ -183,8 +183,6 @@ functions:
   postConfirmation:
     name: ${self:service}-${self:provider.stage}-auth-post-confirmation
     handler: functions/handlers/auth/post_confirmation.lambda_handler
-    # PostConfirmationLambdaRole overrides the default role defined in provider.iam.role because a role to be attached to each Lambda is only one.
-    role: PostConfirmationLambdaRole
   # FastAPI + Mangum + Lambda + API Gateway is defined like below
   # https://zenn.dev/hayata_yamamoto/articles/781efca1687272#%E3%81%A9%E3%81%86%E3%82%84%E3%81%A3%E3%81%A6%E4%BD%BF%E3%81%86%E3%81%AE%E3%81%8B%EF%BC%9F
   hub:
@@ -218,14 +216,17 @@ resources:
       # https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-resource-iam-role.html#aws-resource-iam-role-properties
       Properties:
         RoleName: AWSLambdaEnableCloudWatchS3-${self:provider.stage}
-        # AssumeRolePolicyDocument is required
+        # Define target service (Principal) to be allowed to assume this Role and actions (Action) of the IAM Role.
+        # https://dev.classmethod.jp/articles/iam-role-and-assumerole/
         AssumeRolePolicyDocument:
           Version: '2012-10-17'
           Statement:
             - Effect: Allow
               Principal:
                 Service:
+                  # Attach this Role to Lambda function.
                   - lambda.amazonaws.com
+              # sts:AssumeRole is the action to allow the service to assume any IAM Role.
               Action: sts:AssumeRole
         # ManagedPolicyArns are policies to be attached to the role that are managed by AWS
         # https://dev.classmethod.jp/articles/created_a_cross-account_access_role_in_cloudformation/
@@ -298,8 +299,9 @@ resources:
             # https://docs.aws.amazon.com/ja_jp/AWSCloudFormation/latest/UserGuide/aws-properties-cognito-userpool-recoveryoption.html
             - Name: verified_email
               Priority: 1 # Priority is the order of password recovery methods (ex: 1 or 2)
+        # EmailVerificationSubject don't work if VerificationMessageTemplate is defined.
         # https://docs.aws.amazon.com/ja_jp/AWSCloudFormation/latest/UserGuide/aws-resource-cognito-userpool.html#cfn-cognito-userpool-emailverificationsubject
-        EmailVerificationSubject: "${env:VERIFICATION_EMAI_SUBJECT_PREFIX}Verify your account"
+        # EmailVerificationSubject: "${env:VERIFICATION_EMAI_SUBJECT_PREFIX}Verify your account"
         # Define email configuration (ex: from SES email address, reply-to email address, etc.)
         # https://docs.aws.amazon.com/ja_jp/AWSCloudFormation/latest/UserGuide/aws-properties-cognito-userpool-emailconfiguration.html
         # https://blog.usize-tech.com/mailaddress-check-in-amazon-cognito/
@@ -330,6 +332,11 @@ resources:
         LambdaConfig:
           # Specify a lambda function to be executed when a user verifies their email address.
           # https://docs.aws.amazon.com/ja_jp/cognito/latest/developerguide/user-pool-lambda-post-confirmation.html
+          # TODO: Run the following command to assume resource-based policy to PostConfirmation lambda function in order to allow Cognito User Pool to invoke Lambda function.
+          # ? aws lambda add-permission --function-name arn:aws:lambda:<region>:<account_id>:function:<function_name> --statement-id <sid> --action lambda:InvokeFunction --principal cognito-idp.amazonaws.com --source-arn arn:aws:cognito-idp:<region>:<account_id>:userpool:<user_pool_id> --region <region>
+          # ! It's impossible to assume resource-based policy to Lambda function via Serverless Framework. So, you need to do on AWS console or via AWS CLI.
+          # https://dev.classmethod.jp/articles/cognito-lambda-trigger-version-alias/ 
+          # https://docs.aws.amazon.com/cognito/latest/developerguide/cognito-user-identity-pools-working-with-aws-lambda-triggers.html#important-lambda-considerations
           PostConfirmation: 
             # Fn::GetAtt: [logicalNameOfResource, attributeName] is to get an attribute value of a resource
             # https://docs.aws.amazon.com/ja_jp/AWSCloudFormation/latest/UserGuide/intrinsic-function-reference-getatt.html
@@ -387,47 +394,3 @@ resources:
         # If a client secret is not generated, parts of OAuth 2.0 flows will not work.
         # https://docs.aws.amazon.com/ja_jp/cognito/latest/developerguide/user-pool-settings-client-apps.html
         GenerateSecret: false
-    # The Lambda Trigger is executed by setting the Lambda function assigned this Role as PostConfirmation in the Cognito User Pool.
-    PostConfirmationLambdaRole:
-      Type: AWS::IAM::Role
-      Properties:
-        RoleName: PostConfirmationLambdaRole
-        # Define target service (Principal) to be allowed to assume this Role and actions (Action) of the IAM Role.
-        # https://dev.classmethod.jp/articles/iam-role-and-assumerole/
-        AssumeRolePolicyDocument:
-          Version: '2012-10-17'
-          Statement:
-            - Effect: 'Allow'
-              Principal:
-                Service:
-                  # Attach this Role to Lambda function.
-                  - 'lambda.amazonaws.com'
-              Action:
-                # sts:AssumeRole is the action to allow the service to assume any IAM Role.
-                - 'sts:AssumeRole'
-        # Define policies to be attached to this Role.
-        Policies:
-          - PolicyName: 'postConfirmationLambdaPolicy'
-            PolicyDocument:
-              Version: '2012-10-17'
-              Statement:
-                # Allow Lambda function to write logs to CloudWatch Logs so that it can be run.
-                - Effect: 'Allow'
-                  Action:
-                    - 'logs:CreateLogGroup'
-                    - 'logs:CreateLogStream'
-                    - 'logs:PutLogEvents'
-                  # Resource is the target resource to be allowed to perform the action.
-                  Resource: '*'
-                # This policy is to indirectly allow Cognito User Pool to invoke Lambda function (PostConfirmation trigger) when a user (email) is confirmed.
-                - Effect: 'Allow'
-                  Action:
-                    - 'lambda:InvokeFunction'
-                  Resource: '*'
-    # Define S3 bucket
-    # bucketForLambda:
-    #   # https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-s3-bucket.html#aws-properties-s3-bucket--examples
-    #   Type: 'AWS::S3::Bucket'
-    #   DeletionPolicy: Retain
-    #   Properties:
-    #     BucketName: ${self:custom.deploymentBucketName}
