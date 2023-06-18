@@ -5,7 +5,7 @@
 
 ## TODO
 
-- First, [run command]((https://linuxfan.info/post-1486)) `bash init.sh` to initialize the project (ex: package installation etc.)
+- First, [run command](https://linuxfan.info/post-1486) `bash init.sh` to initialize the project (ex: package installation etc.)
 
 - Update .env file contents to Github Action's secrets when local .env changes
 

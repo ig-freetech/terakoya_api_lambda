@@ -312,9 +312,9 @@ resources:
           # SourceArn is ARN of SES email address that is used as FromEmailAddress
           # SES ARN pattern is arn:aws:ses:<region>:<account_id>:identity/<email>
           SourceArn: arn:aws:ses:${env:AWS_DEFAULT_REGION}:${env:AWS_ACCOUNT_ID}:identity/${env:TERAKOYA_GMAIL_ADDRESS}
-        # VerificationMessageTemplate don't work
+        # Only DefaultEmailOption works in VerificationMessageTemplate
         # https://docs.aws.amazon.com/ja_jp/AWSCloudFormation/latest/UserGuide/aws-properties-cognito-userpool-verificationmessagetemplate.html
-        # VerificationMessageTemplate:
+        VerificationMessageTemplate:
           # In the actual email, {####} is replaced with a verification code
           # EmailMessage: "Your verification code is {####}." # this don't work
           # EmailSubject: "${env:VERIFICATION_EMAI_SUBJECT_PREFIX}Verify your account" # this don't work
@@ -323,9 +323,9 @@ resources:
           # aws cognito-idp create-user-pool-domain --user-pool-id <UserPoolId> --domain <Domain> (ex: <Domain> is terakoya-dev or terakoya-prod)
           # https://docs.aws.amazon.com/ja_jp/cognito/latest/developerguide/cognito-user-pools-assign-domain.html
 
-          # Send a link to verify email address
+          # Send a link to verify email address instead of a verification code
           # https://dev.classmethod.jp/articles/amazon-cognito-user-pool-user-sign-up-for-an-error-was-encountered-with-the-requested-page/
-          # DefaultEmailOption: CONFIRM_WITH_LINK
+          DefaultEmailOption: CONFIRM_WITH_LINK
         # https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-cognito-userpool-lambdaconfig.html
         LambdaConfig:
           # Specify a lambda function to be executed when a user verifies their email address.
