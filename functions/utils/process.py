@@ -18,7 +18,7 @@ class BasicResponseData:
     status_code: int
 
 
-def hub_lambda_handler_wrapper(func: Callable, request: Request, request_data: Optional[dict]) -> dict:
+def hub_lambda_handler_wrapper(func: Callable, request: Request, request_data: Optional[dict] = None) -> dict:
     # FastAPI + Lambda has only one log group in CloudWatch Logs for all routes, so it's difficult to distinguish which route is called
     # Define a common log process to distinguish which route is called
     # https://hawksnowlog.blogspot.com/2022/10/fastapi-logging-request-and-response-with-custom.html
