@@ -8,7 +8,8 @@ from fastapi.exceptions import HTTPException
 FUNCTIONS_DIR_PATH = os.path.dirname(os.path.dirname(__file__))
 sys.path.append(FUNCTIONS_DIR_PATH)
 
-from functions.domain.authentication import issue_new_access_token, signup, signin
+from functions.domain import authentication as auth
+from functions.domain import user
 from utils.process import hub_lambda_handler_wrapper
 
 authentication_router = APIRouter()
@@ -23,21 +24,27 @@ class AuthAccountRequestBody(BaseModel):
 # https://www.integrate.io/jp/blog/best-practices-for-naming-rest-api-endpoints-ja/#one
 @authentication_router.post("/account")
 def create_account(requset_body: AuthAccountRequestBody, request: Request):
-    return hub_lambda_handler_wrapper(lambda: signup(requset_body.email, requset_body.password), request, requset_body.dict())
+    return hub_lambda_handler_wrapper(lambda: auth.signup(requset_body.email, requset_body.password), request, requset_body.dict())
 
 
 class DeleteAccountRequestBody(BaseModel):
-    email: str
+    uuid: str
+    sk: str
 
 
 @authentication_router.delete("/account")
-def delete_account(requset_body: DeleteAccountRequestBody, request: Request):
-    return "delete_account"
+def delete_account(requset_body: DeleteAccountRequestBody, request: Request, access_token: Annotated[Optional[str], Cookie()] = None):
+    if access_token is None:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Access token is not set.")
+    def __delete_account():
+        auth.delete_user(access_token)
+        user.delete_item(requset_body.uuid, requset_body.sk)
+    return hub_lambda_handler_wrapper(__delete_account, request, requset_body.dict())
 
 
 @authentication_router.post("/signin")
 def sign_in(respose: Response, requset_body: AuthAccountRequestBody, request: Request):
-    return hub_lambda_handler_wrapper(lambda: signin(requset_body.email, requset_body.password, respose), request, requset_body.dict())
+    return hub_lambda_handler_wrapper(lambda: auth.signin(requset_body.email, requset_body.password, respose), request, requset_body.dict())
 
 
 # It's recommended to use Annotated[Optional[str], Cookie()] = None instead of Optional[str] = Cookie(None) to get a cookie value.
@@ -46,8 +53,6 @@ def sign_in(respose: Response, requset_body: AuthAccountRequestBody, request: Re
 # <value_cookie> can be obtained by <key_cookie>: Annotated[Optional[str], Cookie()] = None. (ex: access_token: Annotated[Optional[str], Cookie()] = None)
 # Annotated is a type annotation that can be used to add metadata to a type.
 # https://yiskw713.hatenablog.com/entry/2022/01/25/233000
-
-
 @authentication_router.post("/refresh-token")
 def refresh_token(response: Response, request: Request, refresh_token: Annotated[Optional[str], Cookie()] = None):
     if refresh_token is None:
@@ -55,4 +60,4 @@ def refresh_token(response: Response, request: Request, refresh_token: Annotated
         # Access is permanently prohibited due to insufficient authorization to access the resource, etc. So, re-authentication will not change the result.
         # https://developer.mozilla.org/ja/docs/Web/HTTP/Status/403
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Refresh token is not set.")
-    return hub_lambda_handler_wrapper(lambda: issue_new_access_token(refresh_token, response), request)
+    return hub_lambda_handler_wrapper(lambda: auth.issue_new_access_token(refresh_token, response), request)

@@ -257,6 +257,21 @@ resources:
         # PAY_PER_REQUEST is on-demand mode
         # https://dev.classmethod.jp/articles/dynamodb-cfn-ondemand-reinvent-2018/
         BillingMode: PAY_PER_REQUEST
+    userTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: ${self:service}-${self:provider.stage}-user
+        AttributeDefinitions:
+          - AttributeName: uuid
+            AttributeType: S
+          - AttributeName: sk
+            AttributeType: S
+        KeySchema:
+          - AttributeName: uuid
+            KeyType: HASH
+          - AttributeName: sk
+            KeyType: RANGE
+        BillingMode: PAY_PER_REQUEST
     # Cognito User Pool is like a database that stores user authentication information
     # https://zenn.dev/naok_1207/articles/d66a4a1d914000#userpool-%E3%81%AE%E3%82%AA%E3%83%97%E3%82%B7%E3%83%A7%E3%83%B3%E3%81%AB%E3%81%A4%E3%81%84%E3%81%A6
     CognitoUserPool:

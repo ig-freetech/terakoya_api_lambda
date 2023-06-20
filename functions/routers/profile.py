@@ -2,7 +2,6 @@ import os
 import sys
 from typing import Any, Dict
 from fastapi import APIRouter, Request, Depends
-from pydantic import BaseModel
 
 FUNCTIONS_DIR_PATH = os.path.dirname(os.path.dirname(__file__))
 sys.path.append(FUNCTIONS_DIR_PATH)

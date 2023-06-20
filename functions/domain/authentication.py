@@ -201,6 +201,16 @@ def signin(email: str, password: str, fastApiResponse: Response):
         set_cookie(fastApiResponse, 'refresh_token', auth_result['RefreshToken'])
     except cognito.exceptions.NotAuthorizedException:
         raise Exception("Invalid email or password")
+    
+
+def delete_user(access_token: str):
+    try:
+        # https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/cognito-idp/client/delete_user.html
+        cognito.delete_user(
+            AccessToken=access_token
+        )
+    except cognito.exceptions.NotAuthorizedException:
+        raise Exception("Invalid access token")
 
 
 # Signout API endpoint is unnecessary because each client (ex: Web browsers, App) can delete the access token and refresh token in Cookie by itself when a user signs out.
