@@ -159,8 +159,27 @@ def signup(email: str, password: str):
                 'email': email,
             }
         )
+    # If the specified email is already exists, UsernameExistsException is raised.
+    # https://docs.aws.amazon.com/ja_jp/cognito/latest/developerguide/cognito-user-pool-managing-errors.html
     except cognito.exceptions.UsernameExistsException:
-        raise Exception("Specified email is already exists")
+        response = cognito.admin_get_user(
+            UserPoolId=COGNITO_USER_POOL_ID,
+            Username=email
+        )
+
+        for attr in response['UserAttributes']:
+            print(attr)
+            if attr['Name'] == 'email_verified' and attr.get('Value') == 'true':
+                # If email is already verified
+                raise Exception("Specified email is already exists and verified")
+            elif attr['Name'] == 'email_verified' and attr.get('Value') == 'false':
+                # If email is not yet verified
+                cognito.resend_confirmation_code(
+                    ClientId=COGNITO_USER_POOL_CLIENT_ID,
+                    Username=email
+                )
+                raise Exception(
+                    "Specified email is already exists but not verified. So, sent a verification code again. Please check your email and verify it.")
 
 
 def signin(email: str, password: str, fastApiResponse: Response):
