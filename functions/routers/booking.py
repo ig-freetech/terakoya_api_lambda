@@ -63,6 +63,8 @@ class PutExcludedDatesRequestBody(BaseModel):
     dates: list[str]
 
 
+# Separate words with hyphen (ex: kabab-case) in the URL structure instead of using underscore (ex: snake_case) or camel case (ex: appleOrange) in naming the endpoints.
+# https://www.integrate.io/jp/blog/best-practices-for-naming-rest-api-endpoints-ja/#four
 @booking_router.put("/excluded-dates")
 def put_excluded_dates(request_body: PutExcludedDatesRequestBody, request: Request):
     """

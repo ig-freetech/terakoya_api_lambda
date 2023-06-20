@@ -3,3 +3,4 @@
 
 from .booking import booking_router
 from .authentication import authentication_router
+from .profile import profile_router

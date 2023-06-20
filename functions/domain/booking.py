@@ -38,6 +38,9 @@ class BookingTable:
                 "date": DT.CURRENT_JST_ISO_8601_ONLY_DATE,
                 "sk": sk
             },
+            # It's possible to search for target items to be updated with conditions other than Key by setting a conditional expression using attribute values in ConditionExpression,
+            # https://zenn.dev/enven/articles/041ab29a69b3ce#%E3%81%BE%E3%81%A8%E3%82%81
+            # https://docs.aws.amazon.com/ja_jp/amazondynamodb/latest/developerguide/Expressions.ConditionExpressions.html#Expressions.ConditionExpressions.PreventingOverwrites
             ConditionExpression="#is_reminded <> :is_reminded_true",
             UpdateExpression="set #is_reminded = :is_reminded_true",
             ExpressionAttributeNames={

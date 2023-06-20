@@ -8,7 +8,7 @@ from fastapi.exceptions import HTTPException
 FUNCTIONS_DIR_PATH = os.path.dirname(os.path.dirname(__file__))
 sys.path.append(FUNCTIONS_DIR_PATH)
 
-from functions.domain.authentication import issue_new_access_token, signup, signin, signout
+from functions.domain.authentication import issue_new_access_token, signup, signin
 from utils.process import hub_lambda_handler_wrapper
 
 authentication_router = APIRouter()
@@ -19,6 +19,8 @@ class AuthAccountRequestBody(BaseModel):
     password: str
 
 
+# Use noun for the endpoint name and express the action with the HTTP method (ex: GET, POST, PUT, DELETE).
+# https://www.integrate.io/jp/blog/best-practices-for-naming-rest-api-endpoints-ja/#one
 @authentication_router.post("/account")
 def create_account(requset_body: AuthAccountRequestBody, request: Request):
     return hub_lambda_handler_wrapper(lambda: signup(requset_body.email, requset_body.password), request, requset_body.dict())
@@ -37,12 +39,6 @@ def delete_account(requset_body: DeleteAccountRequestBody, request: Request):
 def sign_in(respose: Response, requset_body: AuthAccountRequestBody, request: Request):
     return hub_lambda_handler_wrapper(lambda: signin(requset_body.email, requset_body.password, respose), request, requset_body.dict())
 
-
-@authentication_router.post("/signout")
-def sign_out(response: Response, request: Request, access_token: Annotated[Optional[str], Cookie()] = None):
-    if access_token is None:
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Access token is not set.")
-    return hub_lambda_handler_wrapper(lambda: signout(access_token, response), request)
 
 # It's recommended to use Annotated[Optional[str], Cookie()] = None instead of Optional[str] = Cookie(None) to get a cookie value.
 # https://fastapi.tiangolo.com/tutorial/cookie-params/#__tabbed_2_2
