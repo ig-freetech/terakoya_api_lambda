@@ -12,6 +12,13 @@ RUN yum update -y && \
     rm -f /opt/Python-3.9.16.tgz && \
     python3.9 -m pip install --upgrade pip
 
+# Install AWS CLI v2
+# https://docs.aws.amazon.com/ja_jp/cli/latest/userguide/getting-started-install.html
+# curl is installed by default in amazonlinux:2022
+RUN curl "https://awscli.amazonaws.com/awscli-exe-linux-aarch64.zip" -o "awscliv2.zip" && \
+    unzip awscliv2.zip && \
+    ./aws/install
+
 # Current working directory is / (root) by default when Dockerfile is built and each commands (ex: RUN, COPY) are executed.
 # https://christina04.hatenablog.com/entry/2014/10/31/101510
 WORKDIR /workspaces/terakoya_backend
