@@ -7,11 +7,10 @@ from .slack import SlackErrorNotification
 
 slack_error_notifier = SlackErrorNotification()
 
+
 # Using dataclass, __init__ method is automatically generated.
 # https://yumarublog.com/python/dataclass/
 # https://zenn.dev/karaage0703/articles/3508b20ece17d4
-
-
 @dataclass
 class BasicResponseData:
     message: str

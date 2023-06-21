@@ -40,7 +40,7 @@ def fetch_item(uuid: str, sk: str):
         "uuid": uuid,
         "sk": sk
     }).get("Item", {})
-    return {"item": item}
+    return item
 
 
 def update_item(item: UserItem):
@@ -50,7 +50,22 @@ def update_item(item: UserItem):
             "uuid": item.uuid,
             "sk": item.sk
         },
-        UpdateExpression="set #name = :name, #nickname = :nickname, #school = :school, #grade = :grade, #course_choice = :course_choice, #staff_in_charge = :staff_in_charge, #future_path = :future_path, #like_thing = :like_thing, #how_to_know_terakoya = :how_to_know_terakoya, #number_of_attendances = :number_of_attendances, #attendance_rate = :attendance_rate, #updated_at_iso = :updated_at_iso",
+        UpdateExpression="""
+            set
+            #name = :name,
+            #nickname = :nickname,
+            #school = :school,
+            #grade = :grade,
+            #course_choice = :course_choice,
+            #staff_in_charge = :staff_in_charge,
+            #future_path = :future_path,
+            #like_thing = :like_thing,
+            #how_to_know_terakoya = :how_to_know_terakoya,
+            #number_of_attendances = :number_of_attendances,
+            #attendance_rate = :attendance_rate,
+            #is_admin = :is_admin,
+            #updated_at_iso = :updated_at_iso
+        """,
         ExpressionAttributeNames={
             "#name": "name",
             "#nickname": "nickname",
@@ -63,6 +78,7 @@ def update_item(item: UserItem):
             "#how_to_know_terakoya": "how_to_know_terakoya",
             "#number_of_attendances": "number_of_attendances",
             "#attendance_rate": "attendance_rate",
+            "#is_admin": "is_admin",
             "#updated_at_iso": "updated_at_iso"
         },
         ExpressionAttributeValues={
@@ -78,6 +94,8 @@ def update_item(item: UserItem):
             # Analytics
             ":number_of_attendances": item.number_of_attendances,
             ":attendance_rate": Decimal(str(item.attendance_rate)),
+            # Authority
+            ":is_admin": item.is_admin.value,
             # Timestamp
             ":updated_at_iso": DT.CURRENT_JST_ISO_8601_DATETIME,
         }

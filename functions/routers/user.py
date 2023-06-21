@@ -21,7 +21,10 @@ user_router = APIRouter()
 # https://pandadannikki.blogspot.com/2021/11/riss-http02.html
 @user_router.get("/{uuid}")
 def get_user(uuid: str, request: Request, claims: Dict[str, Any] = Depends(authenticate_user)):
-    return hub_lambda_handler_wrapper_with_rtn_value(lambda: user.fetch_item(uuid, EMPTY_SK), request)
+    def __get_user():
+        user_item = user.fetch_item(uuid, EMPTY_SK)
+        return {"item": user_item}
+    return hub_lambda_handler_wrapper_with_rtn_value(__get_user, request)
 
 
 @user_router.put("/{uuid}")

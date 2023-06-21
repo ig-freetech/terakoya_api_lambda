@@ -23,7 +23,7 @@ class AuthAccountRequestBody(BaseModel):
 # https://www.integrate.io/jp/blog/best-practices-for-naming-rest-api-endpoints-ja/#one
 @authentication_router.post("/account")
 def create_account(requset_body: AuthAccountRequestBody, request: Request):
-    return hub_lambda_handler_wrapper(lambda: auth.signup(requset_body.email, requset_body.password), request, requset_body.dict())
+    return hub_lambda_handler_wrapper_with_rtn_value(lambda: auth.signup(requset_body.email, requset_body.password), request, requset_body.dict())
 
 
 class DeleteAccountRequestBody(BaseModel):
@@ -45,8 +45,10 @@ def delete_account(requset_body: DeleteAccountRequestBody, request: Request, acc
 @authentication_router.post("/signin")
 def sign_in(respose: Response, requset_body: AuthAccountRequestBody, request: Request):
     def __sign_in():
-        access_token = auth.signin(requset_body.email, requset_body.password, respose)
-        jwt = auth.authenticate_user(access_token)
+        tokens = auth.signin(requset_body.email, requset_body.password)
+        auth.set_cookie(respose, 'access_token', tokens.access_token)
+        auth.set_cookie(respose, 'refresh_token', tokens.refresh_token)
+        jwt = auth.authenticate_user(tokens.access_token)
         print(f"jwt: {jwt}")
         return {"uuid": jwt["sub"]}
     return hub_lambda_handler_wrapper_with_rtn_value(__sign_in, request, requset_body.dict())

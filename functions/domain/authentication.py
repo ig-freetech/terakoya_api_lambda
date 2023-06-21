@@ -1,6 +1,7 @@
 import os
 import sys
 from typing import Any, Dict
+from dataclasses import dataclass
 import boto3
 from jose import jwt, jwk, JWTError
 import requests
@@ -142,7 +143,7 @@ def authenticate_user(token: str = Depends(OAuth2PasswordBearer(tokenUrl="/signi
 def signup(email: str, password: str):
     try:
         # https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/cognito-idp/client/sign_up.html
-        cognito.sign_up(
+        response = cognito.sign_up(
             ClientId=COGNITO_USER_POOL_CLIENT_ID,
             Username=email,
             Password=password,
@@ -159,16 +160,22 @@ def signup(email: str, password: str):
                 'email': email,
             }
         )
+        print(f"response: {response}")
+        # response['UserSub'] is the UUID of the authenticated user.
+        # https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/cognito-idp/client/sign_up.html
+        return {"uuid": response['UserSub']}  # Return the UUID for testing.
     # If the specified email is already exists, UsernameExistsException is raised.
     # https://docs.aws.amazon.com/ja_jp/cognito/latest/developerguide/cognito-user-pool-managing-errors.html
     except cognito.exceptions.UsernameExistsException:
+        # https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/cognito-idp/client/admin_get_user.html
         response = cognito.admin_get_user(
             UserPoolId=COGNITO_USER_POOL_ID,
             Username=email
         )
 
-        for attr in response['UserAttributes']:
-            print(attr)
+        user_attrs = response['UserAttributes']
+        print(f"user_attrs: {user_attrs}")
+        for attr in user_attrs:
             if attr['Name'] == 'email_verified' and attr.get('Value') == 'true':
                 # If email is already verified
                 raise Exception("Specified email is already exists and verified")
@@ -180,9 +187,17 @@ def signup(email: str, password: str):
                 )
                 raise Exception(
                     "Specified email is already exists but not verified. So, sent a verification code again. Please check your email and verify it.")
+        # response['Username'] is the UUID of the authenticated user.
+        return {"uuid": response['Username']}  # Return the UUID for testing.
 
 
-def signin(email: str, password: str, fastApiResponse: Response):
+@dataclass
+class SigninResponse:
+    access_token: str
+    refresh_token: str
+
+
+def signin(email: str, password: str):
     try:
         # Get tokens by using email and password.
         # https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/cognito-idp/client/initiate_auth.html
@@ -197,9 +212,8 @@ def signin(email: str, password: str, fastApiResponse: Response):
         # AuthenticationResult is a dictionary that contains the access token , ID token, and refresh token.
         auth_result = response['AuthenticationResult']
         access_token = auth_result['AccessToken']
-        set_cookie(fastApiResponse, 'access_token', access_token)
-        set_cookie(fastApiResponse, 'refresh_token', auth_result['RefreshToken'])
-        return access_token  # To fetch item from User table in DynamoDB
+        refresh_token = auth_result['RefreshToken']
+        return SigninResponse(access_token, refresh_token)  # To fetch item from User table in DynamoDB
     except cognito.exceptions.NotAuthorizedException:
         raise Exception("Invalid email or password")
 

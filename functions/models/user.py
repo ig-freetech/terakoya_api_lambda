@@ -67,6 +67,14 @@ class HOW_TO_KNOW_TERAKOYA(Enum):
     """未選択"""
 
 
+class AUTHORITY(Enum):
+    """管理者権限 (is_admin)"""
+    ADMIN = 1
+    """管理者"""
+    NOT_ADMIN = 0
+    """一般ユーザー"""
+
+
 class UserItem(BaseModel):
     uuid: str
     # アカウント登録時にStepを2つ用意してStep1でユーザータイプを選択させる？ (sk: student, company, admin, staff)
@@ -90,7 +98,7 @@ class UserItem(BaseModel):
     number_of_attendances: int = 0
     attendance_rate: float = 0.0
     # Authority fields
-    is_admin: bool = False
+    is_admin: AUTHORITY = AUTHORITY.NOT_ADMIN
     # Timestamp fields
     created_at_iso: str = DT.CURRENT_JST_ISO_8601_DATETIME
     updated_at_iso: str = ""
