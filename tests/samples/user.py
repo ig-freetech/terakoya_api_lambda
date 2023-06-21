@@ -9,7 +9,7 @@ from functions.models.user import GRADE, COURSE_CHOICE, HOW_TO_KNOW_TERAKOYA, AU
 from functions.utils.dt import DT
 
 email = "i.g.freetech2021@gmail.com"
-password = "Test1234"
+password = "PyTest1234"
 
 account_request_body_json = {
     "email": email,

@@ -26,7 +26,6 @@ class Test:
 
         response_create_account = requests.post(
             f"{base_url}/account", headers=headers, data=json.dumps(account_request_body_json))
-        print(f"response_create_account: {response_create_account}")
         response_body_create_account = response_create_account.json()
         print(f"response_create_account_body: {response_body_create_account}")
         assert response_create_account.status_code == 200
@@ -43,17 +42,18 @@ class Test:
 
         response_signin = requests.post(f"{base_url}/signin", headers=headers,
                                         data=json.dumps(account_request_body_json))
-        print(f"response_signin: {response_signin}")
         response_body_signin = response_signin.json()
-        # print(f"response_body_signin: {response_body_signin}")
+        print(f"response_body_signin: {response_body_signin}")
         assert response_create_account.status_code == 200
         assert response_body_create_account.get("status_code") == 200
         assert response_body_signin.get("uuid") == uuid
 
-        response_get_user = requests.get(f"{base_url}/user/{uuid}", headers=headers)
-        print(f"response_get_user: {response_get_user}")
+        bearer_auth_headers = {**headers, "Authorization": f"Bearer {response_signin.cookies.get('access_token')}"}
+        print(f"bearer_auth_headers: {bearer_auth_headers}")
+
+        response_get_user = requests.get(f"{base_url}/user/{uuid}", headers=bearer_auth_headers)
         response_body_get_user = response_get_user.json()
-        # print(f"response_body_get_user: {response_body_get_user}")
+        print(f"response_body_get_user: {response_body_get_user}")
         assert response_get_user.status_code == 200
         assert response_body_get_user.get("status_code") == 200
         user_item = UserItem(**response_body_get_user.get("item"))
@@ -64,18 +64,16 @@ class Test:
         assert user_item.attendance_rate == 0.0
         assert user_item.is_admin.value == AUTHORITY.NOT_ADMIN.value
 
-        response_update_user = requests.put(f"{base_url}/user/{uuid}", headers=headers,
-                                            data=json.dumps(update_user_item_json))
-        print(f"response_update_user: {response_update_user}")
+        response_update_user = requests.put(f"{base_url}/user/{uuid}", headers=bearer_auth_headers,
+                                            data=json.dumps({**update_user_item_json, "uuid": uuid}))
         response_body_update_user = response_update_user.json()
-        # print(f"response_body_update_user: {response_body_update_user}")
+        print(f"response_body_update_user: {response_body_update_user}")
         assert response_update_user.status_code == 200
         assert response_body_update_user.get("status_code") == 200
 
-        response_get_updated_user = requests.get(f"{base_url}/user/{uuid}", headers=headers)
-        print(f"response_get_updated_user: {response_get_updated_user}")
+        response_get_updated_user = requests.get(f"{base_url}/user/{uuid}", headers=bearer_auth_headers)
         response_body_get_updated_user = response_get_updated_user.json()
-        # print(f"response_body_get_updated_user: {response_body_get_updated_user}")
+        print(f"response_body_get_updated_user: {response_body_get_updated_user}")
         assert response_get_updated_user.status_code == 200
         assert response_body_get_updated_user.get("status_code") == 200
         updated_user_item = UserItem(**response_body_get_updated_user.get("item"))
@@ -89,18 +87,20 @@ class Test:
         # Include cookie returned from signin because delete user api requires cookie including access token
         # https://show-time-blog.com/it-knowledge/python/1014/#toc12
         response_delete_user = requests.delete(
-            f"{base_url}/account", headers=headers, cookies=response_signin.cookies)
-        print(f"response_delete_user: {response_delete_user}")
+            f"{base_url}/account",
+            headers=headers,
+            cookies=response_signin.cookies,
+            data=json.dumps({"uuid": uuid, "sk": EMPTY_SK})
+        )
         response_body_delete_user = response_delete_user.json()
-        # print(f"response_body_delete_user: {response_body_delete_user}")
+        print(f"response_body_delete_user: {response_body_delete_user}")
         assert response_delete_user.status_code == 200
         assert response_body_delete_user.get("status_code") == 200
 
         response_signin_after_deleted = requests.post(f"{base_url}/signin", headers=headers,
                                                       data=json.dumps(account_request_body_json))
-        print(f"response_signin: {response_signin_after_deleted}")
         response_body_signin_after_deleted = response_signin_after_deleted.json()
-        # print(f"response_body_signin: {response_body_signin}")
+        print(f"response_body_signin: {response_body_signin}")
         assert response_signin_after_deleted.status_code == 200
         assert response_body_signin_after_deleted.get("status_code") == 500  # Internal Server Error
         assert response_body_signin_after_deleted.get(
