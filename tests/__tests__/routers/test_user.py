@@ -24,14 +24,14 @@ class Test:
         if COGNITO_USER_POOL_ID is None:
             raise Exception("COGNITO_USER_POOL_ID is None")
 
-        response_create_account = requests.post(
-            f"{base_url}/account", headers=headers, data=json.dumps(account_request_body_json))
-        response_body_create_account = response_create_account.json()
-        print(f"response_create_account_body: {response_body_create_account}")
-        assert response_create_account.status_code == 200
-        assert response_body_create_account.get("status_code") == 200
+        response_signup = requests.post(
+            f"{base_url}/signup", headers=headers, data=json.dumps(account_request_body_json))
+        response_body_signup = response_signup.json()
+        print(f"response_create_account_body: {response_body_signup}")
+        assert response_signup.status_code == 200
+        assert response_body_signup.get("status_code") == 200
 
-        uuid = response_body_create_account.get("uuid")
+        uuid = response_body_signup.get("uuid")
         auth.cognito.admin_confirm_sign_up(UserPoolId=COGNITO_USER_POOL_ID, Username=uuid)
         time.sleep(3)  # wait for PostConfirmation trigger to be finished
         lambda_client.invoke(
@@ -44,8 +44,8 @@ class Test:
                                         data=json.dumps(account_request_body_json))
         response_body_signin = response_signin.json()
         print(f"response_body_signin: {response_body_signin}")
-        assert response_create_account.status_code == 200
-        assert response_body_create_account.get("status_code") == 200
+        assert response_signup.status_code == 200
+        assert response_body_signup.get("status_code") == 200
         assert response_body_signin.get("uuid") == uuid
 
         bearer_auth_headers = {**headers, "Authorization": f"Bearer {response_signin.cookies.get('access_token')}"}
@@ -86,8 +86,8 @@ class Test:
 
         # Include cookie returned from signin because delete user api requires cookie including access token
         # https://show-time-blog.com/it-knowledge/python/1014/#toc12
-        response_delete_user = requests.delete(
-            f"{base_url}/account",
+        response_delete_user = requests.post(
+            f"{base_url}/account/delete",
             headers=headers,
             cookies=response_signin.cookies,
             data=json.dumps({"uuid": uuid, "sk": EMPTY_SK})

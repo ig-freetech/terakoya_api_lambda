@@ -21,8 +21,8 @@ class AuthAccountRequestBody(BaseModel):
 
 # Use noun for the endpoint name and express the action with the HTTP method (ex: GET, POST, PUT, DELETE).
 # https://www.integrate.io/jp/blog/best-practices-for-naming-rest-api-endpoints-ja/#one
-@authentication_router.post("/account")
-def create_account(requset_body: AuthAccountRequestBody, request: Request):
+@authentication_router.post("/signup")
+def signup(requset_body: AuthAccountRequestBody, request: Request):
     return hub_lambda_handler_wrapper_with_rtn_value(lambda: auth.signup(requset_body.email, requset_body.password), request, requset_body.dict())
 
 
@@ -31,7 +31,8 @@ class DeleteAccountRequestBody(BaseModel):
     sk: str
 
 
-@authentication_router.delete("/account")
+# Use post not delete to receive a request body from Client-side. Because delete method does not allow a request body.
+@authentication_router.post("/account/delete")
 def delete_account(requset_body: DeleteAccountRequestBody, request: Request, access_token: Annotated[Optional[str], Cookie()] = None):
     if access_token is None:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Access token is not set.")
