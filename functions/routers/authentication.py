@@ -8,9 +8,8 @@ from fastapi.exceptions import HTTPException
 FUNCTIONS_DIR_PATH = os.path.dirname(os.path.dirname(__file__))
 sys.path.append(FUNCTIONS_DIR_PATH)
 
-from functions.domain import authentication as auth
-from functions.domain import user
-from utils.process import hub_lambda_handler_wrapper
+from domain import authentication as auth, user
+from utils.process import hub_lambda_handler_wrapper, hub_lambda_handler_wrapper_with_rtn_value
 
 authentication_router = APIRouter()
 
@@ -36,6 +35,7 @@ class DeleteAccountRequestBody(BaseModel):
 def delete_account(requset_body: DeleteAccountRequestBody, request: Request, access_token: Annotated[Optional[str], Cookie()] = None):
     if access_token is None:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Access token is not set.")
+
     def __delete_account():
         auth.delete_user(access_token)
         user.delete_item(requset_body.uuid, requset_body.sk)
@@ -44,7 +44,12 @@ def delete_account(requset_body: DeleteAccountRequestBody, request: Request, acc
 
 @authentication_router.post("/signin")
 def sign_in(respose: Response, requset_body: AuthAccountRequestBody, request: Request):
-    return hub_lambda_handler_wrapper(lambda: auth.signin(requset_body.email, requset_body.password, respose), request, requset_body.dict())
+    def __sign_in():
+        access_token = auth.signin(requset_body.email, requset_body.password, respose)
+        jwt = auth.authenticate_user(access_token)
+        print(f"jwt: {jwt}")
+        return {"uuid": jwt["sub"]}
+    return hub_lambda_handler_wrapper_with_rtn_value(__sign_in, request, requset_body.dict())
 
 
 # It's recommended to use Annotated[Optional[str], Cookie()] = None instead of Optional[str] = Cookie(None) to get a cookie value.

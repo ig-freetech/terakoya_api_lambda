@@ -196,12 +196,13 @@ def signin(email: str, password: str, fastApiResponse: Response):
         )
         # AuthenticationResult is a dictionary that contains the access token , ID token, and refresh token.
         auth_result = response['AuthenticationResult']
-
-        set_cookie(fastApiResponse, 'access_token', auth_result['AccessToken'])
+        access_token = auth_result['AccessToken']
+        set_cookie(fastApiResponse, 'access_token', access_token)
         set_cookie(fastApiResponse, 'refresh_token', auth_result['RefreshToken'])
+        return access_token  # To fetch item from User table in DynamoDB
     except cognito.exceptions.NotAuthorizedException:
         raise Exception("Invalid email or password")
-    
+
 
 def delete_user(access_token: str):
     try:

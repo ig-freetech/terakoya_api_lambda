@@ -39,7 +39,7 @@ def fetch_excluded_dates(excluded_dates_csv_fkey: str = EXCLUDED_DATES_CSV_FKEY)
 @booking_router.get("/excluded-dates")
 def get_excluded_dates(request: Request):
     # There are no parameters in the URL and the request body
-    return hub_lambda_handler_wrapper_with_rtn_value(fetch_excluded_dates, request, None)
+    return hub_lambda_handler_wrapper_with_rtn_value(fetch_excluded_dates, request)
 
 
 def update_excluded_dates(dates: list[str], excluded_dates_csv_fkey: str = EXCLUDED_DATES_CSV_FKEY):

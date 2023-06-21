@@ -10,10 +10,11 @@ from utils.slack import SlackErrorNotification
 
 slack_error_notifier = SlackErrorNotification()
 
+
 # This Lambda function is triggered by PostConfirmation trigger of Cognito User Pool. i.e., when a user clicks the confirmation link in the confirmation email.
 def lambda_handler(event, context):
     print(f"event: {event}")
-    try: 
+    try:
         user_name = event['userName']
         user_email = event['request']['userAttributes']['email']
         user_item = UserItem(uuid=user_name, email=user_email)

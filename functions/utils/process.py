@@ -34,7 +34,7 @@ def hub_lambda_handler_wrapper(func: Callable, request: Request, request_data: O
     return asdict(response_data)
 
 
-def hub_lambda_handler_wrapper_with_rtn_value(func: Callable[[], dict], request: Request, request_data: Optional[dict]) -> dict:
+def hub_lambda_handler_wrapper_with_rtn_value(func: Callable[[], dict], request: Request, request_data: Optional[dict] = None) -> dict:
     path = f"{request.method}: {request.url.path}"
     print(f"================= {path} =================")
     rtn_dict = {}

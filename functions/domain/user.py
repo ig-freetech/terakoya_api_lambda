@@ -1,3 +1,4 @@
+from decimal import Decimal
 import os
 import sys
 import boto3
@@ -6,6 +7,7 @@ ROOT_DIR_PATH = os.path.dirname(os.path.dirname(__file__))
 sys.path.append(ROOT_DIR_PATH)
 
 from conf.env import AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, AWS_DEFAULT_REGION, STAGE
+from utils.dt import DT
 from models.user import UserItem
 
 __table = boto3.resource(
@@ -19,7 +21,7 @@ __table = boto3.resource(
 def insert_item(item: UserItem):
     # BaseModel must be converted to dict with .dict() method to add an item to DynamoDB table.
     # https://docs.pydantic.dev/latest/usage/exporting_models/#modeldict
-    __table.put_item(Item=item.dict())
+    __table.put_item(Item=item.to_dynamodb_item())
 
 
 def delete_item(uuid: str, sk: str):
@@ -30,3 +32,53 @@ def delete_item(uuid: str, sk: str):
         "uuid": uuid,
         "sk": sk
     })
+
+
+def fetch_item(uuid: str, sk: str):
+    # https://docs.aws.amazon.com/ja_jp/amazondynamodb/latest/developerguide/GettingStarted.Python.03.html
+    item = __table.get_item(Key={
+        "uuid": uuid,
+        "sk": sk
+    }).get("Item", {})
+    return {"item": item}
+
+
+def update_item(item: UserItem):
+    # https://docs.aws.amazon.com/ja_jp/amazondynamodb/latest/developerguide/GettingStarted.Python.03.html
+    __table.update_item(
+        Key={
+            "uuid": item.uuid,
+            "sk": item.sk
+        },
+        UpdateExpression="set #name = :name, #nickname = :nickname, #school = :school, #grade = :grade, #course_choice = :course_choice, #staff_in_charge = :staff_in_charge, #future_path = :future_path, #like_thing = :like_thing, #how_to_know_terakoya = :how_to_know_terakoya, #number_of_attendances = :number_of_attendances, #attendance_rate = :attendance_rate, #updated_at_iso = :updated_at_iso",
+        ExpressionAttributeNames={
+            "#name": "name",
+            "#nickname": "nickname",
+            "#school": "school",
+            "#grade": "grade",
+            "#course_choice": "course_choice",
+            "#staff_in_charge": "staff_in_charge",
+            "#future_path": "future_path",
+            "#like_thing": "like_thing",
+            "#how_to_know_terakoya": "how_to_know_terakoya",
+            "#number_of_attendances": "number_of_attendances",
+            "#attendance_rate": "attendance_rate",
+            "#updated_at_iso": "updated_at_iso"
+        },
+        ExpressionAttributeValues={
+            ":name": item.name,
+            ":nickname": item.nickname,
+            ":school": item.school,
+            ":grade": item.grade.value,
+            ":course_choice": item.course_choice.value,
+            ":staff_in_charge": item.staff_in_charge,
+            ":future_path": item.future_path,
+            ":like_thing": item.like_thing,
+            ":how_to_know_terakoya": item.how_to_know_terakoya.value,
+            # Analytics
+            ":number_of_attendances": item.number_of_attendances,
+            ":attendance_rate": Decimal(str(item.attendance_rate)),
+            # Timestamp
+            ":updated_at_iso": DT.CURRENT_JST_ISO_8601_DATETIME,
+        }
+    )
