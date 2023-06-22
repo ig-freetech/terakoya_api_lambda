@@ -83,6 +83,9 @@ provider:
   # https://www.serverless.com/framework/docs/providers/aws/guide/serverless.yml#api-gateway-v2-http-api
   httpApi:
     name: ${self:service}-${self:provider.stage}-agw
+    # ? CORS restrictions work only for the request from web browsers.
+    # ? So curl, Postman, and requests when pytest run on Github Actions runner, etc are not restricted by CORS.
+    # https://developer.mozilla.org/ja/docs/Web/HTTP/CORS
     # CORS settings
     # https://www.serverless.com/framework/docs/providers/aws/events/http-api#cors-setup
     cors:
