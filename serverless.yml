@@ -91,7 +91,7 @@ provider:
     cors:
       # Access-Control-Allow-Credentials header (withCredentials) is not allowed when Access-Control-Allow-Origin is wildcard (*). 
       # https://developer.mozilla.org/ja/docs/Web/HTTP/CORS/Errors/CORSNotSupportingCredentials
-      allowOrigins: 
+      allowedOrigins: 
         - ${env:WEB_CLIENT_ORIGIN}
         - http://localhost:3000 # for web client on local to access API Gateway
       allowedHeaders:
