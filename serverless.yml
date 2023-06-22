@@ -83,8 +83,44 @@ provider:
   # https://www.serverless.com/framework/docs/providers/aws/guide/serverless.yml#api-gateway-v2-http-api
   httpApi:
     name: ${self:service}-${self:provider.stage}-agw
-    # Allow CORS HTTP all headers
-    cors: true
+    # CORS settings
+    # https://www.serverless.com/framework/docs/providers/aws/events/http-api#cors-setup
+    cors:
+      # Access-Control-Allow-Credentials header (withCredentials) is not allowed when Access-Control-Allow-Origin is wildcard (*). 
+      # https://developer.mozilla.org/ja/docs/Web/HTTP/CORS/Errors/CORSNotSupportingCredentials
+      allowOrigins: 
+        - ${env:WEB_CLIENT_ORIGIN}
+        - http://localhost:3000 # for web client on local to access API Gateway
+      allowedHeaders:
+        # Content-Type is required to indicate the media type of the request body sent to API Gateway.
+        # https://e-words.jp/w/Content-Type.html
+        # https://developer.mozilla.org/ja/docs/Web/HTTP/Headers/Content-Type
+        - Content-Type
+        # Authorization is required to send credentials (such as access token) to API Gateway.
+        # https://atmarkit.itmedia.co.jp/ait/articles/1608/10/news021.html
+        # https://developer.mozilla.org/ja/docs/Web/HTTP/Headers/Authorization
+        - Authorization
+        # X-Amz-Date is required for AWS Signature Version 4 to indicate the date and time when the request was signed.
+        # https://docs.aws.amazon.com/ja_jp/IAM/latest/UserGuide/signing-elements.html
+        - X-Amz-Date
+        # X-Api-Key is required for AWS Signature Version 4 to send the API key to API Gateway when it uses the API key.
+        # https://docs.aws.amazon.com/ja_jp/apigateway/latest/developerguide/api-gateway-api-key-source.html
+        - X-Api-Key
+        # X-Amz-Security-Token is required for AWS Signature Version 4 to send the security token to API Gateway when it uses temporary security credentials.
+        # https://docs.aws.amazon.com/ja_jp/AmazonS3/latest/userguide/RESTAuthentication.html
+        - X-Amz-Security-Token
+        # X-Amz-User-Agent is required for AWS Signature Version 4 to send the user agent string to API Gateway.
+        # https://qiita.com/sakadonohito/items/61b03bb5224ef83bde41#allowedheader
+        - X-Amz-User-Agent
+      allowedMethods:
+        - OPTIONS
+        - GET
+        - POST
+        - PUT
+        - DELETE
+      # Allow browser to send the request with credentials (cookies, HTTP authentication and client side SSL certificates) to API Gateway by setting Access-Control-Allow-Credentials header to true.
+      # https://developer.mozilla.org/ja/docs/Web/HTTP/Headers/Access-Control-Allow-Credentials
+      allowCredentials: true
 
 # Layer settings
 # https://www.serverless.com/framework/docs/providers/aws/guide/layers
