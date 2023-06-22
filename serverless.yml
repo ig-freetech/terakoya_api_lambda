@@ -93,7 +93,13 @@ provider:
       # https://developer.mozilla.org/ja/docs/Web/HTTP/CORS/Errors/CORSNotSupportingCredentials
       allowedOrigins: 
         - ${env:WEB_CLIENT_ORIGIN}
-        - http://localhost:3000 # for web client on local to access API Gateway
+        # TODO: Remove localhosts when deploying to production
+        # for web client on local to access API Gateway
+        - http://localhost:3000
+        # Add several port candidates so that Next app can be run on any other available ports and access API Gateway when default port 3000 is occupied.
+        - http://localhost:3001
+        - http://localhost:3002
+        - http://localhost:3003
       allowedHeaders:
         # Content-Type is required to indicate the media type of the request body sent to API Gateway.
         # https://e-words.jp/w/Content-Type.html
