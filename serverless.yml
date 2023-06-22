@@ -16,8 +16,18 @@ useDotenv: true
 # disabledDeprecations:
 #   - '*' # all deprecation warnings are disabled
 
-# custom:
-#   deploymentBucketName: ${self:service}-${self:provider.stage}
+# custom is the place to freely define variables that can be referenced in serverless.yml
+# https://www.serverless.com/framework/docs/providers/aws/guide/variables#reference-properties-in-serverlessyml
+custom:
+  allowedLocalhostOrigins:
+    # for web client on local to access API Gateway
+    # Add several port candidates so that Next app can be run on any other available ports and access API Gateway when default port 3000 is occupied.
+    dev: |
+      - http://localhost:3000
+      - http://localhost:3001
+      - http://localhost:3002
+      - http://localhost:3003
+    prod: ''
 
 # General AWS settings
 # https://www.serverless.com/framework/docs/providers/aws/guide/serverless.yml#general-settings
@@ -28,6 +38,7 @@ provider:
   # https://www.serverless.com/framework/docs/providers/aws/guide/deploying#deployment-method
   deploymentMethod: direct
   # ${opt:stage, 'dev'} means that if the stage is not specified, it will be set to 'dev'
+  # https://qiita.com/ktamido/items/24ccfbdaf287bc7855a6#%E3%83%87%E3%83%95%E3%82%A9%E3%83%AB%E3%83%88%E5%80%A4
   # But, if serverless deploy --stage prod is executed, it will be set to 'prod'
   # https://www.serverless.com/framework/docs/providers/aws/guide/variables#referencing-cli-options
   stage: ${opt:stage, 'dev'}
@@ -93,13 +104,8 @@ provider:
       # https://developer.mozilla.org/ja/docs/Web/HTTP/CORS/Errors/CORSNotSupportingCredentials
       allowedOrigins: 
         - ${env:WEB_CLIENT_ORIGIN}
-        # TODO: Remove localhosts when deploying to production
-        # for web client on local to access API Gateway
-        - http://localhost:3000
-        # Add several port candidates so that Next app can be run on any other available ports and access API Gateway when default port 3000 is occupied.
-        - http://localhost:3001
-        - http://localhost:3002
-        - http://localhost:3003
+        # https://qiita.com/ktamido/items/24ccfbdaf287bc7855a6#serverlessyml%E5%86%85%E3%81%AE%E3%83%97%E3%83%AD%E3%83%91%E3%83%86%E3%82%A3%E3%81%AE%E5%8F%82%E7%85%A7
+        - ${self:custom.allowedLocalhostOrigins.${self:provider.stage}}
       allowedHeaders:
         # Content-Type is required to indicate the media type of the request body sent to API Gateway.
         # https://e-words.jp/w/Content-Type.html
