@@ -2,6 +2,7 @@ import os
 import sys
 from typing import Optional, Annotated
 from fastapi import APIRouter, Request, Response, Cookie, status
+from functions.models.user import EMPTY_SK
 from pydantic import BaseModel
 from fastapi.exceptions import HTTPException
 
@@ -47,11 +48,13 @@ def delete_account(requset_body: DeleteAccountRequestBody, request: Request, acc
 def sign_in(respose: Response, requset_body: AuthAccountRequestBody, request: Request):
     def __sign_in():
         tokens = auth.signin(requset_body.email, requset_body.password)
-        auth.set_cookie(respose, 'access_token', tokens.access_token)
-        auth.set_cookie(respose, 'refresh_token', tokens.refresh_token)
+        auth.set_cookie_secured(respose, 'access_token', tokens.access_token)
+        auth.set_cookie_secured(respose, 'refresh_token', tokens.refresh_token)
         jwt = auth.authenticate_user(tokens.access_token)
         print(f"jwt: {jwt}")
-        return {"uuid": jwt["sub"]}
+        uuid = jwt["sub"]
+        user_item = user.fetch_item(uuid, EMPTY_SK)
+        return {"item": user_item}
     return hub_lambda_handler_wrapper_with_rtn_value(__sign_in, request, requset_body.dict())
 
 

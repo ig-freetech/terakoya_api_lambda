@@ -21,7 +21,7 @@ if COGNITO_USER_POOL_CLIENT_ID == None or COGNITO_USER_POOL_ID == None:
     raise Exception("COGNITO_USER_POOL_CLIENT_ID or COGNITO_USER_POOL_ID is None")
 
 
-def set_cookie(fastApiResponse: Response, key: str, value: str):
+def set_cookie_secured(fastApiResponse: Response, key: str, value: str):
     """Set access_token and refresh_token to cookie on Server-side"""
     # Include tokens in the response header as a cookie.
     # https://fastapi.tiangolo.com/advanced/response-cookies/
@@ -57,9 +57,12 @@ def issue_new_access_token(refresh_token: str, fastApiResponse: Response):
             }
         )
         auth_result = response['AuthenticationResult']
-        set_cookie(fastApiResponse, 'access_token', auth_result['AccessToken'])
-        set_cookie(fastApiResponse, 'refresh_token', auth_result['RefreshToken'])
+        set_cookie_secured(fastApiResponse, 'access_token', auth_result['AccessToken'])
+        set_cookie_secured(fastApiResponse, 'refresh_token', auth_result['RefreshToken'])
     except cognito.exceptions.NotAuthorizedException:
+        # Delete credentials from cookie if refresh token is expired.
+        fastApiResponse.delete_cookie('access_token')
+        fastApiResponse.delete_cookie('refresh_token')
         raise Exception("Invalid refresh token")
 
 
@@ -191,6 +194,9 @@ def signup(email: str, password: str):
         return {"uuid": response['Username']}  # Return the UUID for testing.
 
 
+# Using dataclass, __init__ method is automatically generated.
+# https://yumarublog.com/python/dataclass/
+# https://zenn.dev/karaage0703/articles/3508b20ece17d4
 @dataclass
 class SigninResponse:
     access_token: str
