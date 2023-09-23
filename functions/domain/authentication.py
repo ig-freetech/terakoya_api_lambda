@@ -127,7 +127,7 @@ def authenticate_user(fastApiResponse: Response, request: Request, access_token:
     print(f"================= {path} - authenticate_user =================")
 
     if access_token is None:
-        print("Request: " + str(request))
+        print("Request cookies: " + str(request.cookies))
         access_token = request.cookies.get('access_token')
         if access_token is None:
             print("Access token is not set in Cookie.")
