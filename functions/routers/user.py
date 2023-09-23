@@ -23,7 +23,7 @@ user_router = APIRouter()
 def get_user(uuid: str, request: Request, claims: Dict[str, Any] = Depends(authenticate_user)):
     def __get_user():
         user_item = user.fetch_item(uuid, EMPTY_SK)
-        return {"item": user_item}
+        return user_item
     return hub_lambda_handler_wrapper_with_rtn_value(__get_user, request)
 
 

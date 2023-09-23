@@ -29,7 +29,6 @@ class Test:
         response_body_signup = response_signup.json()
         print(f"response_create_account_body: {response_body_signup}")
         assert response_signup.status_code == 200
-        assert response_body_signup.get("status_code") == 200
 
         uuid = response_body_signup.get("uuid")
         auth.cognito.admin_confirm_sign_up(UserPoolId=COGNITO_USER_POOL_ID, Username=uuid)
@@ -44,8 +43,7 @@ class Test:
                                         data=json.dumps(account_request_body_json))
         response_body_signin = response_signin.json()
         print(f"response_body_signin: {response_body_signin}")
-        assert response_signup.status_code == 200
-        assert response_body_signup.get("status_code") == 200
+        assert response_signin.status_code == 200
         assert response_body_signin.get("uuid") == uuid
 
         bearer_auth_headers = {**headers, "Authorization": f"Bearer {response_signin.cookies.get('access_token')}"}
@@ -55,8 +53,7 @@ class Test:
         response_body_get_user = response_get_user.json()
         print(f"response_body_get_user: {response_body_get_user}")
         assert response_get_user.status_code == 200
-        assert response_body_get_user.get("status_code") == 200
-        user_item = UserItem(**response_body_get_user.get("item"))
+        user_item = UserItem(**response_body_get_user)
         assert user_item.email == email
         assert user_item.name == ""
         assert user_item.staff_in_charge == []
@@ -69,14 +66,12 @@ class Test:
         response_body_update_user = response_update_user.json()
         print(f"response_body_update_user: {response_body_update_user}")
         assert response_update_user.status_code == 200
-        assert response_body_update_user.get("status_code") == 200
 
         response_get_updated_user = requests.get(f"{base_url}/user/{uuid}", headers=bearer_auth_headers)
         response_body_get_updated_user = response_get_updated_user.json()
         print(f"response_body_get_updated_user: {response_body_get_updated_user}")
         assert response_get_updated_user.status_code == 200
-        assert response_body_get_updated_user.get("status_code") == 200
-        updated_user_item = UserItem(**response_body_get_updated_user.get("item"))
+        updated_user_item = UserItem(**response_body_get_updated_user)
         assert updated_user_item.email == email
         assert updated_user_item.name == updated_name
         assert updated_user_item.staff_in_charge == updated_staff_in_charge
@@ -95,14 +90,12 @@ class Test:
         response_body_delete_user = response_delete_user.json()
         print(f"response_body_delete_user: {response_body_delete_user}")
         assert response_delete_user.status_code == 200
-        assert response_body_delete_user.get("status_code") == 200
 
         response_signin_after_deleted = requests.post(f"{base_url}/signin", headers=headers,
                                                       data=json.dumps(account_request_body_json))
         response_body_signin_after_deleted = response_signin_after_deleted.json()
         print(f"response_body_signin: {response_body_signin}")
         assert response_signin_after_deleted.status_code == 200
-        assert response_body_signin_after_deleted.get("status_code") == 500  # Internal Server Error
         assert response_body_signin_after_deleted.get(
             "message") == "An error occurred (UserNotFoundException) when calling the InitiateAuth operation: User does not exist."
 

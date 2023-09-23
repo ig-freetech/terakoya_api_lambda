@@ -54,7 +54,7 @@ def sign_in(respose: Response, requset_body: AuthAccountRequestBody, request: Re
         print(f"jwt: {jwt}")
         uuid = jwt["sub"]
         user_item = user.fetch_item(uuid, EMPTY_SK)
-        return {"item": user_item}
+        return user_item
     return hub_lambda_handler_wrapper_with_rtn_value(__sign_in, request, requset_body.dict())
 
 
