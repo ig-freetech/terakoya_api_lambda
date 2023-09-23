@@ -40,7 +40,6 @@ class DeleteAccountRequestBody(BaseModel):
 def delete_account(requset_body: DeleteAccountRequestBody, request: Request, response: Response, access_token: Annotated[Optional[str], Cookie()] = None):
     if access_token is None:
         print("アクセストークンがCookieに設定されていません。サインインし直して下さい。")
-        auth.signout(fastApiResponse=response)
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail=""

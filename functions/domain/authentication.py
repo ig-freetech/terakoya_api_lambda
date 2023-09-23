@@ -130,7 +130,6 @@ def authenticate_user(fastApiResponse: Response, request: Request, access_token:
         access_token = request.cookies.get('access_token')
         if access_token is None:
             print("Access token is not set in Cookie.")
-            signout(fastApiResponse)
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
                 detail="アクセストークンがCookieに設定されていません。サインインし直して下さい。"
