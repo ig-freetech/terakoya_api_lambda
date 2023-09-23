@@ -1,6 +1,6 @@
 import os
 import sys
-from typing import Any, Dict
+from typing import Any, Dict, Optional
 from dataclasses import dataclass
 import boto3
 from jose import jwt, jwk, JWTError
@@ -121,20 +121,20 @@ def get_cognito_jwks() -> Dict[str, Any]:
 # https://developer.mozilla.org/ja/docs/Web/HTTP/Headers/Authorization
 # https://qiita.com/h_tyokinuhata/items/ab8e0337085997be04b1
 
-def authenticate_user(fastApiResponse: Response, request: Request):
+def authenticate_user(fastApiResponse: Response, request: Request, access_token: Optional[str] = None):
     """Verify the signature of the JWT by using the public key of the Cognito User Pool."""
     path = f"{request.method}: {request.url.path}"
     print(f"================= {path} - authenticate_user =================")
 
-    access_token = request.cookies.get('access_token')
-
     if access_token is None:
-        print("Access token is not set in Cookie.")
-        signout(fastApiResponse)
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="アクセストークンがCookieに設定されていません。サインインし直して下さい。"
-        )
+        access_token = request.cookies.get('access_token')
+        if access_token is None:
+            print("Access token is not set in Cookie.")
+            signout(fastApiResponse)
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="アクセストークンがCookieに設定されていません。サインインし直して下さい。"
+            )
 
     jwks = get_cognito_jwks()
     try:

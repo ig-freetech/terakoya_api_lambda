@@ -58,7 +58,7 @@ def sign_in(respose: Response, requset_body: AuthAccountRequestBody, request: Re
         tokens = auth.signin(requset_body.email, requset_body.password)
         auth.set_cookie_secured(respose, 'access_token', tokens.access_token)
         auth.set_cookie_secured(respose, 'refresh_token', tokens.refresh_token)
-        jwt = auth.authenticate_user(request=request, fastApiResponse=respose)
+        jwt = auth.authenticate_user(request=request, fastApiResponse=respose, access_token=tokens.access_token)
         print(f"jwt: {jwt}")
         uuid = jwt["sub"]
         user_item = user.fetch_item(uuid, EMPTY_SK)
