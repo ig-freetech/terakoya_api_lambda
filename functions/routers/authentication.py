@@ -23,8 +23,11 @@ class AuthAccountRequestBody(BaseModel):
 # Use noun for the endpoint name and express the action with the HTTP method (ex: GET, POST, PUT, DELETE).
 # https://www.integrate.io/jp/blog/best-practices-for-naming-rest-api-endpoints-ja/#one
 @authentication_router.post("/signup")
-def signup(requset_body: AuthAccountRequestBody, request: Request):
-    return hub_lambda_handler_wrapper_with_rtn_value(lambda: auth.signup(requset_body.email, requset_body.password), request, requset_body.dict())
+def signup(requset_body: AuthAccountRequestBody, request: Request, response: Response):
+    return hub_lambda_handler_wrapper_with_rtn_value(lambda: auth.signup(
+        email=requset_body.email,
+        password=requset_body.password,
+    ), request, requset_body.dict())
 
 
 class DeleteAccountRequestBody(BaseModel):
@@ -34,12 +37,17 @@ class DeleteAccountRequestBody(BaseModel):
 
 # Use post not delete to receive a request body from Client-side. Because delete method does not allow a request body.
 @authentication_router.post("/account/delete")
-def delete_account(requset_body: DeleteAccountRequestBody, request: Request, access_token: Annotated[Optional[str], Cookie()] = None):
+def delete_account(requset_body: DeleteAccountRequestBody, request: Request, response: Response, access_token: Annotated[Optional[str], Cookie()] = None):
     if access_token is None:
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Access token is not set.")
+        print("アクセストークンがCookieに設定されていません。サインインし直して下さい。")
+        auth.signout(fastApiResponse=response)
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail=""
+        )
 
     def __delete_account():
-        auth.delete_user(access_token)
+        auth.delete_user(access_token=access_token, fastApiResponse=response)
         user.delete_item(requset_body.uuid, requset_body.sk)
     return hub_lambda_handler_wrapper(__delete_account, request, requset_body.dict())
 
@@ -50,7 +58,7 @@ def sign_in(respose: Response, requset_body: AuthAccountRequestBody, request: Re
         tokens = auth.signin(requset_body.email, requset_body.password)
         auth.set_cookie_secured(respose, 'access_token', tokens.access_token)
         auth.set_cookie_secured(respose, 'refresh_token', tokens.refresh_token)
-        jwt = auth.authenticate_user(tokens.access_token)
+        jwt = auth.authenticate_user(request=request, fastApiResponse=respose)
         print(f"jwt: {jwt}")
         uuid = jwt["sub"]
         user_item = user.fetch_item(uuid, EMPTY_SK)
@@ -75,6 +83,11 @@ def refresh_token(response: Response, request: Request, refresh_token: Annotated
         # 403 Forbidden
         # Access is permanently prohibited due to insufficient authorization to access the resource, etc. So, re-authentication will not change the result.
         # https://developer.mozilla.org/ja/docs/Web/HTTP/Status/403
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Refresh token is not set.")
+        print("リフレッシュトークンがCookieに設定されていません。サインインし直して下さい。")
+        auth.signout(fastApiResponse=response)
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Refresh token is not set in cookie. Please sign in again."
+        )
     print(f"refresh_token: ${refresh_token}")
     return hub_lambda_handler_wrapper(lambda: auth.issue_new_access_token(refresh_token, response), request)

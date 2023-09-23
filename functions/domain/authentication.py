@@ -17,7 +17,11 @@ cognito = boto3.client('cognito-idp', aws_access_key_id=AWS_ACCESS_KEY_ID,
                        region_name=AWS_DEFAULT_REGION)
 
 if COGNITO_USER_POOL_CLIENT_ID == None or COGNITO_USER_POOL_ID == None:
-    raise Exception("COGNITO_USER_POOL_CLIENT_ID or COGNITO_USER_POOL_ID is None")
+    print("COGNITO_USER_POOL_CLIENT_ID or COGNITO_USER_POOL_ID is None")
+    raise HTTPException(
+        status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        detail="Internal Server Error"
+    )
 
 
 def set_cookie_secured(fastApiResponse: Response, key: str, value: str):
@@ -60,9 +64,12 @@ def issue_new_access_token(refresh_token: str, fastApiResponse: Response):
         set_cookie_secured(fastApiResponse, 'refresh_token', auth_result['RefreshToken'])
     except cognito.exceptions.NotAuthorizedException:
         # Delete credentials from cookie if refresh token is expired.
-        fastApiResponse.delete_cookie('access_token')
-        fastApiResponse.delete_cookie('refresh_token')
-        raise Exception("Invalid refresh token")
+        print("Invalid refresh token")
+        signout(fastApiResponse)
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="リフレッシュトークンが無効です。サインインし直して下さい。"
+        )
 
 
 def get_cognito_jwks() -> Dict[str, Any]:
@@ -113,21 +120,21 @@ def get_cognito_jwks() -> Dict[str, Any]:
 # token is Authorization: Bearer {token(=access_token)} in HTTP request header.
 # https://developer.mozilla.org/ja/docs/Web/HTTP/Headers/Authorization
 # https://qiita.com/h_tyokinuhata/items/ab8e0337085997be04b1
-def authenticate_user_depends(request: Request):
-    path = f"{request.method}: {request.url.path}"
-    print(f"================= {path} =================")
 
-    token = request.cookies.get('access_token')
-    if token is None:
-        print("Access token is not set.")
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Access token is not set.")
-
-    return authenticate_user(token)
-
-
-def authenticate_user(access_token: str):
+def authenticate_user(fastApiResponse: Response, request: Request):
     """Verify the signature of the JWT by using the public key of the Cognito User Pool."""
-    print("=== authenticate_user ===")
+    path = f"{request.method}: {request.url.path}"
+    print(f"================= {path} - authenticate_user =================")
+
+    access_token = request.cookies.get('access_token')
+
+    if access_token is None:
+        print("Access token is not set in Cookie.")
+        signout(fastApiResponse)
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="アクセストークンがCookieに設定されていません。サインインし直して下さい。"
+        )
 
     jwks = get_cognito_jwks()
     try:
@@ -140,7 +147,11 @@ def authenticate_user(access_token: str):
         target_jwk = jwks[header["kid"]]
         if target_jwk is None:
             print(f"JWK not found.")
-            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail='JWK not found')
+            signout(fastApiResponse)
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="アクセストークンが無効です。サインインし直して下さい。"
+            )
         # Convert JWK to public key object of python-jose.
         pub_key = jwk.construct(target_jwk)
         # Simultaneously verify the signature and decode the payload with the public key and algorithm.
@@ -148,11 +159,13 @@ def authenticate_user(access_token: str):
         # https://zenn.dev/osai/articles/3941f2d1de94f0
         return jwt.decode(access_token, pub_key.to_pem(), algorithms=[alg])
     except JWTError:
+        print("Invalid token")
+        signout(fastApiResponse)
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             # detail is the error message that is displayed in the response body on the client side.
             # https://fastapi.tiangolo.com/ja/tutorial/handling-errors/
-            detail='Invalid token',
+            detail='アクセストークンが無効です。サインインし直して下さい。',
             # WWW-Authenticate header is used to indicate the authentication method(s) and parameters applicable to the target resource.
             # https://developer.mozilla.org/ja/docs/Web/HTTP/Headers/WWW-Authenticate
             headers={"WWW-Authenticate": "Bearer"})  # Specify the authentication method as "Bearer".
@@ -195,16 +208,22 @@ def signup(email: str, password: str):
         print(f"user_attrs: {user_attrs}")
         for attr in user_attrs:
             if attr['Name'] == 'email_verified' and attr.get('Value') == 'true':
-                # If email is already verified
-                raise Exception("Specified email is already exists and verified")
+                print("Specified email is already exists and verified.")
+                raise HTTPException(
+                    status_code=status.HTTP_409_CONFLICT,
+                    detail="指定されたメールアドレスで登録されたユーザーは既に存在します。"
+                )
             elif attr['Name'] == 'email_verified' and attr.get('Value') == 'false':
                 # If email is not yet verified
                 cognito.resend_confirmation_code(
                     ClientId=COGNITO_USER_POOL_CLIENT_ID,
                     Username=email
                 )
-                raise Exception(
-                    "Specified email is already exists but not verified. So, sent a verification code again. Please check your email and verify it.")
+                print("Specified email is already exists but not verified. So, sent a verification code again. Please check your email and verify it.")
+                raise HTTPException(
+                    status_code=status.HTTP_409_CONFLICT,
+                    detail="指定されたメールアドレスで登録されたユーザーは既に存在しますが、メールアドレス未認証で仮登録状態です。\nnpoterakoya2021@gmail.com から再度認証リンクが含まれたメールを送信しました。メールを確認して認証を完了させて下さい。\n※受信ボックスにメールが見つからない場合は、迷惑メールフォルダをご確認ください。"
+                )
         # response['Username'] is the UUID of the authenticated user.
         return {"uuid": response['Username']}  # Return the UUID for testing.
 
@@ -236,17 +255,32 @@ def signin(email: str, password: str):
         refresh_token = auth_result['RefreshToken']
         return SigninResponse(access_token, refresh_token)  # To fetch item from User table in DynamoDB
     except cognito.exceptions.NotAuthorizedException:
-        raise Exception("Invalid email or password")
+        print("Invalid email or password")
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="メールアドレスまたはパスワードが間違っています。"
+        )
+    except cognito.exceptions.UserNotConfirmedException:
+        print("User is not confirmed. Please confirm your email.")
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="このユーザーは仮登録の状態です。\nメールアドレス認証が完了していません。\nnpoterakoya2021@gmail.com から送信された認証リンクが含まれたメールを確認して頂き認証を完了させてから再度サインインして下さい。\n※受信ボックスにメールが見つからない場合は、迷惑メールフォルダをご確認ください。"
+        )
 
 
-def delete_user(access_token: str):
+def delete_user(access_token: str, fastApiResponse: Response):
     try:
         # https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/cognito-idp/client/delete_user.html
         cognito.delete_user(
             AccessToken=access_token
         )
     except cognito.exceptions.NotAuthorizedException:
-        raise Exception("Invalid access token")
+        print("Invalid access token. User deletion failed.")
+        signout(fastApiResponse)
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="アクセストークンが無効なため、ユーザーの削除に失敗しました。"
+        )
 
 
 # Signout API endpoint is unnecessary because each client (ex: Web browsers, App) can delete the access token and refresh token in Cookie by itself when a user signs out.
