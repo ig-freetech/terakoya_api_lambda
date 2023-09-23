@@ -251,17 +251,19 @@ def delete_user(access_token: str):
 
 # Signout API endpoint is unnecessary because each client (ex: Web browsers, App) can delete the access token and refresh token in Cookie by itself when a user signs out.
 # https://qiita.com/wasnot/items/949c6c4efe43ca0fa1cc
-def signout(access_token: str, fastApiResponse: Response):
-    try:
-        # Signs out users from all devices
-        # https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/cognito-idp/client/global_sign_out.html
-        cognito.global_sign_out(
-            AccessToken=access_token
-        )
-    except cognito.exceptions.NotAuthorizedException:
-        print("Invalid access token")
-        # Comment out to delete access token and refresh token from Cookie when access token is invalid.
-        # raise Exception("Invalid access token")
-    finally:
-        fastApiResponse.delete_cookie('access_token')
-        fastApiResponse.delete_cookie('refresh_token')
+def signout(fastApiResponse: Response):
+    fastApiResponse.delete_cookie('access_token')
+    fastApiResponse.delete_cookie('refresh_token')
+    # try:
+    #     # Signs out users from all devices
+    #     # https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/cognito-idp/client/global_sign_out.html
+    #     cognito.global_sign_out(
+    #         AccessToken=access_token
+    #     )
+    # except cognito.exceptions.NotAuthorizedException:
+    #     print("Invalid access token")
+    #     # Comment out to delete access token and refresh token from Cookie when access token is invalid.
+    #     # raise Exception("Invalid access token")
+    # finally:
+    #     fastApiResponse.delete_cookie('access_token')
+    #     fastApiResponse.delete_cookie('refresh_token')

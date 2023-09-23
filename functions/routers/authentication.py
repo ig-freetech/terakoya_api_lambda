@@ -59,11 +59,8 @@ def sign_in(respose: Response, requset_body: AuthAccountRequestBody, request: Re
 
 
 @authentication_router.post("/signout")
-def sign_out(response: Response, request: Request, access_token: Annotated[Optional[str], Cookie()] = None):
-    if access_token is None:
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Access token is not set.")
-    print(f"access_token: ${access_token}")
-    return hub_lambda_handler_wrapper(lambda: auth.signout(access_token, response), request)
+def sign_out(response: Response, request: Request):
+    return hub_lambda_handler_wrapper(lambda: auth.signout(response), request)
 
 
 # It's recommended to use Annotated[Optional[str], Cookie()] = None instead of Optional[str] = Cookie(None) to get a cookie value.
