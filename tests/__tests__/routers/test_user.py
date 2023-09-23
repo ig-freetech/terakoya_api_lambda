@@ -95,9 +95,9 @@ class Test:
                                                       data=json.dumps(account_request_body_json))
         response_body_signin_after_deleted = response_signin_after_deleted.json()
         print(f"response_body_signin: {response_body_signin}")
-        assert response_signin_after_deleted.status_code == 200
+        assert response_signin_after_deleted.status_code == 500
         assert response_body_signin_after_deleted.get(
-            "message") == "An error occurred (UserNotFoundException) when calling the InitiateAuth operation: User does not exist."
+            "detail") == "An error occurred (UserNotFoundException) when calling the InitiateAuth operation: User does not exist."
 
     def test_func_from_create_to_delete_user(self):
         if COGNITO_USER_POOL_ID is None:
