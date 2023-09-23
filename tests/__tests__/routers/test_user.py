@@ -46,10 +46,7 @@ class Test:
         assert response_signin.status_code == 200
         assert response_body_signin.get("uuid") == uuid
 
-        bearer_auth_headers = {**headers, "Authorization": f"Bearer {response_signin.cookies.get('access_token')}"}
-        print(f"bearer_auth_headers: {bearer_auth_headers}")
-
-        response_get_user = requests.get(f"{base_url}/user/{uuid}", headers=bearer_auth_headers)
+        response_get_user = requests.get(f"{base_url}/user/{uuid}", cookies=response_signin.cookies)
         response_body_get_user = response_get_user.json()
         print(f"response_body_get_user: {response_body_get_user}")
         assert response_get_user.status_code == 200
@@ -61,13 +58,13 @@ class Test:
         assert user_item.attendance_rate == 0.0
         assert user_item.is_admin.value == AUTHORITY.NOT_ADMIN.value
 
-        response_update_user = requests.put(f"{base_url}/user/{uuid}", headers=bearer_auth_headers,
+        response_update_user = requests.put(f"{base_url}/user/{uuid}", cookies=response_signin.cookies,
                                             data=json.dumps({**update_user_item_json, "uuid": uuid}))
         response_body_update_user = response_update_user.json()
         print(f"response_body_update_user: {response_body_update_user}")
         assert response_update_user.status_code == 200
 
-        response_get_updated_user = requests.get(f"{base_url}/user/{uuid}", headers=bearer_auth_headers)
+        response_get_updated_user = requests.get(f"{base_url}/user/{uuid}", cookies=response_signin.cookies)
         response_body_get_updated_user = response_get_updated_user.json()
         print(f"response_body_get_updated_user: {response_body_get_updated_user}")
         assert response_get_updated_user.status_code == 200
