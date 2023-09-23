@@ -58,6 +58,14 @@ def sign_in(respose: Response, requset_body: AuthAccountRequestBody, request: Re
     return hub_lambda_handler_wrapper_with_rtn_value(__sign_in, request, requset_body.dict())
 
 
+@authentication_router.post("/signout")
+def sign_out(response: Response, request: Request, access_token: Annotated[Optional[str], Cookie()] = None):
+    if access_token is None:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Access token is not set.")
+    print(f"access_token: ${access_token}")
+    return hub_lambda_handler_wrapper(lambda: auth.signout(access_token, response), request)
+
+
 # It's recommended to use Annotated[Optional[str], Cookie()] = None instead of Optional[str] = Cookie(None) to get a cookie value.
 # https://fastapi.tiangolo.com/tutorial/cookie-params/#__tabbed_2_2
 # Cookie(None) returns None when the cookie is not set, but Annotated[Optional[str], Cookie()] = None returns None when the cookie is set but the value is None.
@@ -71,4 +79,5 @@ def refresh_token(response: Response, request: Request, refresh_token: Annotated
         # Access is permanently prohibited due to insufficient authorization to access the resource, etc. So, re-authentication will not change the result.
         # https://developer.mozilla.org/ja/docs/Web/HTTP/Status/403
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Refresh token is not set.")
+    print(f"refresh_token: ${refresh_token}")
     return hub_lambda_handler_wrapper(lambda: auth.issue_new_access_token(refresh_token, response), request)

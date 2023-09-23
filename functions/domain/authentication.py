@@ -5,8 +5,7 @@ from dataclasses import dataclass
 import boto3
 from jose import jwt, jwk, JWTError
 import requests
-from fastapi import Response, Depends, HTTPException, status
-from fastapi.security import OAuth2PasswordBearer
+from fastapi import Request, Response, HTTPException, status
 
 ROOT_DIR_PATH = os.path.dirname(os.path.dirname(__file__))
 sys.path.append(ROOT_DIR_PATH)
@@ -114,24 +113,40 @@ def get_cognito_jwks() -> Dict[str, Any]:
 # token is Authorization: Bearer {token(=access_token)} in HTTP request header.
 # https://developer.mozilla.org/ja/docs/Web/HTTP/Headers/Authorization
 # https://qiita.com/h_tyokinuhata/items/ab8e0337085997be04b1
-def authenticate_user(token: str = Depends(OAuth2PasswordBearer(tokenUrl="/signin"))):
+def authenticate_user_depends(request: Request):
+    path = f"{request.method}: {request.url.path}"
+    print(f"================= {path} =================")
+
+    token = request.cookies.get('access_token')
+    if token is None:
+        print("Access token is not set.")
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Access token is not set.")
+
+    return authenticate_user(token)
+
+
+def authenticate_user(access_token: str):
     """Verify the signature of the JWT by using the public key of the Cognito User Pool."""
+    print("=== authenticate_user ===")
+
     jwks = get_cognito_jwks()
     try:
         # Decode JWT with python-jose.
         # https://sal-blog.com/cognito%E3%81%AEjwt%E3%81%8B%E3%82%89%E3%83%A6%E3%83%BC%E3%82%B6%E6%83%85%E5%A0%B1%E3%82%92%E5%8F%96%E3%82%8A%E5%87%BA%E3%81%99python-jose/
         # https://docs.aws.amazon.com/ja_jp/cognito/latest/developerguide/amazon-cognito-user-pools-using-tokens-verifying-a-jwt.html#amazon-cognito-user-pools-using-tokens-manually-inspect
-        header = jwt.get_unverified_header(token)
+        header = jwt.get_unverified_header(access_token)
+        print(f"header: {header}")
         alg = header["alg"]
         target_jwk = jwks[header["kid"]]
         if target_jwk is None:
+            print(f"JWK not found.")
             raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail='JWK not found')
         # Convert JWK to public key object of python-jose.
         pub_key = jwk.construct(target_jwk)
         # Simultaneously verify the signature and decode the payload with the public key and algorithm.
         # PEM is a format for storing and transmitting cryptographic keys.
         # https://zenn.dev/osai/articles/3941f2d1de94f0
-        return jwt.decode(token, pub_key.to_pem(), algorithms=[alg])
+        return jwt.decode(access_token, pub_key.to_pem(), algorithms=[alg])
     except JWTError:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
@@ -236,14 +251,17 @@ def delete_user(access_token: str):
 
 # Signout API endpoint is unnecessary because each client (ex: Web browsers, App) can delete the access token and refresh token in Cookie by itself when a user signs out.
 # https://qiita.com/wasnot/items/949c6c4efe43ca0fa1cc
-# def signout(access_token: str, fastApiResponse: Response):
-#     try:
-#         # Signs out users from all devices
-#         # https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/cognito-idp/client/global_sign_out.html
-#         cognito.global_sign_out(
-#             AccessToken=access_token
-#         )
-#         fastApiResponse.delete_cookie('access_token')
-#         fastApiResponse.delete_cookie('refresh_token')
-#     except cognito.exceptions.NotAuthorizedException:
-#         raise Exception("Invalid access token")
+def signout(access_token: str, fastApiResponse: Response):
+    try:
+        # Signs out users from all devices
+        # https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/cognito-idp/client/global_sign_out.html
+        cognito.global_sign_out(
+            AccessToken=access_token
+        )
+    except cognito.exceptions.NotAuthorizedException:
+        print("Invalid access token")
+        # Comment out to delete access token and refresh token from Cookie when access token is invalid.
+        # raise Exception("Invalid access token")
+    finally:
+        fastApiResponse.delete_cookie('access_token')
+        fastApiResponse.delete_cookie('refresh_token')
