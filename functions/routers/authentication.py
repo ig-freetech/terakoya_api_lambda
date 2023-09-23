@@ -67,7 +67,7 @@ def sign_in(respose: Response, requset_body: AuthAccountRequestBody, request: Re
 
 @authentication_router.post("/signout")
 def sign_out(response: Response, request: Request):
-    return hub_lambda_handler_wrapper(lambda: auth.signout(response), request)
+    return hub_lambda_handler_wrapper(lambda: auth.delete_tokens_from_cookie(response), request)
 
 
 # It's recommended to use Annotated[Optional[str], Cookie()] = None instead of Optional[str] = Cookie(None) to get a cookie value.
@@ -83,7 +83,6 @@ def refresh_token(response: Response, request: Request, refresh_token: Annotated
         # Access is permanently prohibited due to insufficient authorization to access the resource, etc. So, re-authentication will not change the result.
         # https://developer.mozilla.org/ja/docs/Web/HTTP/Status/403
         print("リフレッシュトークンがCookieに設定されていません。サインインし直して下さい。")
-        auth.signout(fastApiResponse=response)
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Refresh token is not set in cookie. Please sign in again."

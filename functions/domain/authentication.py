@@ -65,7 +65,7 @@ def issue_new_access_token(refresh_token: str, fastApiResponse: Response):
     except cognito.exceptions.NotAuthorizedException:
         # Delete credentials from cookie if refresh token is expired.
         print("Invalid refresh token")
-        signout(fastApiResponse)
+        delete_tokens_from_cookie(fastApiResponse)
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="リフレッシュトークンが無効です。サインインし直して下さい。"
@@ -146,7 +146,7 @@ def authenticate_user(fastApiResponse: Response, request: Request, access_token:
         target_jwk = jwks[header["kid"]]
         if target_jwk is None:
             print(f"JWK not found.")
-            signout(fastApiResponse)
+            delete_tokens_from_cookie(fastApiResponse)
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
                 detail="アクセストークンが無効です。サインインし直して下さい。"
@@ -159,7 +159,7 @@ def authenticate_user(fastApiResponse: Response, request: Request, access_token:
         return jwt.decode(access_token, pub_key.to_pem(), algorithms=[alg])
     except JWTError:
         print("Invalid token")
-        signout(fastApiResponse)
+        delete_tokens_from_cookie(fastApiResponse)
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             # detail is the error message that is displayed in the response body on the client side.
@@ -275,7 +275,7 @@ def delete_user(access_token: str, fastApiResponse: Response):
         )
     except cognito.exceptions.NotAuthorizedException:
         print("Invalid access token. User deletion failed.")
-        signout(fastApiResponse)
+        delete_tokens_from_cookie(fastApiResponse)
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="アクセストークンが無効なため、ユーザーの削除に失敗しました。"
@@ -284,7 +284,7 @@ def delete_user(access_token: str, fastApiResponse: Response):
 
 # Signout API endpoint is unnecessary because each client (ex: Web browsers, App) can delete the access token and refresh token in Cookie by itself when a user signs out.
 # https://qiita.com/wasnot/items/949c6c4efe43ca0fa1cc
-def signout(fastApiResponse: Response):
+def delete_tokens_from_cookie(fastApiResponse: Response):
     fastApiResponse.delete_cookie('access_token')
     fastApiResponse.delete_cookie('refresh_token')
     # try:
