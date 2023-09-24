@@ -45,6 +45,9 @@ def set_cookie_secured(fastApiResponse: Response, key: str, value: str):
         # strict is to return the cookie only if the request originates from the same site not from a third party site (CSRF) and then prevent CSRF attacks.
         # https://laboradian.com/same-site-cookies/#2_SameSite_Same-site_Cookies
         # https://developer.mozilla.org/ja/docs/Web/HTTP/Cookies#samesite_%E5%B1%9E%E6%80%A7
+        # "none" is to allow the cookie to be sent over a cross-site request. (e.g. from the domain of API Gateway to the domain of Frontend's Vercel environment)
+        # Secure must be set when SameSite is set to "none" to prevent the cookie from being sent over an unencrypted connection and avoid the risk of information leakage and cookie theft　by Man-in-the-middle attack.
+        # https://developers.google.com/search/blog/2020/01/get-ready-for-new-samesitenone-secure?hl=ja
         samesite="none",
         # domain is to specify the domain that can receive the cookie from the server.
         # https://zenn.dev/ymmt1089/articles/20220506_cookie_domain
