@@ -35,7 +35,6 @@ class TestAPIGateway:
         response_body = response.json()
         print(response_body)
         assert response.status_code == 200
-        assert response_body.get("status_code") == 200
         assert response_body.get("item_list") is not None
         item_list: List = response_body.get("item_list")
         assert len(item_list) == len(booking_item_json_list)

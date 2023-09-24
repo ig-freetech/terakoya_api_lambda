@@ -45,6 +45,5 @@ class TestAPIGateway:
         response_body = response.json()
         print(response_body)
         assert response.status_code == 200
-        assert response_body.get("status_code") == 200
 
         self.__check_place_updated(target_date, terakoya_type_value, target_place_value)

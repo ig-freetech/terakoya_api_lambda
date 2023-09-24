@@ -2,6 +2,21 @@
 boto3
 boto3-stubs
 
+# For JWT authentication
+# https://pypi.org/project/PyJWT/
+# pyjwt
+# Require cryptography package to use RSA algorithm
+# https://pyjwt.readthedocs.io/en/stable/installation.html#cryptographic-dependencies-optional
+# pyjwt[crypto]
+
+# PyJWT is better than python-jose in terms of maintenance, support, and numbers of downloads, users, and contributors.
+# But AWS uses python-jose to verify JWT officially.
+# https://github.com/awslabs/aws-support-tools/tree/master/Cognito/decode-verify-jwt#python-3
+# https://github.com/awslabs/aws-support-tools/blob/master/Cognito/decode-verify-jwt/decode-verify-jwt.py
+# https://pypi.org/project/python-jose/
+python-jose[cryptography]
+
+
 # By <package> == <version>, specify the version of the package to install.
 # https://note.nkmk.me/python-pip-install-requirements/
 
@@ -26,7 +41,10 @@ email-validator
 # https://fastapi.tiangolo.com/ja/features/
 # FastAPI is suitable for IO-bound process because it supports asynchronous request handling unlike Flask and Django
 # https://fastapi.tiangolo.com/ja/
-fastapi
+# fastapi
+# Downgrade to 0.99.1 because of the following issue (No module named 'pydantic_core._pydantic_core' using AWS Lambdas)
+# https://github.com/pydantic/pydantic/issues/6557#issuecomment-1724559815
+fastapi==0.99.1
 # Mangum converts a request and response of FastAPI into event and context of AWS Lambda
 # https://mangum.io/
 mangum

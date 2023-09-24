@@ -4,7 +4,8 @@ import sys
 ROOT_DIR_PATH = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
 sys.path.append(ROOT_DIR_PATH)
 
-from functions.models.booking import TERAKOYA_TYPE, ARRIVAL_TIME, GRADE, TERAKOYA_EXPERIENCE, STUDY_SUBJECT, STUDY_STYLE, COURSE_CHOICE, HOW_TO_KNOW_TERAKOYA, PLACE, REMIND_STATUS
+from functions.models.booking import TERAKOYA_TYPE, ARRIVAL_TIME, TERAKOYA_EXPERIENCE, STUDY_SUBJECT, STUDY_STYLE
+from functions.models.user import GRADE, COURSE_CHOICE, HOW_TO_KNOW_TERAKOYA
 
 email = "i.g.freetech2021@gmail.com"
 terakoya_type_value = TERAKOYA_TYPE.HIGH_IKE.value

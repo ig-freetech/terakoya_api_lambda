@@ -72,5 +72,4 @@ def cp_items_from_json_to_table(stored_json_fpath: str, table_name_to: str):
 
 
 if __name__ == '__main__':
-    # cp_items_from_json_to_table(os.path.join(tmp_dpath, 'copied_items.json'), 'terakoya-dev-booking')
-    save_items_to_json('terakoya-dev-booking')
+    cp_items_from_json_to_table(os.path.join(tmp_dpath, 'terakoya-booking-renewal-prod.json'), 'terakoya-prod-booking')

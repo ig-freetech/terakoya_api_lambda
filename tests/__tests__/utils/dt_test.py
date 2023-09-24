@@ -6,7 +6,7 @@ from datetime import datetime
 ROOT_DIR_PATH = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
 sys.path.append(ROOT_DIR_PATH)
 
-from functions.utils.dt import DT, JST_TZ
+from functions.utils.dt import DT, JST_TZ, ISO_DATETIME_FORMAT
 
 MOCK_NOW_DATE = datetime(2045, 5, 8)
 
@@ -24,6 +24,9 @@ class TestDT:
 
     def test_CURRENT_JST_ISO_8601_ONLY_DATE(self):
         assert DT.CURRENT_JST_ISO_8601_ONLY_DATE == self.test_date
+
+    def test_CURRENT_JST_ISO_8601_DATETIME(self):
+        assert DT.CURRENT_JST_ISO_8601_DATETIME == MOCK_NOW_DATE.astimezone(JST_TZ).strftime(ISO_DATETIME_FORMAT)
 
     def test_convert_iso_to_slushdate(self):
         # Specify self.prop_name to access class attributes

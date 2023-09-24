@@ -1,5 +1,5 @@
 {
-  "name": "terakoya-api-lambda",
+  "name": "terakoya-backend",
   "build": {
     "dockerfile": "Dockerfile",
     "context": ".."
