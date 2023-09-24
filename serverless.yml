@@ -128,6 +128,8 @@ provider:
         # X-Amz-User-Agent is required for AWS Signature Version 4 to send the user agent string to API Gateway.
         # https://qiita.com/sakadonohito/items/61b03bb5224ef83bde41#allowedheader
         - X-Amz-User-Agent
+        # https://developer.mozilla.org/ja/docs/Web/HTTP/Headers/Set-Cookie
+        - Set-Cookie
       allowedMethods:
         - OPTIONS
         - GET
