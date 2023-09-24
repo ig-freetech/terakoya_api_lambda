@@ -10,7 +10,7 @@ from fastapi import Request, Response, HTTPException, status
 ROOT_DIR_PATH = os.path.dirname(os.path.dirname(__file__))
 sys.path.append(ROOT_DIR_PATH)
 
-from conf.env import AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, AWS_DEFAULT_REGION, COGNITO_USER_POOL_ID, COGNITO_USER_POOL_CLIENT_ID
+from conf.env import AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, AWS_DEFAULT_REGION, COGNITO_USER_POOL_ID, COGNITO_USER_POOL_CLIENT_ID, WEB_CLIENT_ORIGIN
 
 cognito = boto3.client('cognito-idp', aws_access_key_id=AWS_ACCESS_KEY_ID,
                        aws_secret_access_key=AWS_SECRET_ACCESS_KEY,
@@ -35,7 +35,7 @@ def set_cookie_secured(fastApiResponse: Response, key: str, value: str):
     fastApiResponse.set_cookie(
         key=key,
         value=value,
-        # Cookie is not accessible from JavaScript by enabling httponly.
+        # httponly is to prevent the cookie from being accessed by JavaScript like `document.cookie`.
         # https://qiita.com/kohekohe1221/items/80ff7a0bba6ac9128f56
         # https://developer.mozilla.org/ja/docs/Web/HTTP/Cookies#%E3%82%BB%E3%82%AD%E3%83%A5%E3%83%AA%E3%83%86%E3%82%A3
         httponly=True,
@@ -45,7 +45,15 @@ def set_cookie_secured(fastApiResponse: Response, key: str, value: str):
         # strict is to return the cookie only if the request originates from the same site not from a third party site (CSRF) and then prevent CSRF attacks.
         # https://laboradian.com/same-site-cookies/#2_SameSite_Same-site_Cookies
         # https://developer.mozilla.org/ja/docs/Web/HTTP/Cookies#samesite_%E5%B1%9E%E6%80%A7
-        samesite="strict"
+        samesite="lax",
+        # domain is to specify the domain that can receive the cookie from the server.
+        # https://zenn.dev/ymmt1089/articles/20220506_cookie_domain
+        # https://developer.mozilla.org/ja/docs/Web/HTTP/Headers/Set-Cookie#%E5%B1%9E%E6%80%A7
+        domain="terakoyaweb.com",
+        # path is to specify the path of the domain that can receive the cookie from the server.
+        # "/" means that the cookie is sent to all pages under the domain.
+        # https://developer.mozilla.org/ja/docs/Web/HTTP/Headers/Set-Cookie#%E5%B1%9E%E6%80%A7
+        path="/"
     )
 
 
