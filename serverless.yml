@@ -106,6 +106,8 @@ provider:
       # https://developer.mozilla.org/ja/docs/Web/HTTP/CORS/Errors/CORSNotSupportingCredentials
       # ${self:custom.<property_path>} is used to refer to the property of custom object in serverless.yml
       # https://qiita.com/ktamido/items/24ccfbdaf287bc7855a6#serverlessyml%E5%86%85%E3%81%AE%E3%83%97%E3%83%AD%E3%83%91%E3%83%86%E3%82%A3%E3%81%AE%E5%8F%82%E7%85%A7
+      # Only the domains in allowedOrigins can access API Gateway.
+      # Add an origin to allowedOrigins when you want to allow a new domain to access API Gateway.
       allowedOrigins: ${self:custom.allowedLocalhostOrigins.${self:provider.stage}} 
       allowedHeaders:
         # Content-Type is required to indicate the media type of the request body sent to API Gateway.
@@ -137,6 +139,8 @@ provider:
         - PUT
         - DELETE
       # Allow browser to send the request with credentials (cookies, HTTP authentication and client side SSL certificates) to API Gateway by setting Access-Control-Allow-Credentials header to true.
+      # Configuring allowCredentials to true, enables cookies to be sent across domains.
+      # https://www.securify.jp/blog/cross-origin-resource-sharing/#Cookie
       # https://developer.mozilla.org/ja/docs/Web/HTTP/Headers/Access-Control-Allow-Credentials
       allowCredentials: true
 
