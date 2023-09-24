@@ -144,7 +144,9 @@ class Test:
         assert updated_user_item.attendance_rate == updated_attendance_rate
         assert updated_user_item.is_admin.value == AUTHORITY.ADMIN.value
 
-        auth.delete_user(access_token=login_response.access_token)
+        auth.cognito.delete_user(
+            AccessToken=login_response.access_token
+        )
         user.delete_item(uuid, EMPTY_SK)
 
         try:
