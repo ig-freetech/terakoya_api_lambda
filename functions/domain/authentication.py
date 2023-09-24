@@ -45,7 +45,7 @@ def set_cookie_secured(fastApiResponse: Response, key: str, value: str):
         # strict is to return the cookie only if the request originates from the same site not from a third party site (CSRF) and then prevent CSRF attacks.
         # https://laboradian.com/same-site-cookies/#2_SameSite_Same-site_Cookies
         # https://developer.mozilla.org/ja/docs/Web/HTTP/Cookies#samesite_%E5%B1%9E%E6%80%A7
-        samesite="lax",
+        samesite="none",
         # domain is to specify the domain that can receive the cookie from the server.
         # https://zenn.dev/ymmt1089/articles/20220506_cookie_domain
         # https://developer.mozilla.org/ja/docs/Web/HTTP/Headers/Set-Cookie#%E5%B1%9E%E6%80%A7
