@@ -49,11 +49,11 @@ def set_cookie_secured(fastApiResponse: Response, key: str, value: str):
         # domain is to specify the domain that can receive the cookie from the server.
         # https://zenn.dev/ymmt1089/articles/20220506_cookie_domain
         # https://developer.mozilla.org/ja/docs/Web/HTTP/Headers/Set-Cookie#%E5%B1%9E%E6%80%A7
-        domain="terakoyaweb.com",
+        # domain="terakoyaweb.com",
         # path is to specify the path of the domain that can receive the cookie from the server.
         # "/" means that the cookie is sent to all pages under the domain.
         # https://developer.mozilla.org/ja/docs/Web/HTTP/Headers/Set-Cookie#%E5%B1%9E%E6%80%A7
-        path="/"
+        # path="/"
     )
 
 
