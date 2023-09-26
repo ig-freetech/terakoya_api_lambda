@@ -17,6 +17,9 @@ def hub_lambda_handler_wrapper(func: Callable, request: Request, request_data: O
     print(f"================= {path} =================")
     try:
         func()
+    except HTTPException as e:
+        slack_error_notifier.notify(path=path, msg=e.detail, request_data=request_data)
+        raise e
     except Exception as e:
         print(f"Error happend. Error message: {str(e)}")
         slack_error_notifier.notify(path=path, msg=str(e), request_data=request_data)
@@ -28,6 +31,9 @@ def hub_lambda_handler_wrapper_with_rtn_value(func: Callable[[], dict], request:
     print(f"================= {path} =================")
     try:
         return func()
+    except HTTPException as e:
+        slack_error_notifier.notify(path=path, msg=e.detail, request_data=request_data)
+        raise e
     except Exception as e:
         print(f"Error happend. Error message: {str(e)}")
         slack_error_notifier.notify(path=path, msg=str(e), request_data=request_data)
