@@ -239,6 +239,12 @@ def signup(email: str, password: str):
                 )
         # response['Username'] is the UUID of the authenticated user.
         return {"uuid": response['Username']}  # Return the UUID for testing.
+    except cognito.exceptions.InvalidPasswordException:
+        print("Password did not conform with policy: Password must have numeric characters")
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail="パスワードは半角英数字8文字以上で、アルファベットと数字をそれぞれ1文字以上含む必要があります。"
+        )
 
 
 # Using dataclass, __init__ method is automatically generated.
