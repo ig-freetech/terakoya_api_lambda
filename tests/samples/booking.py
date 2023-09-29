@@ -7,7 +7,7 @@ sys.path.append(ROOT_DIR_PATH)
 from functions.models.booking import TERAKOYA_TYPE, ARRIVAL_TIME, TERAKOYA_EXPERIENCE, STUDY_SUBJECT, STUDY_STYLE
 from functions.models.user import GRADE, COURSE_CHOICE, HOW_TO_KNOW_TERAKOYA
 
-email = "i.g.freetech2021@gmail.com"
+email = "ikeda@npoterakoya.org"
 terakoya_type_value = TERAKOYA_TYPE.HIGH_IKE.value
 attendance_date_list = ["3000-01-07", "3000-01-14", "3000-01-21"]  # All dates are Tuesday
 
