@@ -11,7 +11,7 @@ sys.path.append(ROOT_DIR_PATH)
 from functions.conf.env import COGNITO_USER_POOL_ID, AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, AWS_DEFAULT_REGION, STAGE
 from functions.domain import authentication as auth, user
 from functions.models.user import EMPTY_SK, UserItem, AUTHORITY
-from tests.samples.user import email, password, account_request_body_json, post_confirmation_payload_json, updated_name, updated_staff_in_charge, updated_number_of_attendances, updated_attendance_rate, update_user_item_json
+from tests.samples.user import email_tmp, email, password, uuid, account_request_body_json, post_confirmation_payload_json, updated_name, updated_staff_in_charge, updated_number_of_attendances, updated_attendance_rate, update_user_item_json
 from tests.utils.const import base_url, headers
 
 lambda_client = boto3.client('lambda', aws_access_key_id=AWS_ACCESS_KEY_ID,
@@ -51,7 +51,7 @@ class Test:
         print(f"response_body_get_user: {response_body_get_user}")
         assert response_get_user.status_code == 200
         user_item = UserItem(**response_body_get_user)
-        assert user_item.email == email
+        assert user_item.email == email_tmp
         assert user_item.name == ""
         assert user_item.staff_in_charge == []
         assert user_item.number_of_attendances == 0
@@ -69,7 +69,7 @@ class Test:
         print(f"response_body_get_updated_user: {response_body_get_updated_user}")
         assert response_get_updated_user.status_code == 200
         updated_user_item = UserItem(**response_body_get_updated_user)
-        assert updated_user_item.email == email
+        assert updated_user_item.email == email_tmp
         assert updated_user_item.name == updated_name
         assert updated_user_item.staff_in_charge == updated_staff_in_charge
         assert updated_user_item.number_of_attendances == updated_number_of_attendances
@@ -100,7 +100,7 @@ class Test:
         if COGNITO_USER_POOL_ID is None:
             raise Exception("COGNITO_USER_POOL_ID is None")
 
-        signup_response = auth.signup(email, password)
+        signup_response = auth.signup(email_tmp, password)
         if signup_response is None:
             raise Exception("UUID is None")
         uuid = signup_response['uuid']
@@ -109,13 +109,13 @@ class Test:
         auth.cognito.admin_confirm_sign_up(UserPoolId=COGNITO_USER_POOL_ID, Username=uuid)
         time.sleep(3)  # wait for PostConfirmation trigger to be finished
 
-        login_response = auth.signin(email, password)
+        login_response = auth.signin(email_tmp, password)
         print(f"login_response: {login_response}")
 
         user_item = UserItem(**user.fetch_item(uuid, EMPTY_SK))
         print(f"user_item: {user_item.dict()}")
         # Initial values
-        assert user_item.email == email
+        assert user_item.email == email_tmp
         assert user_item.name == ""
         assert user_item.staff_in_charge == []
         assert user_item.number_of_attendances == 0
@@ -137,7 +137,7 @@ class Test:
         updated_user_item = UserItem(**user.fetch_item(uuid, EMPTY_SK))
         print(f"updated_user_item: {updated_user_item.dict()}")
         # Updated values
-        assert updated_user_item.email == email
+        assert updated_user_item.email == email_tmp
         assert updated_user_item.name == updated_name
         assert updated_user_item.staff_in_charge == updated_staff_in_charge
         assert updated_user_item.number_of_attendances == updated_number_of_attendances
@@ -150,7 +150,16 @@ class Test:
         user.delete_item(uuid, EMPTY_SK)
 
         try:
-            auth.signin(email, password)
+            auth.signin(email_tmp, password)
             raise Exception("(Test Failed) Succeeded to sign in. Maybe the user is not deleted.")
         except auth.cognito.exceptions.UserNotFoundException:
             print("(Test Success) Failed to sign in. Because the user is deleted.")
+
+    def test_func_fetch_profile(self):
+        if COGNITO_USER_POOL_ID is None:
+            raise Exception("COGNITO_USER_POOL_ID is None")
+
+        profile = user.fetch_profile(uuid, EMPTY_SK)
+        print(f"profile: {profile}")
+
+        assert profile.get("uuid") == uuid

@@ -75,8 +75,23 @@ class AUTHORITY(Enum):
     """一般ユーザー"""
 
 
-class UserItem(BaseModel):
+class UserProfile(BaseModel):
     uuid: str
+    name: str = ""
+    nickname: str = ""
+    # school: str = ""
+    grade: GRADE = GRADE.NULL
+    course_choice: COURSE_CHOICE = COURSE_CHOICE.NULL
+    # future_path: str = ""
+    like_thing: str = ""
+
+    # __init__ method is required to convert DynamoDB item to Pydantic model.
+    def __init__(self, **kwargs: Any) -> None:
+        super().__init__(**kwargs)
+
+
+class UserItem(UserProfile):
+    # uuid: str
     # アカウント登録時にStepを2つ用意してStep1でユーザータイプを選択させる？ (sk: student, company, admin, staff)
     # Set a dummy value to sort key by default because Sort key can't be empty string.
     # For now, there's no value to be set as sort key when a user signs up.
@@ -85,15 +100,16 @@ class UserItem(BaseModel):
 
     # The following fields are optional because they are not required when a user signs up. After signing up, a user can update these fields.
     # Profile fields
-    name: str = ""
-    nickname: str = ""
+    # name: str = ""
+    # nickname: str = ""
     school: str = ""
-    grade: GRADE = GRADE.NULL
-    course_choice: COURSE_CHOICE = COURSE_CHOICE.NULL
+    # grade: GRADE = GRADE.NULL
+    # course_choice: COURSE_CHOICE = COURSE_CHOICE.NULL
     staff_in_charge: List[str] = []
     future_path: str = ""
-    like_thing: str = ""
+    # like_thing: str = ""
     how_to_know_terakoya: HOW_TO_KNOW_TERAKOYA = HOW_TO_KNOW_TERAKOYA.NULL
+
     # Analytics fields
     number_of_attendances: int = 0
     attendance_rate: float = 0.0
@@ -113,3 +129,6 @@ class UserItem(BaseModel):
         # DynamoDB doesn't accept float type. So, convert float to Decimal.
         item_dict["attendance_rate"] = Decimal(str(item_dict["attendance_rate"]))
         return item_dict
+
+    def to_profile(self):
+        return UserProfile(**self.dict())

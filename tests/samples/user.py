@@ -8,11 +8,13 @@ from functions.conf.env import AWS_DEFAULT_REGION, COGNITO_USER_POOL_ID, COGNITO
 from functions.models.user import GRADE, COURSE_CHOICE, HOW_TO_KNOW_TERAKOYA, AUTHORITY
 from functions.utils.dt import DT
 
-email = "i.g.freetech2021+pytest@gmail.com"
+email_tmp = "ikeda+pytest-tmp@npoterakoya.org"
+email = "ikeda+pytest@npoterakoya.org"
 password = "PyTest1234"
+uuid = "d0564635-3a8b-40d5-8ae9-057434a46b8a"
 
 account_request_body_json = {
-    "email": email,
+    "email": email_tmp,
     "password": password,
 }
 
@@ -31,7 +33,7 @@ post_confirmation_payload_json = {
             "sub": "Dummy",  # Not to be merged (uuid) because it is not used in post confirmation trigger
             "email_verified": "true",
             "cognito:user_status": "CONFIRMED",
-            "email": email
+            "email": email_tmp
         }
     },
     "response": {}
@@ -45,7 +47,7 @@ updated_attendance_rate = 0.5
 update_user_item_json = {
     "uuid": "Dummy",  # TODO: to be merged (uuid)
     "sk": "EMPTY_SK",
-    "email": email,
+    "email": email_tmp,
     "name": updated_name,
     "nickname": "Test Nickname",
     "school": "Test School",
