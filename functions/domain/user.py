@@ -100,3 +100,9 @@ def update_item(item: UserItem):
             ":updated_at_iso": DT.CURRENT_JST_ISO_8601_DATETIME,
         }
     )
+
+
+def fetch_profile(uuid: str, sk: str):
+    user_item = UserItem(**fetch_item(uuid, sk))
+    profile = user_item.to_profile()
+    return profile.dict()
