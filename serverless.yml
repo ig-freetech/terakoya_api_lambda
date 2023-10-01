@@ -330,7 +330,7 @@ resources:
           - AttributeName: sk
             KeyType: RANGE
         BillingMode: PAY_PER_REQUEST
-    timelineTable:
+    timelinePostTable:
       Type: AWS::DynamoDB::Table
       Properties:
         TableName: ${self:service}-${self:provider.stage}-timeline-post
@@ -339,11 +339,28 @@ resources:
             AttributeType: S
           - AttributeName: timestamp
             AttributeType: N
+          # Add an attribute to be used as a partition key of GSI
+          - AttributeName: all_pk
+            AttributeType: S
         KeySchema:
           - AttributeName: uuid
             KeyType: HASH
           - AttributeName: timestamp
             KeyType: RANGE
+        # Define GSI
+        # https://docs.aws.amazon.com/ja_jp/AWSCloudFormation/latest/UserGuide/aws-properties-dynamodb-table-globalsecondaryindex.html
+        GlobalSecondaryIndexes:
+          - IndexName: ${self:service}-${self:provider.stage}-timeline-post-all
+            KeySchema:
+              - AttributeName: all_pk
+                KeyType: HASH
+              - AttributeName: timestamp
+                KeyType: RANGE
+            Projection:
+              # "ALL" is to project(copy) all attributes of the table into the index
+              # ALL attributes are synced between the table and the index
+              # https://docs.aws.amazon.com/ja_jp/amazondynamodb/latest/developerguide/GSI.html#GSI.Projections
+              ProjectionType: "ALL"
         BillingMode: PAY_PER_REQUEST
     timelineCommentTable:
       Type: AWS::DynamoDB::Table
