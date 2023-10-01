@@ -16,15 +16,15 @@ DYNAMO_DB_RESOURCE = boto3.resource(
     aws_secret_access_key=AWS_SECRET_ACCESS_KEY,
     region_name=AWS_DEFAULT_REGION
 )
-__post_table = DYNAMO_DB_RESOURCE.Table(f"terakoya-{STAGE}-timeline-posts")
-__comment_table = DYNAMO_DB_RESOURCE.Table(f"terakoya-{STAGE}-timeline-comments")
+__post_table = DYNAMO_DB_RESOURCE.Table(f"terakoya-{STAGE}-timeline-post")
+__comment_table = DYNAMO_DB_RESOURCE.Table(f"terakoya-{STAGE}-timeline-comment")
 
 ALL_GSI_PK = "all_posts"
 
 
 def fetch_timeline(last_evaluated_key: Optional[str] = None):
     query_params = {
-        "IndexName": f"terakoya-{STAGE}-timeline-posts-all",
+        "IndexName": f"terakoya-{STAGE}-timeline-post-all",
         "KeyConditionExpression": 'all_pk = :value',
         "ExpressionAttributeValues": {
             ':value': ALL_GSI_PK
