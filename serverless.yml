@@ -333,7 +333,7 @@ resources:
     timelineTable:
       Type: AWS::DynamoDB::Table
       Properties:
-        TableName: ${self:service}-${self:provider.stage}-timeline
+        TableName: ${self:service}-${self:provider.stage}-timeline-post
         AttributeDefinitions:
           - AttributeName: uuid
             AttributeType: S
@@ -341,6 +341,21 @@ resources:
             AttributeType: N
         KeySchema:
           - AttributeName: uuid
+            KeyType: HASH
+          - AttributeName: timestamp
+            KeyType: RANGE
+        BillingMode: PAY_PER_REQUEST
+    timelineCommentTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: ${self:service}-${self:provider.stage}-timeline-comment
+        AttributeDefinitions:
+          - AttributeName: post_id
+            AttributeType: S
+          - AttributeName: timestamp
+            AttributeType: N
+        KeySchema:
+          - AttributeName: post_id
             KeyType: HASH
           - AttributeName: timestamp
             KeyType: RANGE
