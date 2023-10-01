@@ -333,7 +333,7 @@ resources:
     timelinePostTable:
       Type: AWS::DynamoDB::Table
       Properties:
-        TableName: ${self:service}-${self:provider.stage}-timeline-post
+        TableName: ${self:service}-${self:provider.stage}-timeline-posts
         AttributeDefinitions:
           - AttributeName: uuid
             AttributeType: S
@@ -350,7 +350,7 @@ resources:
         # Define GSI
         # https://docs.aws.amazon.com/ja_jp/AWSCloudFormation/latest/UserGuide/aws-properties-dynamodb-table-globalsecondaryindex.html
         GlobalSecondaryIndexes:
-          - IndexName: ${self:service}-${self:provider.stage}-timeline-post-all
+          - IndexName: ${self:service}-${self:provider.stage}-timeline-posts-all
             KeySchema:
               - AttributeName: all_pk
                 KeyType: HASH
@@ -365,7 +365,7 @@ resources:
     timelineCommentTable:
       Type: AWS::DynamoDB::Table
       Properties:
-        TableName: ${self:service}-${self:provider.stage}-timeline-comment
+        TableName: ${self:service}-${self:provider.stage}-timeline-comments
         AttributeDefinitions:
           - AttributeName: post_id
             AttributeType: S
