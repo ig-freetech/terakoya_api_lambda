@@ -1,7 +1,7 @@
 import os
 import sys
 import uuid
-from typing import List
+from typing import Any, List
 from pydantic import BaseModel
 
 ROOT_DIR_PATH = os.path.dirname(os.path.dirname(__file__))
@@ -22,7 +22,9 @@ class BaseTimelineItem(BaseModel):
     timestamp: int = int(DT.CURRENT_JST_DATETIME.timestamp())
     """Sort Key: Timestamp of post/comment"""
     user_name: str = ""
+    """Nick name of user who posted/commented"""
     user_profile_img_url: str = ""
+    """URL of user profile image uploaded to S3"""
     texts: str = ""
     """Texts of post/comment"""
     reactions: List[Reaction] = []
@@ -34,6 +36,9 @@ class CommentItem(BaseTimelineItem):
     comment_id: str = uuid.uuid4().hex
     """UID of comment"""
 
+    def __init__(self, **kwargs: Any) -> None:
+        super().__init__(**kwargs)
+
 
 class PostItem(BaseTimelineItem):
     comments: List[str] = []
@@ -44,3 +49,7 @@ class PostItem(BaseTimelineItem):
     # https://www.python.ambitious-engineer.com/archives/1436
     post_id: str = uuid.uuid4().hex
     """UID of post (used for URL)"""
+
+    # __init__ method is required to convert DynamoDB item to Pydantic model.
+    def __init__(self, **kwargs: Any) -> None:
+        super().__init__(**kwargs)
