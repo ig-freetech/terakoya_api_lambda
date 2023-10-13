@@ -9,6 +9,8 @@ sys.path.append(ROOT_DIR_PATH)
 
 from utils.dt import DT
 
+PK_FOR_ALL_POST_GSI = "pk_for_all_post_gsi"
+
 
 class Reaction(BaseModel):
     uuid: str
@@ -35,13 +37,14 @@ class CommentItem(BaseTimelineItem):
     """Partion Key: Parent post id"""
     comment_id: str = uuid.uuid4().hex
     """UID of comment"""
+    pk_for_all_post_gsi: str = PK_FOR_ALL_POST_GSI
 
     def __init__(self, **kwargs: Any) -> None:
         super().__init__(**kwargs)
 
 
 class PostItem(BaseTimelineItem):
-    comments: List[str] = []
+    comment_count: int = 0
     """List of comment_id"""
     # uuid.uuid4() generates random UUID.
     # https://yumarublog.com/python/uuid/

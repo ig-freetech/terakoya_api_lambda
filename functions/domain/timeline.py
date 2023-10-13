@@ -1,14 +1,15 @@
 import os
 import sys
-from typing import Optional
+from typing import List, Optional, TypeVar
 import boto3
 from fastapi import HTTPException, status
+from pydantic.generics import GenericModel, Generic, BaseModel
 
 ROOT_DIR_PATH = os.path.dirname(os.path.dirname(__file__))
 sys.path.append(ROOT_DIR_PATH)
 
 from conf.env import AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, AWS_DEFAULT_REGION, STAGE
-from models.timeline import PostItem, CommentItem, Reaction
+from models.timeline import PK_FOR_ALL_POST_GSI, PostItem, CommentItem, Reaction
 
 DYNAMO_DB_RESOURCE = boto3.resource(
     "dynamodb",
@@ -19,15 +20,20 @@ DYNAMO_DB_RESOURCE = boto3.resource(
 __post_table = DYNAMO_DB_RESOURCE.Table(f"terakoya-{STAGE}-timeline-post")
 __comment_table = DYNAMO_DB_RESOURCE.Table(f"terakoya-{STAGE}-timeline-comment")
 
-ALL_GSI_PK = "all_posts"
+T = TypeVar("T", bound=BaseModel)
+
+
+class FetchListResponseBody(GenericModel, Generic[T]):
+    items: List[T]
+    last_evaluated_key: Optional[str]
 
 
 def fetch_timeline_list(last_evaluated_key: Optional[str] = None):
     query_params = {
         "IndexName": f"terakoya-{STAGE}-timeline-post-all",
-        "KeyConditionExpression": 'all_pk = :value',
+        "KeyConditionExpression": 'pk_for_all_post_gsi = :value',
         "ExpressionAttributeValues": {
-            ':value': ALL_GSI_PK
+            ':value': PK_FOR_ALL_POST_GSI
         },
         "Limit": 20,
         # The result of query() is sorted by sort key in ascending order by default.
@@ -112,10 +118,11 @@ def post_comment_item(post_id: str, comment: CommentItem):
     )
 
 
-def put_reaction_item_to_post(post_id: str, reaction: Reaction):
+def put_reaction_item_to_post(uuid: str, post_id: str, reaction: Reaction):
     print(f"reaction: {reaction}")
 
     post_item = __post_table.get_item(Key={
+        "uuid": uuid,
         "post_id": post_id
     }).get("Item", {})
     pi = PostItem(**post_item)

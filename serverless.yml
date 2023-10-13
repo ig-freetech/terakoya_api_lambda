@@ -340,7 +340,9 @@ resources:
           - AttributeName: timestamp
             AttributeType: N
           # Add an attribute to be used as a partition key of GSI
-          - AttributeName: all_pk
+          - AttributeName: pk_for_all_post_gsi
+            AttributeType: S
+          - AttributeName: post_id
             AttributeType: S
         KeySchema:
           - AttributeName: uuid
@@ -353,7 +355,7 @@ resources:
         GlobalSecondaryIndexes:
           - IndexName: ${self:service}-${self:provider.stage}-timeline-post-all
             KeySchema:
-              - AttributeName: all_pk
+              - AttributeName: pk_for_all_post_gsi
                 KeyType: HASH
               - AttributeName: timestamp
                 KeyType: RANGE
@@ -361,6 +363,12 @@ resources:
               # "ALL" is to project(copy) all attributes of the table into the index
               # ALL attributes are synced between the table and the index
               # https://docs.aws.amazon.com/ja_jp/amazondynamodb/latest/developerguide/GSI.html#GSI.Projections
+              ProjectionType: "ALL"
+          - IndexName: ${self:service}-${self:provider.stage}-timeline-post-uid
+            KeySchema:
+              - AttributeName: post_id
+                KeyType: HASH
+            Projection:
               ProjectionType: "ALL"
         BillingMode: PAY_PER_REQUEST
     timelineCommentTable:
@@ -372,11 +380,20 @@ resources:
             AttributeType: S
           - AttributeName: timestamp
             AttributeType: N
+          # Add an attribute to be used as a partition key of GSI
+          - AttributeName: comment_id
+            AttributeType: S
         KeySchema:
           - AttributeName: post_id
             KeyType: HASH
           - AttributeName: timestamp
             KeyType: RANGE
+        GlobalSecondaryIndexes:
+          - KeySchema:
+              - AttributeName: comment_id
+                KeyType: HASH
+            Projection: 
+              ProjectionType: "ALL"
         BillingMode: PAY_PER_REQUEST
     # Cognito User Pool is like a database that stores user authentication information
     # https://zenn.dev/naok_1207/articles/d66a4a1d914000#userpool-%E3%81%AE%E3%82%AA%E3%83%97%E3%82%B7%E3%83%A7%E3%83%B3%E3%81%AB%E3%81%A4%E3%81%84%E3%81%A6
