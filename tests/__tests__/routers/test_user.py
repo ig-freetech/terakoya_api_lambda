@@ -11,7 +11,7 @@ sys.path.append(ROOT_DIR_PATH)
 from functions.conf.env import COGNITO_USER_POOL_ID, AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, AWS_DEFAULT_REGION, STAGE
 from functions.domain import authentication as auth, user
 from functions.models.user import EMPTY_SK, UserItem, AUTHORITY
-from tests.samples.user import email_tmp, email, password, uuid, account_request_body_json, post_confirmation_payload_json, updated_name, updated_staff_in_charge, updated_number_of_attendances, updated_attendance_rate, update_user_item_json
+from tests.samples.user import email_tmp, password, uuid, account_request_body_json, post_confirmation_payload_json, updated_name, updated_staff_in_charge, updated_number_of_attendances, updated_attendance_rate, update_user_item_json
 from tests.utils.const import base_url, headers
 
 lambda_client = boto3.client('lambda', aws_access_key_id=AWS_ACCESS_KEY_ID,
