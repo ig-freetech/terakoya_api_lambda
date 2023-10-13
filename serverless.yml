@@ -389,7 +389,8 @@ resources:
           - AttributeName: timestamp
             KeyType: RANGE
         GlobalSecondaryIndexes:
-          - KeySchema:
+          - IndexName: ${self:service}-${self:provider.stage}-timeline-comment-uid
+            KeySchema:
               - AttributeName: comment_id
                 KeyType: HASH
             Projection: 
