@@ -333,7 +333,7 @@ resources:
     timelinePostTable:
       Type: AWS::DynamoDB::Table
       Properties:
-        TableName: ${self:service}-${self:provider.stage}-timeline-post
+        TableName: ${self:service}-${self:provider.stage}-timeline-post-2
         AttributeDefinitions:
           - AttributeName: uuid
             AttributeType: S
@@ -374,7 +374,7 @@ resources:
     timelineCommentTable:
       Type: AWS::DynamoDB::Table
       Properties:
-        TableName: ${self:service}-${self:provider.stage}-timeline-comment
+        TableName: ${self:service}-${self:provider.stage}-timeline-comment-2
         AttributeDefinitions:
           - AttributeName: post_id
             AttributeType: S
