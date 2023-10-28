@@ -22,7 +22,7 @@ class BaseTimelineItem(BaseModel):
     uuid: str
     """UID of user who posted/commented"""
     timestamp: int = int(DT.CURRENT_JST_DATETIME.timestamp())
-    """Sort Key: Timestamp of post/comment"""
+    """Timestamp of post/comment"""
     user_name: str = ""
     """Nick name of user who posted/commented"""
     user_profile_img_url: str = ""
@@ -34,7 +34,7 @@ class BaseTimelineItem(BaseModel):
 
 class CommentItem(BaseTimelineItem):
     post_id: str
-    """Partion Key: Parent post id"""
+    """Parent post id"""
     comment_id: str = uuid.uuid4().hex
     """UID of comment"""
     pk_for_all_post_gsi: str = PK_FOR_ALL_POST_GSI
@@ -52,6 +52,8 @@ class PostItem(BaseTimelineItem):
     # https://www.python.ambitious-engineer.com/archives/1436
     post_id: str = uuid.uuid4().hex
     """UID of post (used for URL)"""
+    is_deleted: int = 0
+    """0: not deleted, 1: deleted"""
 
     # __init__ method is required to convert DynamoDB item to Pydantic model.
     def __init__(self, **kwargs: Any) -> None:
