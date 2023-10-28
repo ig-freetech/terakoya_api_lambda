@@ -1,24 +1,20 @@
 import os
 import sys
 from typing import List, Optional, TypeVar
-import boto3
 from fastapi import HTTPException, status
 from pydantic.generics import GenericModel, Generic, BaseModel
 
 ROOT_DIR_PATH = os.path.dirname(os.path.dirname(__file__))
 sys.path.append(ROOT_DIR_PATH)
 
-from conf.env import AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, AWS_DEFAULT_REGION, STAGE
+from conf.env import STAGE
 from models.timeline import PK_FOR_ALL_POST_GSI, PostItem, CommentItem, Reaction
+from utils.aws import dynamodb_resource
 
-DYNAMO_DB_RESOURCE = boto3.resource(
-    "dynamodb",
-    aws_access_key_id=AWS_ACCESS_KEY_ID,
-    aws_secret_access_key=AWS_SECRET_ACCESS_KEY,
-    region_name=AWS_DEFAULT_REGION
-)
-__post_table = DYNAMO_DB_RESOURCE.Table(f"terakoya-{STAGE}-timeline-post")
-__comment_table = DYNAMO_DB_RESOURCE.Table(f"terakoya-{STAGE}-timeline-comment")
+__post_table = dynamodb_resource.Table(f"terakoya-{STAGE}-timeline-post")
+__post_all_table = dynamodb_resource.Table(f"terakoya-{STAGE}-timeline-post-all")
+__post_uid_table = dynamodb_resource.Table(f"terakoya-{STAGE}-timeline-post-uid")
+__comment_table = dynamodb_resource.Table(f"terakoya-{STAGE}-timeline-comment")
 
 T = TypeVar("T", bound=BaseModel)
 
@@ -79,6 +75,12 @@ def fetch_user_timeline_list(uuid: str, last_evaluated_key: Optional[str] = None
 
 def post_timeline_item(post: PostItem):
     __post_table.put_item(Item=post.dict())
+
+
+def delete_timeline_item(post_id: str):
+    __post_uid_table.delete_item(Key={
+        "post_id": post_id
+    })
 
 
 def fetch_comment_list(post_id: str, last_evaluated_key: Optional[str] = None):

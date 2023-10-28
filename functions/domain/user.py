@@ -1,21 +1,16 @@
 from decimal import Decimal
 import os
 import sys
-import boto3
 
 ROOT_DIR_PATH = os.path.dirname(os.path.dirname(__file__))
 sys.path.append(ROOT_DIR_PATH)
 
-from conf.env import AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, AWS_DEFAULT_REGION, STAGE
-from utils.dt import DT
+from conf.env import STAGE
 from models.user import UserItem
+from utils.aws import dynamodb_resource
+from utils.dt import DT
 
-__table = boto3.resource(
-    "dynamodb",
-    aws_access_key_id=AWS_ACCESS_KEY_ID,
-    aws_secret_access_key=AWS_SECRET_ACCESS_KEY,
-    region_name=AWS_DEFAULT_REGION
-).Table(f"terakoya-{STAGE}-user")
+__table = dynamodb_resource.Table(f"terakoya-{STAGE}-user")
 
 
 def insert_item(item: UserItem):
