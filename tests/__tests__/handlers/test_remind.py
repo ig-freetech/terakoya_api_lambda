@@ -30,14 +30,14 @@ def is_tuesday_or_saturday(date: datetime):
 def test_remind():
     """Black-box testing for sending reminder email"""
     target_date = DT.CURRENT_JST_ISO_8601_ONLY_DATE
+    common_bk_item_json = {**booking_item_json, "date": target_date, "is_reminded": REMIND_STATUS.NOT_SENT.value}
     booking_item_json_list = [
-        {**booking_item_json, "date": target_date, "is_reminded": REMIND_STATUS.NOT_SENT.value},
-        {k: v for k, v in {
-            **booking_item_json,
-            "date": target_date,
-            "terakoya_type": TERAKOYA_TYPE.ONLINE_TAMA.value,
-            "is_reminded": REMIND_STATUS.NOT_SENT.value
-        }.items() if k != "sk"},
+        {**common_bk_item_json, "sk": "test_remind_sk1"},
+        {**common_bk_item_json, "sk": "test_remind_sk2", "terakoya_type": TERAKOYA_TYPE.ONLINE_TAMA.value},
+        {**common_bk_item_json, "sk": "test_remind_sk3",
+            "terakoya_type": TERAKOYA_TYPE.MID_IKE.value, "place": PLACE.BASE_CAMP.value},
+        {**common_bk_item_json, "sk": "test_remind_sk4",
+            "terakoya_type": TERAKOYA_TYPE.HIGH_IKE.value, "place": PLACE.SUNSHINE.value},
     ]
     for bk_item_json in booking_item_json_list:
         BookingTable.insert_item(BookingItem(**bk_item_json))
@@ -47,6 +47,10 @@ def test_remind():
     assert item_list[0].place.value == PLACE.TBD.value
     assert item_list[1].is_reminded.value == REMIND_STATUS.NOT_SENT.value
     assert item_list[1].place.value == PLACE.CAREER_MOM.value
+    assert item_list[2].is_reminded.value == REMIND_STATUS.NOT_SENT.value
+    assert item_list[2].place.value == PLACE.BASE_CAMP.value
+    assert item_list[3].is_reminded.value == REMIND_STATUS.NOT_SENT.value
+    assert item_list[3].place.value == PLACE.SUNSHINE.value
 
     remind()
 
@@ -54,3 +58,5 @@ def test_remind():
     assert len(item_list) == len(booking_item_json_list)
     assert item_list[0].is_reminded.value == REMIND_STATUS.NOT_SENT.value
     assert item_list[1].is_reminded.value == REMIND_STATUS.SENT.value
+    assert item_list[2].is_reminded.value == REMIND_STATUS.SENT.value
+    assert item_list[3].is_reminded.value == REMIND_STATUS.SENT.value
