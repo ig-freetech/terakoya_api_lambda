@@ -48,12 +48,12 @@ PLACE_DICT = {
         <p>初回参加の方や17:00以降に到着される場合はご案内致しますので公式LINEからご連絡下さい。</p>
         <p>よろしくお願いします。</p>
     """,
-    "DIORAMA CAFE": """
-        <p>■DIORAMA CAFE</p>
-        <p>(池袋駅1b出口から徒歩1分)</p>
+    "テラコヤ事務所（ベースキャンプ）": """
+        <p>■テラコヤ事務所（ベースキャンプ）</p>
+        <p>(池袋駅C3出口から徒歩3分)</p>
         <p>〒171-0021</p>
-        <p>東京都豊島区西池袋3丁目30-1Nビル1階 ※虹の描かれたバスが目印です</p>
-        <p>https://www.instagram.com/diorama_cafe/</p>
+        <p>東京都豊島区西池袋５丁目１０−２４</p>
+        <p>※建物の1階部分です。</p>
     """,
     "キカガク": """
         <p>■株式会社キカガク住所</p>
@@ -95,7 +95,12 @@ class Remind():
             <br/>
             {PLACE_DICT[self.place]}
         """
-        img_fpath = os.path.join(FUNCTIONS_DIR_PATH, "assets", "sunshine-map.jpg") if self.place == "サンシャインシティ" else ""
+        PLACE_TO_IMG = {
+            "サンシャインシティ": "sunshine-map.jpg",
+            "テラコヤ事務所（ベースキャンプ）": "base-camp-exterior.png",
+        }
+        img_fpath = os.path.join(FUNCTIONS_DIR_PATH, "assets", PLACE_TO_IMG.get(self.place, ""))
+
         self.__ses_client.send(self.email, subject, body, TERAKOYA_GROUP_MAIL_CC, img_fpath)
 
 
@@ -106,7 +111,7 @@ def remind() -> None:
         PLACE.TBD: "",  # 未設定状態
         PLACE.SUNSHINE: "サンシャインシティ",
         PLACE.RYOHIN: "良品計画本社",
-        PLACE.DIORAMA_CAFE: "DIORAMA CAFE",
+        PLACE.BASE_CAMP: "テラコヤ事務所（ベースキャンプ）",
         PLACE.CAREER_MOM: "キャリア・マム",
         PLACE.KIKAGAKU: "キカガク"
     }

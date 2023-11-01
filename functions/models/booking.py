@@ -134,8 +134,8 @@ class PLACE(Enum):
     """サンシャインシティ"""
     RYOHIN = 2
     """良品計画本社"""
-    DIORAMA_CAFE = 3
-    """DIORAMA CAFE"""
+    BASE_CAMP = 3
+    """テラコヤ事務所（ベースキャンプ）"""
     CAREER_MOM = 4
     """キャリア・マム"""
     KIKAGAKU = 5
