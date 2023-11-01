@@ -100,8 +100,6 @@ class Remind():
             "テラコヤ事務所（ベースキャンプ）": "base-camp-exterior.png",
         }
         img_fpath = os.path.join(FUNCTIONS_DIR_PATH, "assets", PLACE_TO_IMG.get(self.place, ""))
-        print(f"self.place: {self.place}")
-        print(f"img_fpath: {img_fpath}")
 
         self.__ses_client.send(self.email, subject, body, TERAKOYA_GROUP_MAIL_CC, img_fpath)
 
