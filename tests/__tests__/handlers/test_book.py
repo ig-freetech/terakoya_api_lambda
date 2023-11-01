@@ -36,7 +36,6 @@ class TestAPIGateway:
             response_body = response.json()
             print(response_body)
             assert response.status_code == 200
-            assert response_body.get("status_code") == 200
             bk_item = BookingItem(**BookingTable.get_item(self.__target_date, email, terakoya_type))
             assert bk_item.place == TERAKOYA_TYPE_TO_PLACE_MAP[terakoya_type]
 

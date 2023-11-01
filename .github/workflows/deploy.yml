@@ -12,7 +12,7 @@ on:
     branches:
       - develop
       - master
-      # - 'feature/**' # Comment out this line without testing the workflow on branchs other than develop and master
+      - 'feature/**' # Comment out this line without testing the workflow on branchs other than develop and master
     # Run actions only when changes happens in functions directory
     # https://blog.35d.jp/2020-09-29-github-actions-path
     paths:
@@ -123,3 +123,6 @@ jobs:
           # STAGE: ${{ github.ref_name == 'master' && 'prod' || 'dev' }}
           SLACK_ERROR_CH_WEBHOOK_URL: ${{ secrets.SLACK_ERROR_CH_WEBHOOK_URL }}
           VERIFICATION_EMAI_SUBJECT_PREFIX: ${{ github.ref_name == 'master' && '' || '[DEV] ' }}
+          COGNITO_USER_POOL_ID: ${{ github.ref_name == 'master' && secrets.COGNITO_USER_POOL_ID_PROD || secrets.COGNITO_USER_POOL_ID_DEV }}
+          COGNITO_USER_POOL_CLIENT_ID: ${{ github.ref_name == 'master' && secrets.COGNITO_USER_POOL_CLIENT_ID_PROD || secrets.COGNITO_USER_POOL_CLIENT_ID_DEV }}
+          WEB_CLIENT_ORIGIN: ${{ github.ref_name == 'master' && 'https://terakoyaweb.com' || 'https://dev.terakoyaweb.com' }}

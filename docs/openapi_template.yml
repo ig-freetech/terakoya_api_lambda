@@ -35,10 +35,10 @@ components:
             ソートキー
             #{email}#{terakoya_type}
           type: string
-          example: "#i.g.freetech2021@gmail.com#1"
+          example: "#ikeda@npoterakoya.org#1"
         email:
           type: string
-          example: "i.g.freetech2021@gmail.com"
+          example: "ikeda@npoterakoya.org"
         terakoya_type:
           description: |
             テラコヤ種別
@@ -195,7 +195,7 @@ paths:
                   example: "I.G"
                 email:
                   type: string
-                  example: "i.g.freetech2021@gmail.com"
+                  example: "ikeda@npoterakoya.org"
                 terakoya_type:
                   description: |
                     テラコヤ種別

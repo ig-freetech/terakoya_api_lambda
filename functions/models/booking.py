@@ -9,6 +9,7 @@ ROOT_DIR_PATH = os.path.dirname(os.path.dirname(__file__))
 sys.path.append(ROOT_DIR_PATH)
 
 from utils.dt import DT
+from .user import GRADE, COURSE_CHOICE, HOW_TO_KNOW_TERAKOYA
 
 # Define a private member with '__' prefix
 # https://rinatz.github.io/python-book/ch03-02-scopes/
@@ -39,24 +40,6 @@ class ARRIVAL_TIME(Enum):
     """17:30~18:00"""
     AFTER_1800 = 4
     """18:00以降"""
-
-
-class GRADE(Enum):
-    """学年 (grade)"""
-    HIGH_SCHOOL_1 = 1
-    """高校1年生"""
-    HIGH_SCHOOL_2 = 2
-    """高校2年生"""
-    HIGH_SCHOOL_3 = 3
-    """高校3年生"""
-    JUNIOR_HIGH_SCHOOL_1 = 11
-    """中学1年生"""
-    JUNIOR_HIGH_SCHOOL_2 = 12
-    """中学2年生"""
-    JUNIOR_HIGH_SCHOOL_3 = 13
-    """中学3年生"""
-    OTHER = 0
-    """その他"""
 
 
 class TERAKOYA_EXPERIENCE(Enum):
@@ -109,63 +92,31 @@ class STUDY_STYLE(Enum):
     """未選択"""
 
 
-class COURSE_CHOICE(Enum):
-    """文理選択 (course_choice)"""
-    TBD = 1
-    """まだ決めていない"""
-    LIBERAL_ARTS = 2
-    """文系"""
-    SCIENCE = 3
-    """理系"""
-    OTHER = 0
-    """その他"""
-    NULL = -1
-    """未選択"""
-
-
-class HOW_TO_KNOW_TERAKOYA(Enum):
-    """テラコヤを知ったきっかけ (how_to_know_terakoya)"""
-    HP = 1
-    """HP"""
-    INSTAGRAM = 2
-    """Instagram"""
-    FACEBOOK = 3
-    """Facebook"""
-    TWITTER = 4
-    """Twitter"""
-    INTRODUCE = 5
-    """知人の紹介"""
-    POSTER = 6
-    """ポスター・ビラ"""
-    OTHER = 0
-    """その他"""
-    NULL = -1
-    """未選択"""
-
-
 class __CommonProperties(BaseModel):
+    # Validation based on Enum
+    # https://qiita.com/sand/items/ca2c7c49e8bd94053b04
+    terakoya_type: TERAKOYA_TYPE
+    arrival_time: ARRIVAL_TIME
+    terakoya_experience: TERAKOYA_EXPERIENCE
+    study_subject: STUDY_SUBJECT
+    study_subject_detail: str
+    study_style: STUDY_STYLE
+    remarks: str
+    # Meta fields (not displayed on the form)
     name: str
     # Check whether the email format is valid based on RFC 5322 using EmailStr type
     # https://qiita.com/koralle/items/93b094ddb6d3af917702#emailstr
     # https://docs.pydantic.dev/latest/usage/types/#pydantic-types
     # https://qiita.com/yoshitake_1201/items/40268332cd23f67c504c
     email: EmailStr
-    # Validation based on Enum
-    # https://qiita.com/sand/items/ca2c7c49e8bd94053b04
-    terakoya_type: TERAKOYA_TYPE
-    arrival_time: ARRIVAL_TIME
     grade: GRADE
-    terakoya_experience: TERAKOYA_EXPERIENCE
-    study_subject: STUDY_SUBJECT
-    study_subject_detail: str
-    study_style: STUDY_STYLE
+    # Deprecated fields
     school_name: str
-    first_choice_school: str
     course_choice: COURSE_CHOICE
+    first_choice_school: str
+    how_to_know_terakoya: HOW_TO_KNOW_TERAKOYA
     future_free: str
     like_thing_free: str
-    how_to_know_terakoya: HOW_TO_KNOW_TERAKOYA
-    remarks: str
 
 
 class BookRequestBody(__CommonProperties):
@@ -218,8 +169,9 @@ class BookingItem(__CommonProperties):
     place: PLACE = PLACE.NULL
     is_reminded: REMIND_STATUS = REMIND_STATUS.NOT_SENT
     timestamp: int = int(DT.CURRENT_JST_DATETIME.timestamp())
-    timestamp_iso: str = DT.CURRENT_JST_DATETIME.strftime("%Y-%m-%d %H:%M:%S")
+    timestamp_iso: str = DT.CURRENT_JST_ISO_8601_DATETIME
     date_unix_time: int = -1
+    # Deprecated fields (TODO: Remove these fields in the future)
     uid: str = ""
 
     # kwargs is a dictionary of arguments. args is a tuple of positional arguments.
@@ -232,9 +184,10 @@ class BookingItem(__CommonProperties):
             self.sk = f"#{self.email}#{self.terakoya_type.value}"
         if self.date_unix_time == -1:
             self.date_unix_time = DT.convert_iso_to_timestamp(self.date)
+        # TODO: Remove the following code in the future
         if self.uid == "":
             self.uid = hashlib.md5(f"#{self.date}{self.sk}".encode()).hexdigest()
 
     def to_dict(self) -> Dict[str, Union[str, int, float, bool]]:
         """Convert the instance to a dictionary, replacing Enum members with their values."""
-        return {k: v.value if isinstance(v, Enum) else v for k, v in self.__dict__.items()}
+        return {k: v.value if isinstance(v, Enum) else v for k, v in super().dict().items()}

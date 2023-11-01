@@ -1,6 +1,6 @@
 import os
 import sys
-from fastapi import APIRouter, Request
+from fastapi import APIRouter, Request, Response
 from pydantic import BaseModel
 
 FUNCTIONS_DIR_PATH = os.path.dirname(os.path.dirname(__file__))
@@ -39,7 +39,7 @@ def fetch_excluded_dates(excluded_dates_csv_fkey: str = EXCLUDED_DATES_CSV_FKEY)
 @booking_router.get("/excluded-dates")
 def get_excluded_dates(request: Request):
     # There are no parameters in the URL and the request body
-    return hub_lambda_handler_wrapper_with_rtn_value(fetch_excluded_dates, request, None)
+    return hub_lambda_handler_wrapper_with_rtn_value(fetch_excluded_dates, request)
 
 
 def update_excluded_dates(dates: list[str], excluded_dates_csv_fkey: str = EXCLUDED_DATES_CSV_FKEY):
@@ -63,6 +63,8 @@ class PutExcludedDatesRequestBody(BaseModel):
     dates: list[str]
 
 
+# Separate words with hyphen (ex: kabab-case) in the URL structure instead of using underscore (ex: snake_case) or camel case (ex: appleOrange) in naming the endpoints.
+# https://www.integrate.io/jp/blog/best-practices-for-naming-rest-api-endpoints-ja/#four
 @booking_router.put("/excluded-dates")
 def put_excluded_dates(request_body: PutExcludedDatesRequestBody, request: Request):
     """

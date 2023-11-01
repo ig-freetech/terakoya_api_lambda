@@ -2,3 +2,5 @@
 # https://qiita.com/miyuki_samitani/items/a7758ba44bf00ef30f26
 
 from .booking import booking_router
+from .authentication import authentication_router
+from .user import user_router

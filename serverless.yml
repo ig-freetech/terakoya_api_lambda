@@ -16,8 +16,20 @@ useDotenv: true
 # disabledDeprecations:
 #   - '*' # all deprecation warnings are disabled
 
-# custom:
-#   deploymentBucketName: ${self:service}-${self:provider.stage}
+# custom is the place to freely define variables that can be referenced in serverless.yml
+# https://www.serverless.com/framework/docs/providers/aws/guide/variables#reference-properties-in-serverlessyml
+custom:
+  allowedLocalhostOrigins:
+    # for web client on local to access API Gateway
+    # Add several port candidates so that Next app can be run on any other available ports and access API Gateway when default port 3000 is occupied.
+    dev:
+      - ${env:WEB_CLIENT_ORIGIN}
+      - http://localhost:3000
+      - http://localhost:3001
+      - http://localhost:3002
+      - http://localhost:3003
+    prod: 
+      - ${env:WEB_CLIENT_ORIGIN}
 
 # General AWS settings
 # https://www.serverless.com/framework/docs/providers/aws/guide/serverless.yml#general-settings
@@ -28,6 +40,7 @@ provider:
   # https://www.serverless.com/framework/docs/providers/aws/guide/deploying#deployment-method
   deploymentMethod: direct
   # ${opt:stage, 'dev'} means that if the stage is not specified, it will be set to 'dev'
+  # https://qiita.com/ktamido/items/24ccfbdaf287bc7855a6#%E3%83%87%E3%83%95%E3%82%A9%E3%83%AB%E3%83%88%E5%80%A4
   # But, if serverless deploy --stage prod is executed, it will be set to 'prod'
   # https://www.serverless.com/framework/docs/providers/aws/guide/variables#referencing-cli-options
   stage: ${opt:stage, 'dev'}
@@ -49,7 +62,7 @@ provider:
     DEFAULT_REGION: ${env:AWS_DEFAULT_REGION}
     STAGE: ${self:provider.stage}
     SLACK_ERROR_CH_WEBHOOK_URL: ${env:SLACK_ERROR_CH_WEBHOOK_URL}
-  # Specify default IAM role of Lambda functions
+  # Specify default IAM role of all Lambda functions
   # https://www.serverless.com/framework/docs/providers/aws/guide/iam
   # IAM role arn syntax
   # https://docs.aws.amazon.com/ja_jp/IAM/latest/UserGuide/reference_identifiers.html#identifiers-arns
@@ -83,8 +96,53 @@ provider:
   # https://www.serverless.com/framework/docs/providers/aws/guide/serverless.yml#api-gateway-v2-http-api
   httpApi:
     name: ${self:service}-${self:provider.stage}-agw
-    # Allow CORS HTTP all headers
-    cors: true
+    # ? CORS restrictions work only for the request from web browsers.
+    # ? So curl, Postman, and requests when pytest run on Github Actions runner, etc are not restricted by CORS.
+    # https://developer.mozilla.org/ja/docs/Web/HTTP/CORS
+    # CORS settings
+    # https://www.serverless.com/framework/docs/providers/aws/events/http-api#cors-setup
+    cors:
+      # Access-Control-Allow-Credentials header (withCredentials) is not allowed when Access-Control-Allow-Origin is wildcard (*). 
+      # https://developer.mozilla.org/ja/docs/Web/HTTP/CORS/Errors/CORSNotSupportingCredentials
+      # ${self:custom.<property_path>} is used to refer to the property of custom object in serverless.yml
+      # https://qiita.com/ktamido/items/24ccfbdaf287bc7855a6#serverlessyml%E5%86%85%E3%81%AE%E3%83%97%E3%83%AD%E3%83%91%E3%83%86%E3%82%A3%E3%81%AE%E5%8F%82%E7%85%A7
+      # Only the domains in allowedOrigins can access API Gateway.
+      # Add an origin to allowedOrigins when you want to allow a new domain to access API Gateway.
+      allowedOrigins: ${self:custom.allowedLocalhostOrigins.${self:provider.stage}} 
+      allowedHeaders:
+        # Content-Type is required to indicate the media type of the request body sent to API Gateway.
+        # https://e-words.jp/w/Content-Type.html
+        # https://developer.mozilla.org/ja/docs/Web/HTTP/Headers/Content-Type
+        - Content-Type
+        # Authorization is required to send credentials (such as access token) to API Gateway.
+        # https://atmarkit.itmedia.co.jp/ait/articles/1608/10/news021.html
+        # https://developer.mozilla.org/ja/docs/Web/HTTP/Headers/Authorization
+        - Authorization
+        # X-Amz-Date is required for AWS Signature Version 4 to indicate the date and time when the request was signed.
+        # https://docs.aws.amazon.com/ja_jp/IAM/latest/UserGuide/signing-elements.html
+        - X-Amz-Date
+        # X-Api-Key is required for AWS Signature Version 4 to send the API key to API Gateway when it uses the API key.
+        # https://docs.aws.amazon.com/ja_jp/apigateway/latest/developerguide/api-gateway-api-key-source.html
+        - X-Api-Key
+        # X-Amz-Security-Token is required for AWS Signature Version 4 to send the security token to API Gateway when it uses temporary security credentials.
+        # https://docs.aws.amazon.com/ja_jp/AmazonS3/latest/userguide/RESTAuthentication.html
+        - X-Amz-Security-Token
+        # X-Amz-User-Agent is required for AWS Signature Version 4 to send the user agent string to API Gateway.
+        # https://qiita.com/sakadonohito/items/61b03bb5224ef83bde41#allowedheader
+        - X-Amz-User-Agent
+        # https://developer.mozilla.org/ja/docs/Web/HTTP/Headers/Set-Cookie
+        - Set-Cookie
+      allowedMethods:
+        - OPTIONS
+        - GET
+        - POST
+        - PUT
+        - DELETE
+      # Allow browser to send the request with credentials (cookies, HTTP authentication and client side SSL certificates) to API Gateway by setting Access-Control-Allow-Credentials header to true.
+      # Configuring allowCredentials to true, enables cookies to be sent across domains.
+      # https://www.securify.jp/blog/cross-origin-resource-sharing/#Cookie
+      # https://developer.mozilla.org/ja/docs/Web/HTTP/Headers/Access-Control-Allow-Credentials
+      allowCredentials: true
 
 # Layer settings
 # https://www.serverless.com/framework/docs/providers/aws/guide/layers
@@ -189,7 +247,9 @@ functions:
     name: ${self:service}-${self:provider.stage}-hub
     handler: functions/hub.lambda_handler
     environment:
-      S3_TERAKOYA_BUCKET_NAME: ${env:S3_TERAKOYA_BUCKET_NAME} 
+      S3_TERAKOYA_BUCKET_NAME: ${env:S3_TERAKOYA_BUCKET_NAME}
+      COGNITO_USER_POOL_ID: ${env:COGNITO_USER_POOL_ID}
+      COGNITO_USER_POOL_CLIENT_ID: ${env:COGNITO_USER_POOL_CLIENT_ID}
     events:
       - httpApi:
           # ANY method is used to catch all HTTP methods
@@ -214,14 +274,17 @@ resources:
       # https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-resource-iam-role.html#aws-resource-iam-role-properties
       Properties:
         RoleName: AWSLambdaEnableCloudWatchS3-${self:provider.stage}
-        # AssumeRolePolicyDocument is required
+        # Define target service (Principal) to be allowed to assume this Role and actions (Action) of the IAM Role.
+        # https://dev.classmethod.jp/articles/iam-role-and-assumerole/
         AssumeRolePolicyDocument:
           Version: '2012-10-17'
           Statement:
             - Effect: Allow
               Principal:
                 Service:
+                  # Attach this Role to Lambda function.
                   - lambda.amazonaws.com
+              # sts:AssumeRole is the action to allow the service to assume any IAM Role.
               Action: sts:AssumeRole
         # ManagedPolicyArns are policies to be attached to the role that are managed by AWS
         # https://dev.classmethod.jp/articles/created_a_cross-account_access_role_in_cloudformation/
@@ -251,6 +314,21 @@ resources:
             KeyType: RANGE
         # PAY_PER_REQUEST is on-demand mode
         # https://dev.classmethod.jp/articles/dynamodb-cfn-ondemand-reinvent-2018/
+        BillingMode: PAY_PER_REQUEST
+    userTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: ${self:service}-${self:provider.stage}-user
+        AttributeDefinitions:
+          - AttributeName: uuid
+            AttributeType: S
+          - AttributeName: sk
+            AttributeType: S
+        KeySchema:
+          - AttributeName: uuid
+            KeyType: HASH
+          - AttributeName: sk
+            KeyType: RANGE
         BillingMode: PAY_PER_REQUEST
     # Cognito User Pool is like a database that stores user authentication information
     # https://zenn.dev/naok_1207/articles/d66a4a1d914000#userpool-%E3%81%AE%E3%82%AA%E3%83%97%E3%82%B7%E3%83%A7%E3%83%B3%E3%81%AB%E3%81%A4%E3%81%84%E3%81%A6
@@ -294,6 +372,9 @@ resources:
             # https://docs.aws.amazon.com/ja_jp/AWSCloudFormation/latest/UserGuide/aws-properties-cognito-userpool-recoveryoption.html
             - Name: verified_email
               Priority: 1 # Priority is the order of password recovery methods (ex: 1 or 2)
+        # EmailVerificationSubject don't work if VerificationMessageTemplate is defined.
+        # https://docs.aws.amazon.com/ja_jp/AWSCloudFormation/latest/UserGuide/aws-resource-cognito-userpool.html#cfn-cognito-userpool-emailverificationsubject
+        # EmailVerificationSubject: "${env:VERIFICATION_EMAI_SUBJECT_PREFIX}Verify your account"
         # Define email configuration (ex: from SES email address, reply-to email address, etc.)
         # https://docs.aws.amazon.com/ja_jp/AWSCloudFormation/latest/UserGuide/aws-properties-cognito-userpool-emailconfiguration.html
         # https://blog.usize-tech.com/mailaddress-check-in-amazon-cognito/
@@ -306,18 +387,29 @@ resources:
           # SourceArn is ARN of SES email address that is used as FromEmailAddress
           # SES ARN pattern is arn:aws:ses:<region>:<account_id>:identity/<email>
           SourceArn: arn:aws:ses:${env:AWS_DEFAULT_REGION}:${env:AWS_ACCOUNT_ID}:identity/${env:TERAKOYA_GMAIL_ADDRESS}
+        # Only DefaultEmailOption works in VerificationMessageTemplate
         # https://docs.aws.amazon.com/ja_jp/AWSCloudFormation/latest/UserGuide/aws-properties-cognito-userpool-verificationmessagetemplate.html
         VerificationMessageTemplate:
           # In the actual email, {####} is replaced with a verification code
-          EmailMessage: "Your verification code is {####}."
-          EmailSubject: "${env:VERIFICATION_EMAI_SUBJECT_PREFIX}Verify your account"
-          # Send a link to verify email address
+          # EmailMessage: "Your verification code is {####}." # this don't work
+          # EmailSubject: "${env:VERIFICATION_EMAI_SUBJECT_PREFIX}Verify your account" # this don't work
+          # After User Pool is created, you need to manually create a domain to send a verification email because User Pool uses the domain when a user when users sign up or reset password.
+          # Serverless Framework can't create a domain for User Pool automatically. So you need to do on AWS console or via AWS CLI.
+          # aws cognito-idp create-user-pool-domain --user-pool-id <UserPoolId> --domain <Domain> (ex: <Domain> is terakoya-dev or terakoya-prod)
+          # https://docs.aws.amazon.com/ja_jp/cognito/latest/developerguide/cognito-user-pools-assign-domain.html
+
+          # Send a link to verify email address instead of a verification code
           # https://dev.classmethod.jp/articles/amazon-cognito-user-pool-user-sign-up-for-an-error-was-encountered-with-the-requested-page/
           DefaultEmailOption: CONFIRM_WITH_LINK
         # https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-cognito-userpool-lambdaconfig.html
         LambdaConfig:
           # Specify a lambda function to be executed when a user verifies their email address.
           # https://docs.aws.amazon.com/ja_jp/cognito/latest/developerguide/user-pool-lambda-post-confirmation.html
+          # TODO: Run the following command to assume resource-based policy to PostConfirmation lambda function in order to allow Cognito User Pool to invoke Lambda function.
+          # ? aws lambda add-permission --function-name arn:aws:lambda:<region>:<account_id>:function:<function_name> --statement-id <sid> --action lambda:InvokeFunction --principal cognito-idp.amazonaws.com --source-arn arn:aws:cognito-idp:<region>:<account_id>:userpool:<user_pool_id> --region <region>
+          # ! It's impossible to assume resource-based policy to Lambda function via Serverless Framework. So, you need to do on AWS console or via AWS CLI.
+          # https://dev.classmethod.jp/articles/cognito-lambda-trigger-version-alias/ 
+          # https://docs.aws.amazon.com/cognito/latest/developerguide/cognito-user-identity-pools-working-with-aws-lambda-triggers.html#important-lambda-considerations
           PostConfirmation: 
             # Fn::GetAtt: [logicalNameOfResource, attributeName] is to get an attribute value of a resource
             # https://docs.aws.amazon.com/ja_jp/AWSCloudFormation/latest/UserGuide/intrinsic-function-reference-getatt.html
@@ -375,10 +467,3 @@ resources:
         # If a client secret is not generated, parts of OAuth 2.0 flows will not work.
         # https://docs.aws.amazon.com/ja_jp/cognito/latest/developerguide/user-pool-settings-client-apps.html
         GenerateSecret: false
-    # Define S3 bucket
-    # bucketForLambda:
-    #   # https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-s3-bucket.html#aws-properties-s3-bucket--examples
-    #   Type: 'AWS::S3::Bucket'
-    #   DeletionPolicy: Retain
-    #   Properties:
-    #     BucketName: ${self:custom.deploymentBucketName}

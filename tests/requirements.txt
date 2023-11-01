@@ -12,6 +12,7 @@ requests
 # https://obataka.com/moto-dynamodb/
 # https://qiita.com/abemaru/items/7a521a8cf6d755c0f34c
 # moto
+boto3
 
 # tenacity is used for retrying
 # https://zenn.dev/taroman_zenn/articles/dd0b33a3a37d1e

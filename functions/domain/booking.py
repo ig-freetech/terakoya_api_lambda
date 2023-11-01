@@ -10,8 +10,6 @@ from utils.dt import DT
 from models.booking import REMIND_STATUS, BookingItem, TERAKOYA_TYPE, PLACE
 from conf.env import AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, AWS_DEFAULT_REGION, STAGE
 
-BOOKING_TABLE_NAME = f"terakoya-{STAGE}-booking"
-
 
 def generate_sk(email: str, terakoya_type: TERAKOYA_TYPE) -> str:
     return f"#{email}#{terakoya_type.value}"
@@ -23,7 +21,7 @@ class BookingTable:
         aws_access_key_id=AWS_ACCESS_KEY_ID,
         aws_secret_access_key=AWS_SECRET_ACCESS_KEY,
         region_name=AWS_DEFAULT_REGION
-    ).Table(BOOKING_TABLE_NAME)
+    ).Table(f"terakoya-{STAGE}-booking")
 
     @classmethod
     def insert_item(cls, item: BookingItem):
@@ -38,6 +36,9 @@ class BookingTable:
                 "date": DT.CURRENT_JST_ISO_8601_ONLY_DATE,
                 "sk": sk
             },
+            # It's possible to search for target items to be updated with conditions other than Key by setting a conditional expression using attribute values in ConditionExpression,
+            # https://zenn.dev/enven/articles/041ab29a69b3ce#%E3%81%BE%E3%81%A8%E3%82%81
+            # https://docs.aws.amazon.com/ja_jp/amazondynamodb/latest/developerguide/Expressions.ConditionExpressions.html#Expressions.ConditionExpressions.PreventingOverwrites
             ConditionExpression="#is_reminded <> :is_reminded_true",
             UpdateExpression="set #is_reminded = :is_reminded_true",
             ExpressionAttributeNames={
