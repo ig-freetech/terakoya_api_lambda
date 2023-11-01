@@ -57,9 +57,6 @@ def fetch_user_timeline_list(uuid: str, last_evaluated_key: Optional[str] = None
             ':value': uuid
         },
         "Limit": 20,
-        # The result of query() is sorted by sort key in ascending order by default.
-        # But ScanIndexForward=False makes it descending order. If sort key is timestamp, it means latest first.
-        # https://docs.aws.amazon.com/ja_jp/amazondynamodb/latest/developerguide/Query.html#Query.KeyConditionExpressions
         "ScanIndexForward": False,
     }
 
