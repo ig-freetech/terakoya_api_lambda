@@ -20,6 +20,9 @@
           "/workspaces/terakoya_backend/functions/layer/python/"
         ],
         "editor.formatOnSave": true,
+        // Use autopep8 as a formatter
+        // https://github.com/microsoft/vscode-python/wiki/Migration-to-Python-Tools-Extensions
+        "python.formatting.autopep8": true,
         "python.formatting.provider": "autopep8",
         "python.formatting.autopep8Args": [
           "--max-line-length",
