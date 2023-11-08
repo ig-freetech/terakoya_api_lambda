@@ -12,7 +12,8 @@ from functions.domain import timeline
 from functions.models.timeline import CommentItem, PostItem, Reaction
 from functions.utils.dt import DT
 from tests.utils.const import base_url, headers
-from tests.samples.timeline import TEST_USER_UUID, TEST_USER_NAME, post_timeline_item_json
+from tests.samples.timeline import TEST_USER_UUID, TEST_USER_NAME, post_timeline_item_json, post_comment_item_json
+from tests.samples.user import pytest_user_account_request_body_json
 
 
 class TestFunc:
@@ -404,8 +405,20 @@ class TestFunc:
 
 class TestAPIGateway:
     def test_post_timeline_item(self):
+        response_signin = requests.post(f"{base_url}/signin", headers=headers,
+                                        data=json.dumps(pytest_user_account_request_body_json))
+        assert response_signin.status_code == 200
+
         response_post_timeline_item = requests.post(
-            f"{base_url}/", headers=headers, data=json.dumps(post_timeline_item_json)
+            f"{base_url}/timeline", headers=headers, data=json.dumps(post_timeline_item_json)
+        )
+        assert response_post_timeline_item.status_code == 401
+
+        response_post_timeline_item = requests.post(
+            f"{base_url}/timeline", 
+            headers=headers, 
+            data=json.dumps(post_timeline_item_json), 
+            cookies=response_signin.cookies
         )
         response_body_post_timeline_item = response_post_timeline_item.json()
         print(f"response_body_post_timeline_item: {response_body_post_timeline_item}")
@@ -419,3 +432,28 @@ class TestAPIGateway:
         print(f"response_body_get_timeline_item: {response_body_get_timeline_item}")
         assert response_get_timeline_item.status_code == 200
         assert response_body_get_timeline_item.get("post_id") == post_id
+
+    def test_post_comment_item(self):
+        response_post_timeline_item = requests.post(
+            f"{base_url}/timeline", headers=headers, data=json.dumps(post_timeline_item_json)
+        )
+        response_body_post_timeline_item = response_post_timeline_item.json()
+        print(f"response_body_post_timeline_item: {response_body_post_timeline_item}")
+        assert response_post_timeline_item.status_code == 200
+
+        post_id = response_body_post_timeline_item.get("post_id")
+        assert post_id is not None
+
+        response_post_comment_item = requests.post(
+            f"{base_url}/timeline/{post_id}/comment", headers=headers, data=json.dumps(post_comment_item_json)
+        )
+        response_body_post_comment_item = response_post_comment_item.json()
+        print(f"response_body_post_comment_item: {response_body_post_comment_item}")
+        assert response_post_comment_item.status_code == 200
+
+        comment_id = response_body_post_comment_item.get("comment_id")
+        assert comment_id is not None
+
+        comment_item = timeline.fetch_comment_item(comment_id)
+        print(f"comment_item: {comment_item}")
+        assert comment_item.get("comment_id") == comment_id

@@ -18,7 +18,7 @@ timeline_router = APIRouter()
 
 @timeline_router.post("")
 def post_timeline(request_body: PostItem, request: Request, response: Response, _: Dict[str, Any] = Depends(authenticate_user)):
-    return hub_lambda_handler_wrapper(
+    return hub_lambda_handler_wrapper_with_rtn_value(
         lambda: timeline.post_timeline_item(post=request_body),
         request=request,
         request_data=request_body.dict()
@@ -26,7 +26,7 @@ def post_timeline(request_body: PostItem, request: Request, response: Response, 
 
 @timeline_router.post("/{post_id}/comment")
 def post_comment(post_id: str, request_body: CommentItem, request: Request, response: Response, _: Dict[str, Any] = Depends(authenticate_user)):
-    return hub_lambda_handler_wrapper(
+    return hub_lambda_handler_wrapper_with_rtn_value(
         lambda: timeline.post_comment_item(
             post_id=post_id,
             comment=request_body

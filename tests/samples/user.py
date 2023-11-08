@@ -18,6 +18,11 @@ account_request_body_json = {
     "password": password,
 }
 
+pytest_user_account_request_body_json = {
+    "email": email,
+    "password": password,
+}
+
 post_confirmation_payload_json = {
     "version": "1",
     "region": AWS_DEFAULT_REGION,
