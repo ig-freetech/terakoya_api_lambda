@@ -17,6 +17,12 @@ class Reaction(BaseModel):
     type: int
     """1: like, 2: bad"""
 
+    def to_dict(self) -> dict:
+        return {
+            "uuid": self.uuid,
+            "type": self.type,
+        }
+
 
 class BaseTimelineItem(BaseModel):
     uuid: str
@@ -30,6 +36,9 @@ class BaseTimelineItem(BaseModel):
     texts: str = ""
     """Texts of post/comment"""
     reactions: List[Reaction] = []
+    """List of Reaction"""
+    is_deleted: int = 0
+    """0: not deleted, 1: deleted"""
 
 
 class CommentItem(BaseTimelineItem):
@@ -37,7 +46,6 @@ class CommentItem(BaseTimelineItem):
     """Parent post id"""
     comment_id: str = uuid.uuid4().hex
     """UID of comment"""
-    pk_for_all_post_gsi: str = PK_FOR_ALL_POST_GSI
 
     def __init__(self, **kwargs: Any) -> None:
         super().__init__(**kwargs)
@@ -52,8 +60,8 @@ class PostItem(BaseTimelineItem):
     # https://www.python.ambitious-engineer.com/archives/1436
     post_id: str = uuid.uuid4().hex
     """UID of post (used for URL)"""
-    is_deleted: int = 0
-    """0: not deleted, 1: deleted"""
+    pk_for_all_post_gsi: str = PK_FOR_ALL_POST_GSI
+    """Partition key for GSI"""
 
     # __init__ method is required to convert DynamoDB item to Pydantic model.
     def __init__(self, **kwargs: Any) -> None:
