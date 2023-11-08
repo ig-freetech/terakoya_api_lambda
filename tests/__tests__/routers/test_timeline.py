@@ -547,14 +547,14 @@ class TestAPIGateway:
         assert comment_id is not None
 
         response_put_reaction_to_comment_item = requests.put(
-            f"{base_url}/timeline/{comment_id}/reaction", 
+            f"{base_url}/timeline/comment/{comment_id}/reaction", 
             headers=headers, 
             data=json.dumps(put_reaction_json)
         )
         assert response_put_reaction_to_comment_item.status_code == 401
 
         response_put_reaction_to_comment_item = requests.put(
-            f"{base_url}/timeline/{comment_id}/reaction", 
+            f"{base_url}/timeline/comment/{comment_id}/reaction", 
             headers=headers, 
             data=json.dumps(put_reaction_json),
             cookies=response_signin.cookies

@@ -48,7 +48,7 @@ def put_reaction_to_post(post_id: str, request_body: Reaction, request: Request,
     )
 
 
-@timeline_router.put("/{comment_id}/reaction")
+@timeline_router.put("/comment/{comment_id}/reaction")
 def put_reaction_to_comment(comment_id: str, request_body: Reaction, request: Request, response: Response, _: Dict[str, Any] = Depends(authenticate_user)):
     return hub_lambda_handler_wrapper(
         lambda: timeline.put_reaction_to_comment_item(
