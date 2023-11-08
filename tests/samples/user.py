@@ -11,7 +11,9 @@ from functions.utils.dt import DT
 email_tmp = "ikeda+pytest-tmp@npoterakoya.org"
 email = "ikeda+pytest@npoterakoya.org"
 password = "PyTest1234"
-uuid = "d0564635-3a8b-40d5-8ae9-057434a46b8a"
+
+PYTEST_USER_UUID = "4f41486d-e061-437e-a5ba-7ecc85eec43c" # UUID of ikeda+pytest@npoterakoya.org
+PYTEST_USER_NAME = "pytest"
 
 account_request_body_json = {
     "email": email_tmp,

@@ -35,17 +35,13 @@ def post_comment(post_id: str, request_body: CommentItem, request: Request, resp
         request_data=request_body.dict()
     )
 
-class PutReactionToPostReqBody(BaseModel):
-    uuid: str
-    reaction: Reaction
-
 
 @timeline_router.put("/{post_id}/reaction")
-def put_reaction_to_post(post_id: str, request_body: PutReactionToPostReqBody, request: Request, response: Response, _: Dict[str, Any] = Depends(authenticate_user)):
+def put_reaction_to_post(post_id: str, request_body: Reaction, request: Request, response: Response, _: Dict[str, Any] = Depends(authenticate_user)):
     return hub_lambda_handler_wrapper(
         lambda: timeline.put_reaction_to_timeline_item(
             post_id=post_id,
-            reaction=request_body.reaction
+            reaction=request_body
         ),
         request=request,
         request_data=request_body.dict()

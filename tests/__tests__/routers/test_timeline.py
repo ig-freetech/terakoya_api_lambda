@@ -12,8 +12,8 @@ from functions.domain import timeline
 from functions.models.timeline import CommentItem, PostItem, Reaction
 from functions.utils.dt import DT
 from tests.utils.const import base_url, headers
-from tests.samples.timeline import TEST_USER_UUID, TEST_USER_NAME, post_timeline_item_json, post_comment_item_json
-from tests.samples.user import pytest_user_account_request_body_json
+from tests.samples.timeline import post_timeline_item_json, post_comment_item_json, put_reaction_json, TYPE_LIKE
+from tests.samples.user import pytest_user_account_request_body_json, PYTEST_USER_UUID, PYTEST_USER_NAME
 
 
 class TestFunc:
@@ -21,8 +21,8 @@ class TestFunc:
         # Post the test data
         post_response = timeline.post_timeline_item(
             post=PostItem(**{
-                "uuid": TEST_USER_UUID,
-                "user_name": TEST_USER_NAME,
+                "uuid": PYTEST_USER_UUID,
+                "user_name": PYTEST_USER_NAME,
                 "texts": f"Post timeline item\n{DT.CURRENT_JST_ISO_8601_DATETIME}",
             })
         )
@@ -42,8 +42,8 @@ class TestFunc:
         # Post the test data
         post_response = timeline.post_timeline_item(
             post=PostItem(**{
-                "uuid": TEST_USER_UUID,
-                "user_name": TEST_USER_NAME,
+                "uuid": PYTEST_USER_UUID,
+                "user_name": PYTEST_USER_NAME,
                 "texts": f"Post comment item\n{DT.CURRENT_JST_ISO_8601_DATETIME}",
             })
         )
@@ -56,8 +56,8 @@ class TestFunc:
             post_id=post_id,
             comment=CommentItem(**{
                 "post_id": post_id,
-                "uuid": TEST_USER_UUID,
-                "user_name": TEST_USER_NAME,
+                "uuid": PYTEST_USER_UUID,
+                "user_name": PYTEST_USER_NAME,
                 "texts": f"Post comment item\n{DT.CURRENT_JST_ISO_8601_DATETIME}",
             })
         )
@@ -86,8 +86,8 @@ class TestFunc:
         # Post the test data
         post_response = timeline.post_timeline_item(
             post=PostItem(**{
-                "uuid": TEST_USER_UUID,
-                "user_name": TEST_USER_NAME,
+                "uuid": PYTEST_USER_UUID,
+                "user_name": PYTEST_USER_NAME,
                 "texts": f"Put reaction to timeline item\n{DT.CURRENT_JST_ISO_8601_DATETIME}",
             })
         )
@@ -98,7 +98,7 @@ class TestFunc:
         # Post the reaction to the test data
         timeline.put_reaction_to_timeline_item(
             post_id=post_id,
-            reaction=Reaction(uuid=TEST_USER_UUID, type=1) # Like
+            reaction=Reaction(uuid=PYTEST_USER_UUID, type=1) # Like
         )
 
         # Check whether the reaction has been posted
@@ -107,13 +107,13 @@ class TestFunc:
         assert timeline_item is not None
         reactions = timeline_item.get("reactions", [])
         assert len(reactions) == 1
-        assert reactions[0].get("uuid") == TEST_USER_UUID
+        assert reactions[0].get("uuid") == PYTEST_USER_UUID
         assert reactions[0].get("type") == 1
 
         # Put the new reaction to the test data
         timeline.put_reaction_to_timeline_item(
             post_id=post_id,
-            reaction=Reaction(uuid=TEST_USER_UUID, type=2) # Bad
+            reaction=Reaction(uuid=PYTEST_USER_UUID, type=2) # Bad
         )
 
         # Check whether the reaction has been updated
@@ -132,8 +132,8 @@ class TestFunc:
         # Post the test data
         post_response = timeline.post_timeline_item(
             post=PostItem(**{
-                "uuid": TEST_USER_UUID,
-                "user_name": TEST_USER_NAME,
+                "uuid": PYTEST_USER_UUID,
+                "user_name": PYTEST_USER_NAME,
                 "texts": f"Put reaction to comment item\n{DT.CURRENT_JST_ISO_8601_DATETIME}",
             })
         )
@@ -146,8 +146,8 @@ class TestFunc:
             post_id=post_id,
             comment=CommentItem(**{
                 "post_id": post_id,
-                "uuid": TEST_USER_UUID,
-                "user_name": TEST_USER_NAME,
+                "uuid": PYTEST_USER_UUID,
+                "user_name": PYTEST_USER_NAME,
                 "texts": f"Put reaction to comment item\n{DT.CURRENT_JST_ISO_8601_DATETIME}",
             })
         )
@@ -158,7 +158,7 @@ class TestFunc:
         # Post the reaction to the test data
         timeline.put_reaction_to_comment_item(
             comment_id=comment_id,
-            reaction=Reaction(uuid=TEST_USER_UUID, type=1) # Like
+            reaction=Reaction(uuid=PYTEST_USER_UUID, type=1) # Like
         )
 
         # Check whether the reaction has been posted
@@ -167,13 +167,13 @@ class TestFunc:
         assert comment_item is not None
         reactions = comment_item.get("reactions", [])
         assert len(reactions) == 1
-        assert reactions[0].get("uuid") == TEST_USER_UUID
+        assert reactions[0].get("uuid") == PYTEST_USER_UUID
         assert reactions[0].get("type") == 1
 
         # Put the new reaction to the test data
         timeline.put_reaction_to_comment_item(
             comment_id=comment_id,
-            reaction=Reaction(uuid=TEST_USER_UUID, type=2) # Bad
+            reaction=Reaction(uuid=PYTEST_USER_UUID, type=2) # Bad
         )
 
         # Check whether the reaction has been updated
@@ -188,8 +188,8 @@ class TestFunc:
         # Post the test data
         post_response = timeline.post_timeline_item(
             post=PostItem(**{
-                "uuid": TEST_USER_UUID,
-                "user_name": TEST_USER_NAME,
+                "uuid": PYTEST_USER_UUID,
+                "user_name": PYTEST_USER_NAME,
                 "texts": f"Post comment item\n{DT.CURRENT_JST_ISO_8601_DATETIME}",
             })
         )
@@ -202,8 +202,8 @@ class TestFunc:
             post_id=post_id,
             comment=CommentItem(**{
                 "post_id": post_id,
-                "uuid": TEST_USER_UUID,
-                "user_name": TEST_USER_NAME,
+                "uuid": PYTEST_USER_UUID,
+                "user_name": PYTEST_USER_NAME,
                 "texts": f"Post comment item\n{DT.CURRENT_JST_ISO_8601_DATETIME}",
             })
         )
@@ -239,8 +239,8 @@ class TestFunc:
         # Post the test data
         post_response = timeline.post_timeline_item(
             post=PostItem(**{
-                "uuid": TEST_USER_UUID,
-                "user_name": TEST_USER_NAME,
+                "uuid": PYTEST_USER_UUID,
+                "user_name": PYTEST_USER_NAME,
                 "texts": f"Post timeline item\n{DT.CURRENT_JST_ISO_8601_DATETIME}",
             })
         ) 
@@ -282,8 +282,8 @@ class TestFunc:
         # Post the test data
         post_response = timeline.post_timeline_item(
             post=PostItem(**{
-                "uuid": TEST_USER_UUID,
-                "user_name": TEST_USER_NAME,
+                "uuid": PYTEST_USER_UUID,
+                "user_name": PYTEST_USER_NAME,
                 "texts": f"Fetch timeline items\n{DT.CURRENT_JST_ISO_8601_DATETIME}",
             })
         )
@@ -317,8 +317,8 @@ class TestFunc:
         # Post the test data
         post_response = timeline.post_timeline_item(
             post=PostItem(**{
-                "uuid": TEST_USER_UUID,
-                "user_name": TEST_USER_NAME,
+                "uuid": PYTEST_USER_UUID,
+                "user_name": PYTEST_USER_NAME,
                 "texts": f"Fetch timeline items by user\n{DT.CURRENT_JST_ISO_8601_DATETIME}",
             })
         )
@@ -327,7 +327,7 @@ class TestFunc:
         assert post_id is not None
 
         # Check whether the timeline item has been fetched
-        response = timeline.fetch_timeline_list_by_user(TEST_USER_UUID)
+        response = timeline.fetch_timeline_list_by_user(PYTEST_USER_UUID)
         print(f"response: {response}")
         assert response.get("items") is not None
         timeline_items: List = response.get("items", [])
@@ -339,7 +339,7 @@ class TestFunc:
             assert last_evaluated_key is not None
 
             # Check whether the timeline item has been fetched with the last_evaluated_key
-            response = timeline.fetch_timeline_list_by_user(TEST_USER_UUID, last_evaluated_key=last_evaluated_key)
+            response = timeline.fetch_timeline_list_by_user(PYTEST_USER_UUID, last_evaluated_key=last_evaluated_key)
             print(f"response: {response}")
             assert response.get("items") is not None
             timeline_items: List = response.get("items", [])
@@ -353,8 +353,8 @@ class TestFunc:
         # Post the test data
         # post_response = timeline.post_timeline_item(
         #     post=PostItem(**{
-        #         "uuid": TEST_USER_UUID,
-        #         "user_name": TEST_USER_NAME,
+        #         "uuid": PYTEST_USER_UUID,
+        #         "user_name": PYTEST_USER_NAME,
         #         "texts": f"Fetch comment items\n{DT.CURRENT_JST_ISO_8601_DATETIME}",
         #     })
         # )
@@ -370,8 +370,8 @@ class TestFunc:
             post_id=post_id,
             comment=CommentItem(**{
                 "post_id": post_id,
-                "uuid": TEST_USER_UUID,
-                "user_name": TEST_USER_NAME,
+                "uuid": PYTEST_USER_UUID,
+                "user_name": PYTEST_USER_NAME,
                 "texts": f"Fetch comment items\n{DT.CURRENT_JST_ISO_8601_DATETIME}",
             })
         )
@@ -434,18 +434,37 @@ class TestAPIGateway:
         assert response_body_get_timeline_item.get("post_id") == post_id
 
     def test_post_comment_item(self):
+        response_signin = requests.post(f"{base_url}/signin", headers=headers,
+                                        data=json.dumps(pytest_user_account_request_body_json))
+        assert response_signin.status_code == 200
+
         response_post_timeline_item = requests.post(
-            f"{base_url}/timeline", headers=headers, data=json.dumps(post_timeline_item_json)
+            f"{base_url}/timeline", 
+            headers=headers, 
+            data=json.dumps(post_timeline_item_json), 
+            cookies=response_signin.cookies
         )
         response_body_post_timeline_item = response_post_timeline_item.json()
-        print(f"response_body_post_timeline_item: {response_body_post_timeline_item}")
         assert response_post_timeline_item.status_code == 200
 
         post_id = response_body_post_timeline_item.get("post_id")
         assert post_id is not None
 
         response_post_comment_item = requests.post(
-            f"{base_url}/timeline/{post_id}/comment", headers=headers, data=json.dumps(post_comment_item_json)
+            f"{base_url}/timeline/{post_id}/comment", 
+            headers=headers, 
+            data=json.dumps(post_comment_item_json)
+        )
+        assert response_post_comment_item.status_code == 401
+
+        response_post_comment_item = requests.post(
+            f"{base_url}/timeline/{post_id}/comment", 
+            headers=headers, 
+            data=json.dumps({
+                **post_comment_item_json,
+                "post_id": post_id
+            }),
+            cookies=response_signin.cookies
         )
         response_body_post_comment_item = response_post_comment_item.json()
         print(f"response_body_post_comment_item: {response_body_post_comment_item}")
@@ -457,3 +476,252 @@ class TestAPIGateway:
         comment_item = timeline.fetch_comment_item(comment_id)
         print(f"comment_item: {comment_item}")
         assert comment_item.get("comment_id") == comment_id
+
+    def test_put_reaction_to_timeline_item(self):
+        response_signin = requests.post(f"{base_url}/signin", headers=headers,
+                                        data=json.dumps(pytest_user_account_request_body_json))
+        assert response_signin.status_code == 200
+
+        response_post_timeline_item = requests.post(
+            f"{base_url}/timeline", 
+            headers=headers, 
+            data=json.dumps(post_timeline_item_json), 
+            cookies=response_signin.cookies
+        )
+        assert response_post_timeline_item.status_code == 200
+
+        post_id = response_post_timeline_item.json().get("post_id")
+        assert post_id is not None
+
+        response_put_reaction_to_timeline_item = requests.put(
+            f"{base_url}/timeline/{post_id}/reaction", 
+            headers=headers, 
+            data=json.dumps(put_reaction_json)
+        )
+        assert response_put_reaction_to_timeline_item.status_code == 401
+
+        response_put_reaction_to_timeline_item = requests.put(
+            f"{base_url}/timeline/{post_id}/reaction", 
+            headers=headers, 
+            data=json.dumps(put_reaction_json),
+            cookies=response_signin.cookies
+        )
+        assert response_put_reaction_to_timeline_item.status_code == 200
+
+        timeline_item = timeline.fetch_timeline_item(post_id)
+        print(f"timeline_item: {timeline_item}")
+        assert timeline_item.get("reactions") is not None
+        reactions: List = timeline_item.get("reactions", [])
+        assert len(reactions) > 0
+        assert reactions[0].get("uuid") == PYTEST_USER_UUID
+        assert reactions[0].get("type") == TYPE_LIKE
+
+    def test_put_reaction_to_comment_item(self):
+        response_signin = requests.post(f"{base_url}/signin", headers=headers,
+                                        data=json.dumps(pytest_user_account_request_body_json))
+        assert response_signin.status_code == 200
+
+        response_post_timeline_item = requests.post(
+            f"{base_url}/timeline", 
+            headers=headers, 
+            data=json.dumps(post_timeline_item_json), 
+            cookies=response_signin.cookies
+        )
+        assert response_post_timeline_item.status_code == 200
+
+        post_id = response_post_timeline_item.json().get("post_id")
+        assert post_id is not None
+
+        response_post_comment_item = requests.post(
+            f"{base_url}/timeline/{post_id}/comment", 
+            headers=headers, 
+            data=json.dumps({
+                **post_comment_item_json,
+                "post_id": post_id
+            }),
+            cookies=response_signin.cookies
+        )
+        assert response_post_comment_item.status_code == 200
+
+        comment_id = response_post_comment_item.json().get("comment_id")
+        assert comment_id is not None
+
+        response_put_reaction_to_comment_item = requests.put(
+            f"{base_url}/timeline/{comment_id}/reaction", 
+            headers=headers, 
+            data=json.dumps(put_reaction_json)
+        )
+        assert response_put_reaction_to_comment_item.status_code == 401
+
+        response_put_reaction_to_comment_item = requests.put(
+            f"{base_url}/timeline/{comment_id}/reaction", 
+            headers=headers, 
+            data=json.dumps(put_reaction_json),
+            cookies=response_signin.cookies
+        )
+        assert response_put_reaction_to_comment_item.status_code == 200
+
+        comment_item = timeline.fetch_comment_item(comment_id)
+        print(f"comment_item: {comment_item}")
+        assert comment_item.get("reactions") is not None
+        reactions: List = comment_item.get("reactions", [])
+        assert len(reactions) > 0
+        assert reactions[0].get("uuid") == PYTEST_USER_UUID
+        assert reactions[0].get("type") == TYPE_LIKE
+
+    def test_fetch_timeline_list(self):
+        # response_signin = requests.post(f"{base_url}/signin", headers=headers,
+        #                                 data=json.dumps(pytest_user_account_request_body_json))
+        # assert response_signin.status_code == 200
+
+        # response_post_timeline_item = requests.post(
+        #     f"{base_url}/timeline", 
+        #     headers=headers, 
+        #     data=json.dumps(post_timeline_item_json), 
+        #     cookies=response_signin.cookies
+        # )
+        # assert response_post_timeline_item.status_code == 200
+
+        response_fetch_timeline_list = requests.get(f"{base_url}/timeline/list", headers=headers)
+        response_body_fetch_timeline_list = response_fetch_timeline_list.json()
+        print(f"response_body_fetch_timeline_list: {response_body_fetch_timeline_list}")
+        assert response_fetch_timeline_list.status_code == 200
+
+        assert response_body_fetch_timeline_list.get("items") is not None
+        timeline_items: List = response_body_fetch_timeline_list.get("items", [])
+        assert len(timeline_items) > 0
+
+    def test_fetch_timeline_list_by_user(self):
+        # response_signin = requests.post(f"{base_url}/signin", headers=headers,
+        #                                 data=json.dumps(pytest_user_account_request_body_json))
+        # assert response_signin.status_code == 200
+
+        # response_post_timeline_item = requests.post(
+        #     f"{base_url}/timeline", 
+        #     headers=headers, 
+        #     data=json.dumps(post_timeline_item_json), 
+        #     cookies=response_signin.cookies
+        # )
+        # assert response_post_timeline_item.status_code == 200
+
+        response_fetch_timeline_list_by_user = requests.get(
+            f"{base_url}/timeline/list/{PYTEST_USER_UUID}", 
+            headers=headers
+        )
+        response_body_fetch_timeline_list_by_user = response_fetch_timeline_list_by_user.json()
+        print(f"response_body_fetch_timeline_list_by_user: {response_body_fetch_timeline_list_by_user}")
+        assert response_fetch_timeline_list_by_user.status_code == 200
+
+        assert response_body_fetch_timeline_list_by_user.get("items") is not None
+        timeline_items: List = response_body_fetch_timeline_list_by_user.get("items", [])
+        assert len(timeline_items) > 0
+
+    def test_fetch_comment_list(self):
+        response_signin = requests.post(f"{base_url}/signin", headers=headers,
+                                        data=json.dumps(pytest_user_account_request_body_json))
+        assert response_signin.status_code == 200
+
+        response_post_timeline_item = requests.post(
+            f"{base_url}/timeline", 
+            headers=headers, 
+            data=json.dumps(post_timeline_item_json), 
+            cookies=response_signin.cookies
+        )
+        assert response_post_timeline_item.status_code == 200
+
+        post_id = response_post_timeline_item.json().get("post_id")
+        assert post_id is not None
+
+        response_post_comment_item = requests.post(
+            f"{base_url}/timeline/{post_id}/comment",
+            headers=headers,
+            data=json.dumps({
+                **post_comment_item_json,
+                "post_id": post_id
+            }),
+            cookies=response_signin.cookies
+        )
+        assert response_post_comment_item.status_code == 200
+
+        comment_id = response_post_comment_item.json().get("comment_id")
+        assert comment_id is not None
+
+        response_fetch_comment_list = requests.get(
+            f"{base_url}/timeline/{post_id}/comment/list",
+            headers=headers
+        )
+        response_body_fetch_comment_list = response_fetch_comment_list.json()
+        print(f"response_body_fetch_comment_list: {response_body_fetch_comment_list}")
+        assert response_fetch_comment_list.status_code == 200
+
+        assert response_body_fetch_comment_list.get("items") is not None
+        comment_items: List = response_body_fetch_comment_list.get("items", [])
+        assert len(comment_items) > 0
+
+    def test_delete_timeline_item(self):
+        response_signin = requests.post(f"{base_url}/signin", headers=headers,
+                                        data=json.dumps(pytest_user_account_request_body_json))
+        assert response_signin.status_code == 200
+
+        response_post_timeline_item = requests.post(
+            f"{base_url}/timeline", 
+            headers=headers, 
+            data=json.dumps(post_timeline_item_json), 
+            cookies=response_signin.cookies
+        )
+        assert response_post_timeline_item.status_code == 200
+
+        post_id = response_post_timeline_item.json().get("post_id")
+        assert post_id is not None
+
+        response_delete_timeline_item = requests.delete(
+            f"{base_url}/timeline/{post_id}",
+            headers=headers,
+            cookies=response_signin.cookies
+        )
+        assert response_delete_timeline_item.status_code == 200
+
+        timeline_item = timeline.fetch_timeline_item(post_id)
+        print(f"timeline_item: {timeline_item}")
+        assert timeline_item.get("is_deleted") == Decimal(1)
+
+    def test_delete_comment_item(self):
+        response_signin = requests.post(f"{base_url}/signin", headers=headers,
+                                        data=json.dumps(pytest_user_account_request_body_json))
+        assert response_signin.status_code == 200
+
+        response_post_timeline_item = requests.post(
+            f"{base_url}/timeline", 
+            headers=headers, 
+            data=json.dumps(post_timeline_item_json), 
+            cookies=response_signin.cookies
+        )
+        assert response_post_timeline_item.status_code == 200
+
+        post_id = response_post_timeline_item.json().get("post_id")
+        assert post_id is not None
+
+        response_post_comment_item = requests.post(
+            f"{base_url}/timeline/{post_id}/comment",
+            headers=headers,
+            data=json.dumps({
+                **post_comment_item_json,
+                "post_id": post_id
+            }),
+            cookies=response_signin.cookies
+        )
+        assert response_post_comment_item.status_code == 200
+
+        comment_id = response_post_comment_item.json().get("comment_id")
+        assert comment_id is not None
+
+        response_delete_comment_item = requests.delete(
+            f"{base_url}/timeline/{post_id}/comment/{comment_id}",
+            headers=headers,
+            cookies=response_signin.cookies
+        )
+        assert response_delete_comment_item.status_code == 200
+
+        comment_item = timeline.fetch_comment_item(comment_id)
+        print(f"comment_item: {comment_item}")
+        assert comment_item.get("is_deleted") == Decimal(1)

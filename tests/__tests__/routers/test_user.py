@@ -12,7 +12,7 @@ from functions.conf.env import COGNITO_USER_POOL_ID, AWS_ACCESS_KEY_ID, AWS_SECR
 from functions.domain import authentication as auth, user
 from functions.models.user import EMPTY_SK, UserItem, AUTHORITY
 from functions.utils.aws import cognito_client
-from tests.samples.user import email_tmp, password, uuid, account_request_body_json, post_confirmation_payload_json, updated_name, updated_staff_in_charge, updated_number_of_attendances, updated_attendance_rate, update_user_item_json
+from tests.samples.user import email_tmp, password, PYTEST_USER_UUID, account_request_body_json, post_confirmation_payload_json, updated_name, updated_staff_in_charge, updated_number_of_attendances, updated_attendance_rate, update_user_item_json
 from tests.utils.const import base_url, headers
 
 lambda_client = boto3.client('lambda', aws_access_key_id=AWS_ACCESS_KEY_ID,
@@ -160,7 +160,7 @@ class Test:
         if COGNITO_USER_POOL_ID is None:
             raise Exception("COGNITO_USER_POOL_ID is None")
 
-        profile = user.fetch_profile(uuid, EMPTY_SK)
+        profile = user.fetch_profile(PYTEST_USER_UUID, EMPTY_SK)
         print(f"profile: {profile}")
 
-        assert profile.get("uuid") == uuid
+        assert profile.get("uuid") == PYTEST_USER_UUID
