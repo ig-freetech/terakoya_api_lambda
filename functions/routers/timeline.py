@@ -3,7 +3,6 @@ import sys
 from typing import Any, Dict, Optional
 from fastapi import APIRouter, Request, Response, Depends
 from functions.domain.authentication import authenticate_user
-from pydantic import BaseModel
 
 FUNCTIONS_DIR_PATH = os.path.dirname(os.path.dirname(__file__))
 sys.path.append(FUNCTIONS_DIR_PATH)
