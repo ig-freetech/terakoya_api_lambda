@@ -44,7 +44,7 @@ RUN pip install --no-cache-dir -r ./tests/requirements.txt
 # Install packages for development that are not needed in production
 # uvicorn works as a ASGI server to run FastAPI on local
 # https://www.uvicorn.org/
-RUN pip install autopep8 uvicorn
+RUN pip install uvicorn
 
 # Copy aws credentials to use AWS toolkit extension
 # https://docs.aws.amazon.com/ja_jp/cli/latest/userguide/cli-configure-files.html

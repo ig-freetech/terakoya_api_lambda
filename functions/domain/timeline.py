@@ -18,6 +18,7 @@ def post_timeline_item(post: PostItem):
     __post_table.put_item(Item=post.dict())
     return {"post_id": post.post_id}
 
+
 def post_comment_item(post_id: str, comment: CommentItem):
     __comment_table.put_item(Item=comment.dict())
     __post_table.update_item(
@@ -41,6 +42,7 @@ def delete_logical_timeline_item(post_id: str):
         ExpressionAttributeValues={
         ":is_deleted_true": 1
     })
+
 
 def delete_logical_comment_item(post_id: str, comment_id: str):
     __comment_table.update_item(Key={
@@ -78,12 +80,16 @@ def put_reaction_to_timeline_item(post_id: str, reaction: Reaction):
     elif len(same_user_reactions) == 1:
         existing_reaction = same_user_reactions[0]
         if reaction.type == existing_reaction.type:
-            print("Already reacted to the post with the same reaction type. So removed reaction.")
-            new_reactions = [r for r in pi.reactions if r.uuid != reaction.uuid]
+            print(
+                "Already reacted to the post with the same reaction type. So removed reaction.")
+            new_reactions = [
+                r for r in pi.reactions if r.uuid != reaction.uuid]
         else:
-            print("Already reacted to the post with the different reaction type. So updated reaction.")
+            print(
+                "Already reacted to the post with the different reaction type. So updated reaction.")
             # raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="この投稿には既に別のリアクションがされています。")
-            new_reactions = [r for r in pi.reactions if r.uuid != reaction.uuid] + [reaction]
+            new_reactions = [
+                r for r in pi.reactions if r.uuid != reaction.uuid] + [reaction]
 
     __post_table.update_item(
         Key={
@@ -113,12 +119,15 @@ def put_reaction_to_comment_item(comment_id: str, reaction: Reaction):
     elif len(same_user_reactions) == 1:
         existing_reaction = same_user_reactions[0]
         if reaction.type == existing_reaction.type:
-            print("Already reacted to this comment with same reaction type. So removed reaction.")
-            new_reactions = [r for r in ci.reactions if r.uuid != reaction.uuid]
+            print(
+                "Already reacted to this comment with same reaction type. So removed reaction.")
+            new_reactions = [
+                r for r in ci.reactions if r.uuid != reaction.uuid]
         else:
             print("Already reacted to this comment with different reaction type.")
             # raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="この投稿には既に別のリアクションがされています。")
-            new_reactions = [r for r in ci.reactions if r.uuid != reaction.uuid] + [reaction]
+            new_reactions = [
+                r for r in ci.reactions if r.uuid != reaction.uuid] + [reaction]
 
     __comment_table.update_item(
         Key={
@@ -130,13 +139,17 @@ def put_reaction_to_comment_item(comment_id: str, reaction: Reaction):
         }
     )
 
+
 T = TypeVar("T", bound=BaseModel)
+
+
 class FetchListResponseBody(GenericModel, Generic[T]):
     items: List[T]
-    last_evaluated_id: Optional[str]
+    timestamp: Optional[str]
     count: Optional[int]
 
-def fetch_timeline_list(last_post_id: Optional[str] = None):
+
+def fetch_timeline_list(timestamp: Optional[int] = None):
     query_params = {
         "IndexName": f"terakoya-{STAGE}-timeline-post-all",
         "KeyConditionExpression": 'pk_for_all_post_gsi = :value',
@@ -152,27 +165,29 @@ def fetch_timeline_list(last_post_id: Optional[str] = None):
         "ScanIndexForward": False,
     }
 
-    if last_post_id:
+    if timestamp:
         query_params["ExclusiveStartKey"] = {
             "pk_for_all_post_gsi": PK_FOR_ALL_POST_GSI,
-            "post_id": last_post_id
+            "timestamp": timestamp
         }
 
     response = __post_table.query(**query_params)
     IS_NOT_DELETED = 0
-    active_posts = [p for p in response.get("Items", []) if p.get("is_deleted", IS_NOT_DELETED) == IS_NOT_DELETED]
+    active_posts = [p for p in response.get("Items", []) if p.get(
+        "is_deleted", IS_NOT_DELETED) == IS_NOT_DELETED]
 
     last_evaluated_key = response.get("LastEvaluatedKey", None)
-    last_post_id = last_evaluated_key.get("post_id", None) if last_evaluated_key else None
+    timestamp = last_evaluated_key.get(
+        "timestamp", None) if last_evaluated_key else None
 
     return FetchListResponseBody[PostItem](
         items=active_posts,
-        last_evaluated_id=last_post_id,
+        timestamp=timestamp,
         count=response.get("Count", None)
     ).dict()
 
 
-def fetch_timeline_list_by_user(uuid: str, last_post_id: Optional[str] = None):
+def fetch_timeline_list_by_user(uuid: str, timestamp: Optional[int] = None):
     query_params = {
         "IndexName": f"terakoya-{STAGE}-timeline-post-by-user",
         "KeyConditionExpression": '#uuid = :value',
@@ -188,26 +203,29 @@ def fetch_timeline_list_by_user(uuid: str, last_post_id: Optional[str] = None):
         "ScanIndexForward": False,
     }
 
-    if last_post_id:
+    if timestamp:
         query_params["ExclusiveStartKey"] = {
             "uuid": uuid,
-            "post_id": last_post_id
+            "timestamp": timestamp
         }
 
     response = __post_table.query(**query_params)
     IS_NOT_DELETED = 0
-    active_posts = [p for p in response.get("Items", []) if p.get("is_deleted", IS_NOT_DELETED) == IS_NOT_DELETED]
+    active_posts = [p for p in response.get("Items", []) if p.get(
+        "is_deleted", IS_NOT_DELETED) == IS_NOT_DELETED]
 
     last_evaluated_key = response.get("LastEvaluatedKey", None)
-    last_post_id = last_evaluated_key.get("post_id", None) if last_evaluated_key else None
+    timestamp = last_evaluated_key.get(
+        "timestamp", None) if last_evaluated_key else None
 
     return FetchListResponseBody[PostItem](
         items=active_posts,
-        last_evaluated_id=last_post_id,
+        timestamp=timestamp,
         count=response.get("Count", None)
     ).dict()
 
-def fetch_comment_list(post_id: str, last_comment_id: Optional[str] = None):
+
+def fetch_comment_list(post_id: str, timestamp: Optional[int] = None):
     query_params = {
         "IndexName": f"terakoya-{STAGE}-timeline-comment-for-post",
         "KeyConditionExpression": 'post_id = :value',
@@ -221,21 +239,23 @@ def fetch_comment_list(post_id: str, last_comment_id: Optional[str] = None):
         "ScanIndexForward": False,
     }
 
-    if last_comment_id:
+    if timestamp:
         query_params["ExclusiveStartKey"] = {
-            "comment_id": last_comment_id
+            "post_id": post_id,
+            "timestamp": timestamp
         }
 
     response = __comment_table.query(**query_params)
 
     last_evaluated_key = response.get("LastEvaluatedKey", None)
-    last_comment_id = last_evaluated_key.get("comment_id", None) if last_evaluated_key else None
+    timestamp = last_evaluated_key.get(
+        "timestamp", None) if last_evaluated_key else None
 
     return FetchListResponseBody[CommentItem](
         items=response.get("Items", []),
-        last_evaluated_id=last_comment_id,
+        timestamp=timestamp,
         count=response.get("Count", None)
-    ).dict() 
+    ).dict()
 
 
 def fetch_timeline_item(post_id: str):
@@ -245,9 +265,11 @@ def fetch_timeline_item(post_id: str):
     timeline_item = response.get("Item", None)
 
     if not timeline_item:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"指定された投稿は存在しません。\npost_id: {post_id}")
-    
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
+                            detail=f"指定された投稿は存在しません。\npost_id: {post_id}")
+
     return dict(timeline_item)
+
 
 def fetch_comment_item(comment_id: str):
     """Only for testing"""
@@ -257,19 +279,51 @@ def fetch_comment_item(comment_id: str):
     comment_item = response.get("Item", None)
 
     if not comment_item:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"指定されたコメントは存在しません。\ncomment_id: {comment_id}")
-    
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
+                            detail=f"指定されたコメントは存在しません。\ncomment_id: {comment_id}")
+
     return dict(comment_item)
 
-def update_user_info(uuid: str, user_name: str, user_profile_img_url: str):
-    posts_response = __post_table.query(
-        IndexName=f"terakoya-{STAGE}-timeline-post-by-user",
-        KeyConditionExpression='uuid = :value',
-        ExpressionAttributeValues={
+
+def update_user_info(uuid: str, user_name: str, user_profile_img_url: str, timestamp: Optional[int] = None):
+    posts = []
+    post_query_params = {
+        "IndexName": f"terakoya-{STAGE}-timeline-post-by-user",
+        "KeyConditionExpression": 'uuid = :value',
+        "ExpressionAttributeValues": {
             ':value': uuid
+        },
+        "Limit": 100,
+    }
+
+    if timestamp:
+        post_query_params["ExclusiveStartKey"] = {
+            "uuid": uuid,
+            "timestamp": timestamp
         }
-    )
-    posts = posts_response.get("Items", [])
+
+    response = __post_table.query(**post_query_params)
+
+    posts = response.get("Items", [])
+
+    last_evaluated_key = response.get("LastEvaluatedKey", None)
+    timestamp = last_evaluated_key.get(
+        "timestamp", None) if last_evaluated_key else None
+
+    while timestamp is not None:
+        post_query_params["ExclusiveStartKey"] = {
+            "uuid": uuid,
+            "timestamp": timestamp
+        }
+
+        response = __post_table.query(**post_query_params)
+
+        posts += response.get("Items", [])
+
+        last_evaluated_key = response.get("LastEvaluatedKey", None)
+        timestamp = last_evaluated_key.get(
+            "timestamp", None) if last_evaluated_key else None
+
     for p in posts:
         __post_table.update_item(
             Key={
@@ -282,14 +336,43 @@ def update_user_info(uuid: str, user_name: str, user_profile_img_url: str):
             }
         )
 
-    comments_response = __comment_table.query(
-        IndexName=f"terakoya-{STAGE}-timeline-comment-by-user",
-        KeyConditionExpression='uuid = :value',
-        ExpressionAttributeValues={
+    comment_query_params = {
+        "IndexName": f"terakoya-{STAGE}-timeline-comment-by-user",
+        "KeyConditionExpression": 'uuid = :value',
+        "ExpressionAttributeValues": {
             ':value': uuid
+        },
+        "Limit": 100,
+    }
+
+    if timestamp:
+        comment_query_params["ExclusiveStartKey"] = {
+            "uuid": uuid,
+            "timestamp": timestamp
         }
-    )
-    comments = comments_response.get("Items", [])
+
+    response = __comment_table.query(**comment_query_params)
+
+    comments = response.get("Items", [])
+
+    last_evaluated_key = response.get("LastEvaluatedKey", None)
+    timestamp = last_evaluated_key.get(
+        "timestamp", None) if last_evaluated_key else None
+
+    while timestamp is not None:
+        comment_query_params["ExclusiveStartKey"] = {
+            "uuid": uuid,
+            "timestamp": timestamp
+        }
+
+        response = __comment_table.query(**comment_query_params)
+
+        comments += response.get("Items", [])
+
+        last_evaluated_key = response.get("LastEvaluatedKey", None)
+        timestamp = last_evaluated_key.get(
+            "timestamp", None) if last_evaluated_key else None
+
     for c in comments:
         __comment_table.update_item(
             Key={
@@ -301,6 +384,7 @@ def update_user_info(uuid: str, user_name: str, user_profile_img_url: str):
                 ":user_profile_img_url": user_profile_img_url
             }
         )
+
 
 def delete_timeline_item(post_id: str):
     """Only for testing"""

@@ -19,18 +19,17 @@
         "python.autoComplete.extraPaths": [
           "/workspaces/terakoya_backend/functions/layer/python/"
         ],
-        "editor.formatOnSave": true,
         // Use autopep8 as a formatter
         // https://github.com/microsoft/vscode-python/wiki/Migration-to-Python-Tools-Extensions
-        // https://marketplace.visualstudio.com/items?itemName=ms-python.autopep8
-        "python.formatting.autopep8": true,
-        "python.formatting.provider": "autopep8",
-        "python.formatting.autopep8Args": [
-          "--max-line-length",
-          "120",
-          "--ignore",
-          "E402"
-        ],
+        "[python]": {
+          // Settings for Python formatter
+          // https://code.visualstudio.com/docs/python/formatting
+          // autopep8 extension is available by installing itself without doing the library via pip.
+          // https://zenn.dev/bellstone/articles/ff5aac74455cbf
+          "editor.defaultFormatter": "ms-python.autopep8",
+          "editor.formatOnSave": true,
+          "autopep8.args": ["--max-line-length", "120", "--ignore", "E402"]
+        },
         "python.analysis.typeCheckingMode": "basic",
         "python.languageServer": "Pylance",
         // https://code.visualstudio.com/docs/python/testing#_pytest-configuration-settings
@@ -66,6 +65,8 @@
       },
       "extensions": [
         "ms-python.python",
+        // https://marketplace.visualstudio.com/items?itemName=ms-python.autopep8
+        "ms-python.autopep8",
         "boto3typed.boto3-ide",
         // https://developer.mamezou-tech.com/blogs/2023/03/05/using-pytest-02/
         "littlefoxteam.vscode-python-test-adapter",
