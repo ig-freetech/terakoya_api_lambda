@@ -1,3 +1,6 @@
+from utils.aws import dynamodb_resource
+from models.timeline import PK_FOR_ALL_POST_GSI, PostItem, CommentItem, Reaction
+from conf.env import STAGE
 import os
 import sys
 from typing import List, Optional, TypeVar
@@ -7,12 +10,10 @@ from pydantic.generics import GenericModel, Generic, BaseModel
 ROOT_DIR_PATH = os.path.dirname(os.path.dirname(__file__))
 sys.path.append(ROOT_DIR_PATH)
 
-from conf.env import STAGE
-from models.timeline import PK_FOR_ALL_POST_GSI, PostItem, CommentItem, Reaction
-from utils.aws import dynamodb_resource
 
 __post_table = dynamodb_resource.Table(f"terakoya-{STAGE}-timeline-post")
 __comment_table = dynamodb_resource.Table(f"terakoya-{STAGE}-timeline-comment")
+
 
 def post_timeline_item(post: PostItem):
     __post_table.put_item(Item=post.dict())
@@ -145,7 +146,7 @@ T = TypeVar("T", bound=BaseModel)
 
 class FetchListResponseBody(GenericModel, Generic[T]):
     items: List[T]
-    timestamp: Optional[str]
+    timestamp: Optional[int]
     count: Optional[int]
 
 
