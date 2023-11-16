@@ -133,10 +133,10 @@ def put_reaction_to_comment_item(comment_id: str, reaction: Reaction):
 T = TypeVar("T", bound=BaseModel)
 class FetchListResponseBody(GenericModel, Generic[T]):
     items: List[T]
-    last_evaluated_key: Optional[str]
+    last_evaluated_id: Optional[str]
     count: Optional[int]
 
-def fetch_timeline_list(last_evaluated_key: Optional[str] = None):
+def fetch_timeline_list(last_post_id: Optional[str] = None):
     query_params = {
         "IndexName": f"terakoya-{STAGE}-timeline-post-all",
         "KeyConditionExpression": 'pk_for_all_post_gsi = :value',
@@ -152,21 +152,27 @@ def fetch_timeline_list(last_evaluated_key: Optional[str] = None):
         "ScanIndexForward": False,
     }
 
-    if last_evaluated_key:
-        query_params["ExclusiveStartKey"] = last_evaluated_key
+    if last_post_id:
+        query_params["ExclusiveStartKey"] = {
+            "pk_for_all_post_gsi": PK_FOR_ALL_POST_GSI,
+            "post_id": last_post_id
+        }
 
     response = __post_table.query(**query_params)
     IS_NOT_DELETED = 0
     active_posts = [p for p in response.get("Items", []) if p.get("is_deleted", IS_NOT_DELETED) == IS_NOT_DELETED]
 
+    last_evaluated_key = response.get("LastEvaluatedKey", None)
+    last_post_id = last_evaluated_key.get("post_id", None) if last_evaluated_key else None
+
     return FetchListResponseBody[PostItem](
         items=active_posts,
-        last_evaluated_key=response.get("LastEvaluatedKey", None),
+        last_evaluated_id=last_post_id,
         count=response.get("Count", None)
     ).dict()
 
 
-def fetch_timeline_list_by_user(uuid: str, last_evaluated_key: Optional[str] = None):
+def fetch_timeline_list_by_user(uuid: str, last_post_id: Optional[str] = None):
     query_params = {
         "IndexName": f"terakoya-{STAGE}-timeline-post-by-user",
         "KeyConditionExpression": '#uuid = :value',
@@ -182,20 +188,26 @@ def fetch_timeline_list_by_user(uuid: str, last_evaluated_key: Optional[str] = N
         "ScanIndexForward": False,
     }
 
-    if last_evaluated_key:
-        query_params["ExclusiveStartKey"] = last_evaluated_key
+    if last_post_id:
+        query_params["ExclusiveStartKey"] = {
+            "uuid": uuid,
+            "post_id": last_post_id
+        }
 
     response = __post_table.query(**query_params)
     IS_NOT_DELETED = 0
     active_posts = [p for p in response.get("Items", []) if p.get("is_deleted", IS_NOT_DELETED) == IS_NOT_DELETED]
 
+    last_evaluated_key = response.get("LastEvaluatedKey", None)
+    last_post_id = last_evaluated_key.get("post_id", None) if last_evaluated_key else None
+
     return FetchListResponseBody[PostItem](
         items=active_posts,
-        last_evaluated_key=response.get("LastEvaluatedKey", None),
+        last_evaluated_id=last_post_id,
         count=response.get("Count", None)
     ).dict()
 
-def fetch_comment_list(post_id: str, last_evaluated_key: Optional[str] = None):
+def fetch_comment_list(post_id: str, last_comment_id: Optional[str] = None):
     query_params = {
         "IndexName": f"terakoya-{STAGE}-timeline-comment-for-post",
         "KeyConditionExpression": 'post_id = :value',
@@ -209,14 +221,19 @@ def fetch_comment_list(post_id: str, last_evaluated_key: Optional[str] = None):
         "ScanIndexForward": False,
     }
 
-    if last_evaluated_key:
-        query_params["ExclusiveStartKey"] = last_evaluated_key
+    if last_comment_id:
+        query_params["ExclusiveStartKey"] = {
+            "comment_id": last_comment_id
+        }
 
     response = __comment_table.query(**query_params)
 
+    last_evaluated_key = response.get("LastEvaluatedKey", None)
+    last_comment_id = last_evaluated_key.get("comment_id", None) if last_evaluated_key else None
+
     return FetchListResponseBody[CommentItem](
         items=response.get("Items", []),
-        last_evaluated_key=response.get("LastEvaluatedKey", None),
+        last_evaluated_id=last_comment_id,
         count=response.get("Count", None)
     ).dict() 
 

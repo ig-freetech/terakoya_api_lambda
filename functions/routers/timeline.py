@@ -73,27 +73,30 @@ def delete_comment(post_id: str, comment_id: str, request: Request, response: Re
     )
 
 @timeline_router.get("/list", response_model=timeline.FetchListResponseBody[PostItem])
-def get_timeline_list(request: Request, response: Response, last_evaluated_key: Optional[str] = None, uuid: Optional[str] = None):
+# FastAPI automatically recognizes the query parameter when the function argument name matches the query parameter name.
+# def get_xx(query_param: Optional[str] = None): is to define a optional query parameter.
+# https://fastapi.tiangolo.com/ja/tutorial/query-params/#_3
+def get_timeline_list(request: Request, response: Response, last_post_id: Optional[str] = None, uuid: Optional[str] = None):
     if uuid:
         return hub_lambda_handler_wrapper_with_rtn_value(
             lambda: timeline.fetch_timeline_list_by_user(
                 uuid=uuid,
-                last_evaluated_key=last_evaluated_key
+                last_post_id=last_post_id
             ),
             request=request
         )
     
     return hub_lambda_handler_wrapper_with_rtn_value(
-        lambda: timeline.fetch_timeline_list(last_evaluated_key=last_evaluated_key) ,
+        lambda: timeline.fetch_timeline_list(last_post_id=last_post_id) ,
         request=request
     )
 
 @timeline_router.get("/{post_id}/comment/list", response_model=timeline.FetchListResponseBody[CommentItem])
-def get_comment_list(post_id: str, request: Request, response: Response, last_evaluated_key: Optional[str] = None):
+def get_comment_list(post_id: str, request: Request, response: Response, last_comment_id: Optional[str] = None):
     return hub_lambda_handler_wrapper_with_rtn_value(
         lambda: timeline.fetch_comment_list(
             post_id=post_id,
-            last_evaluated_key=last_evaluated_key
+            last_comment_id=last_comment_id
         ),
         request=request
     )

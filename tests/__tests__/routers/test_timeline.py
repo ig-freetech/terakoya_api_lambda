@@ -298,20 +298,22 @@ class TestFunc:
         timeline_items: List = response.get("items", [])
         assert len(timeline_items) > 0 # At least one item is fetched
 
-        # Check whether the last_evaluated_key is returned if there are more than 20 items
+        # Check whether the last_post_id is returned if there are more than 20 items
         if len(timeline_items) == 20:
-            assert response.get("last_evaluated_key") is not None
+            last_post_id = response.get("last_evaluated_id")
+            assert last_post_id is not None
 
-            # Check whether the timeline item has been fetched with the last_evaluated_key
-            response = timeline.fetch_timeline_list(last_evaluated_key=response.get("last_evaluated_key"))
+            # Check whether the timeline item has been fetched with the last_post_id
+            response = timeline.fetch_timeline_list(last_post_id=last_post_id)
             print(f"response: {response}")
             assert response.get("items") is not None
             timeline_items: List = response.get("items", [])
             assert len(timeline_items) > 0 # At least one item is fetched
 
+            last_post_id = response.get("last_evaluated_id")
             if len(timeline_items) == 20:
-                assert response.get("last_evaluated_key") is not None
-            assert response.get("last_evaluated_key") is None
+                assert last_post_id is not None
+            assert last_post_id is None
 
     def test_fetch_fetch_timeline_items_by_user(self):
         # Post the test data
@@ -333,21 +335,22 @@ class TestFunc:
         timeline_items: List = response.get("items", [])
         assert len(timeline_items) > 0
 
-        # Check whether the last_evaluated_key is returned if there are more than 20 items
+        # Check whether the last_post_id is returned if there are more than 20 items
         if len(timeline_items) == 20:
-            last_evaluated_key = response.get("last_evaluated_key")
-            assert last_evaluated_key is not None
+            last_post_id = response.get("last_evaluated_id")
+            assert last_post_id is not None
 
-            # Check whether the timeline item has been fetched with the last_evaluated_key
-            response = timeline.fetch_timeline_list_by_user(PYTEST_USER_UUID, last_evaluated_key=last_evaluated_key)
+            # Check whether the timeline item has been fetched with the last_post_id
+            response = timeline.fetch_timeline_list_by_user(PYTEST_USER_UUID, last_post_id=last_post_id)
             print(f"response: {response}")
             assert response.get("items") is not None
             timeline_items: List = response.get("items", [])
             assert len(timeline_items) > 0
 
+            last_post_id = response.get("last_evaluated_id")
             if len(timeline_items) == 20:
-                assert response.get("last_evaluated_key") is not None
-            assert response.get("last_evaluated_key") is None
+                assert last_post_id is not None
+            assert last_post_id is None
 
     def test_fetch_comment_items(self):
         # Post the test data
@@ -386,21 +389,22 @@ class TestFunc:
         comment_items: List = response.get("items", [])
         assert len(comment_items) > 0
 
-        # Check whether the last_evaluated_key is returned if there are more than 20 items
+        # Check whether the last_comment_id is returned if there are more than 20 items
         if len(comment_items) == 20:
-            last_evaluated_key = response.get("last_evaluated_key")
-            assert last_evaluated_key is not None
+            last_comment_id = response.get("last_evaluated_id")
+            assert last_comment_id is not None
 
-            # Check whether the comment item has been fetched with the last_evaluated_key
-            response = timeline.fetch_comment_list(post_id, last_evaluated_key=last_evaluated_key)
+            # Check whether the comment item has been fetched with the last_comment_id
+            response = timeline.fetch_comment_list(post_id, last_comment_id=last_comment_id)
             print(f"response: {response}")
             assert response.get("items") is not None
             comment_items: List = response.get("items", [])
             assert len(comment_items) > 0
 
+            last_comment_id = response.get("last_evaluated_id")
             if len(comment_items) == 20:
-                assert response.get("last_evaluated_key") is not None
-            assert response.get("last_evaluated_key") is None
+                assert last_comment_id is not None
+            assert last_comment_id is None
 
 
 class TestAPIGateway:
@@ -605,7 +609,7 @@ class TestAPIGateway:
         # assert response_post_timeline_item.status_code == 200
 
         response_fetch_timeline_list_by_user = requests.get(
-            f"{base_url}/timeline/list/{PYTEST_USER_UUID}", 
+            f"{base_url}/timeline/list?uuid={PYTEST_USER_UUID}", 
             headers=headers
         )
         response_body_fetch_timeline_list_by_user = response_fetch_timeline_list_by_user.json()
