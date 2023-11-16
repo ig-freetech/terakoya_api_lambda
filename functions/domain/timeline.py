@@ -147,7 +147,7 @@ T = TypeVar("T", bound=BaseModel)
 class FetchListResponseBody(GenericModel, Generic[T]):
     items: List[T]
     last_evaluated_timestamp: Optional[int]
-    count: Optional[int]
+    count: int
 
 
 def fetch_timeline_list(timestamp: Optional[int] = None):
@@ -184,7 +184,7 @@ def fetch_timeline_list(timestamp: Optional[int] = None):
     return FetchListResponseBody[PostItem](
         items=active_posts,
         last_evaluated_timestamp=timestamp,
-        count=response.get("Count", None)
+        count=response.get("Count", -1)
     ).dict()
 
 
@@ -222,7 +222,7 @@ def fetch_timeline_list_by_user(uuid: str, timestamp: Optional[int] = None):
     return FetchListResponseBody[PostItem](
         items=active_posts,
         last_evaluated_timestamp=timestamp,
-        count=response.get("Count", None)
+        count=response.get("Count", -1)
     ).dict()
 
 
@@ -255,7 +255,7 @@ def fetch_comment_list(post_id: str, timestamp: Optional[int] = None):
     return FetchListResponseBody[CommentItem](
         items=response.get("Items", []),
         last_evaluated_timestamp=timestamp,
-        count=response.get("Count", None)
+        count=response.get("Count", -1)
     ).dict()
 
 
