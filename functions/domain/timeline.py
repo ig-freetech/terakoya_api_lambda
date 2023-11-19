@@ -65,7 +65,7 @@ def delete_logical_comment_item(post_id: str, comment_id: str):
 
 
 def put_reaction_to_timeline_item(post_id: str, reaction: Reaction):
-    print(f"reaction: {reaction}")
+    print(f"post_id: {post_id}, reaction: {reaction}")
 
     post_item = __post_table.get_item(Key={
         "post_id": post_id
@@ -104,7 +104,7 @@ def put_reaction_to_timeline_item(post_id: str, reaction: Reaction):
 
 
 def put_reaction_to_comment_item(comment_id: str, reaction: Reaction):
-    print(f"reaction: {reaction}")
+    print(f"comment_id: {comment_id}, reaction: {reaction}")
 
     comment_item = __comment_table.get_item(Key={
         "comment_id": comment_id
@@ -151,6 +151,8 @@ class FetchListResponseBody(GenericModel, Generic[T]):
 
 
 def fetch_timeline_list(timestamp: Optional[int] = None):
+    print(f"timestamp: {timestamp}")
+
     query_params = {
         "IndexName": f"terakoya-{STAGE}-timeline-post-all",
         "KeyConditionExpression": 'pk_for_all_post_gsi = :value',
@@ -189,6 +191,8 @@ def fetch_timeline_list(timestamp: Optional[int] = None):
 
 
 def fetch_timeline_list_by_user(uuid: str, timestamp: Optional[int] = None):
+    print(f"uuid: {uuid}, timestamp: {timestamp}")
+
     query_params = {
         "IndexName": f"terakoya-{STAGE}-timeline-post-by-user",
         "KeyConditionExpression": '#uuid = :value',
@@ -227,6 +231,8 @@ def fetch_timeline_list_by_user(uuid: str, timestamp: Optional[int] = None):
 
 
 def fetch_comment_list(post_id: str, timestamp: Optional[int] = None):
+    print(f"post_id: {post_id}, timestamp: {timestamp}")
+
     query_params = {
         "IndexName": f"terakoya-{STAGE}-timeline-comment-for-post",
         "KeyConditionExpression": 'post_id = :value',
@@ -287,6 +293,8 @@ def fetch_comment_item(comment_id: str):
 
 
 def update_user_info(uuid: str, user_name: str, user_profile_img_url: str, timestamp: Optional[int] = None):
+    print(f"uuid: {uuid}, user_name: {user_name}, user_profile_img_url: {user_profile_img_url}, timestamp: {timestamp}")
+
     posts = []
     post_query_params = {
         "IndexName": f"terakoya-{STAGE}-timeline-post-by-user",
