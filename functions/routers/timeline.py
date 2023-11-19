@@ -118,18 +118,20 @@ def get_timeline_list(
         request: Request,
         response: Response,
         timestamp: Optional[int] = Query(None),
+        post_id: Optional[str] = Query(None),
         uuid: Optional[str] = Query(None)):
     if uuid:
         return hub_lambda_handler_wrapper_with_rtn_value(
             lambda: timeline.fetch_timeline_list_by_user(
                 uuid=uuid,
-                timestamp=timestamp
+                timestamp=timestamp,
+                post_id=post_id
             ),
             request=request
         )
 
     return hub_lambda_handler_wrapper_with_rtn_value(
-        lambda: timeline.fetch_timeline_list(timestamp=timestamp),
+        lambda: timeline.fetch_timeline_list(timestamp=timestamp, post_id=post_id),
         request=request
     )
 
@@ -142,11 +144,13 @@ def get_comment_list(
         post_id: str,
         request: Request,
         response: Response,
-        timestamp: Optional[int] = Query(None)):
+        timestamp: Optional[int] = Query(None),
+        comment_id: Optional[str] = Query(None)):
     return hub_lambda_handler_wrapper_with_rtn_value(
         lambda: timeline.fetch_comment_list(
             post_id=post_id,
-            timestamp=timestamp
+            timestamp=timestamp,
+            comment_id=comment_id
         ),
         request=request
     )

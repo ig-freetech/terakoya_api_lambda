@@ -1,9 +1,3 @@
-from tests.samples.user import pytest_user_account_request_body_json, PYTEST_USER_UUID, PYTEST_USER_NAME
-from tests.samples.timeline import post_timeline_item_json, post_comment_item_json, put_reaction_json, TYPE_LIKE
-from tests.utils.const import base_url, headers
-from functions.utils.dt import DT
-from functions.models.timeline import CommentItem, PostItem, Reaction
-from functions.domain import timeline
 import os
 import sys
 from decimal import Decimal
@@ -14,6 +8,12 @@ import json
 ROOT_DIR_PATH = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
 sys.path.append(ROOT_DIR_PATH)
 
+from tests.samples.user import pytest_user_account_request_body_json, PYTEST_USER_UUID, PYTEST_USER_NAME
+from tests.samples.timeline import post_timeline_item_json, post_comment_item_json, put_reaction_json, TYPE_LIKE
+from tests.utils.const import base_url, headers
+from functions.utils.dt import DT
+from functions.models.timeline import CommentItem, PostItem, Reaction
+from functions.domain import timeline
 
 class TestFunc:
     def test_post_timeline_item(self):
@@ -300,20 +300,24 @@ class TestFunc:
 
         # Check whether the last_post_id is returned if there are more than 20 items
         if len(timeline_items) == 20:
-            last_post_id = response.get("last_evaluated_timestamp")
-            assert last_post_id is not None
+            last_evaluated_timestamp = response.get("last_evaluated_timestamp")
+            last_evaluated_id = response.get("last_evaluated_id")
+            assert last_evaluated_timestamp is not None
 
             # Check whether the timeline item has been fetched with the last_post_id
-            response = timeline.fetch_timeline_list(timestamp=last_post_id)
+            response = timeline.fetch_timeline_list(
+                timestamp=last_evaluated_timestamp, post_id=last_evaluated_id)
             print(f"response: {response}")
             assert response.get("items") is not None
             timeline_items: List = response.get("items", [])
             assert len(timeline_items) > 0  # At least one item is fetched
 
-            last_post_id = response.get("last_evaluated_timestamp")
+            last_evaluated_timestamp_2 = response.get("last_evaluated_timestamp")
+            last_evaluated_id_2 = response.get("last_evaluated_id")
             if len(timeline_items) == 20:
-                assert last_post_id is not None
-            assert last_post_id is None
+                assert last_evaluated_timestamp_2 is not None
+            else:    
+                assert last_evaluated_timestamp_2 is None
 
     def test_fetch_fetch_timeline_items_by_user(self):
         # Post the test data
@@ -351,7 +355,8 @@ class TestFunc:
             last_post_id = response.get("last_evaluated_timestamp")
             if len(timeline_items) == 20:
                 assert last_post_id is not None
-            assert last_post_id is None
+            else:
+                assert last_post_id is None
 
     def test_fetch_comment_items(self):
         # Post the test data
@@ -406,7 +411,8 @@ class TestFunc:
             last_comment_id = response.get("last_evaluated_timestamp")
             if len(comment_items) == 20:
                 assert last_comment_id is not None
-            assert last_comment_id is None
+            else:
+                assert last_comment_id is None
 
 
 class TestAPIGateway:

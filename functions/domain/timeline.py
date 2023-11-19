@@ -1,6 +1,3 @@
-from utils.aws import dynamodb_resource
-from models.timeline import PK_FOR_ALL_POST_GSI, PostItem, CommentItem, Reaction
-from conf.env import STAGE
 import os
 import sys
 from typing import List, Optional, TypeVar
@@ -10,6 +7,9 @@ from pydantic.generics import GenericModel, Generic, BaseModel
 ROOT_DIR_PATH = os.path.dirname(os.path.dirname(__file__))
 sys.path.append(ROOT_DIR_PATH)
 
+from utils.aws import dynamodb_resource
+from models.timeline import PK_FOR_ALL_POST_GSI, PostItem, CommentItem, Reaction
+from conf.env import STAGE
 
 __post_table = dynamodb_resource.Table(f"terakoya-{STAGE}-timeline-post")
 __comment_table = dynamodb_resource.Table(f"terakoya-{STAGE}-timeline-comment")
@@ -147,10 +147,11 @@ T = TypeVar("T", bound=BaseModel)
 class FetchListResponseBody(GenericModel, Generic[T]):
     items: List[T]
     last_evaluated_timestamp: Optional[int]
+    last_evaluated_id: Optional[str]
     count: int
 
 
-def fetch_timeline_list(timestamp: Optional[int] = None):
+def fetch_timeline_list(timestamp: Optional[int] = None, post_id: Optional[str] = None):
     print(f"timestamp: {timestamp}")
 
     query_params = {
@@ -168,10 +169,11 @@ def fetch_timeline_list(timestamp: Optional[int] = None):
         "ScanIndexForward": False,
     }
 
-    if timestamp:
+    if timestamp and post_id:
         query_params["ExclusiveStartKey"] = {
             "pk_for_all_post_gsi": PK_FOR_ALL_POST_GSI,
-            "timestamp": timestamp
+            "timestamp": timestamp,
+            "post_id": post_id
         }
 
     response = __post_table.query(**query_params)
@@ -182,15 +184,18 @@ def fetch_timeline_list(timestamp: Optional[int] = None):
     last_evaluated_key = response.get("LastEvaluatedKey", None)
     timestamp = last_evaluated_key.get(
         "timestamp", None) if last_evaluated_key else None
+    post_id = last_evaluated_key.get(
+        "post_id", None) if last_evaluated_key else None
 
     return FetchListResponseBody[PostItem](
         items=active_posts,
         last_evaluated_timestamp=timestamp,
+        last_evaluated_id=post_id,
         count=response.get("Count", -1)
     ).dict()
 
 
-def fetch_timeline_list_by_user(uuid: str, timestamp: Optional[int] = None):
+def fetch_timeline_list_by_user(uuid: str, timestamp: Optional[int] = None, post_id: Optional[str] = None):
     print(f"uuid: {uuid}, timestamp: {timestamp}")
 
     query_params = {
@@ -208,10 +213,11 @@ def fetch_timeline_list_by_user(uuid: str, timestamp: Optional[int] = None):
         "ScanIndexForward": False,
     }
 
-    if timestamp:
+    if timestamp and post_id:
         query_params["ExclusiveStartKey"] = {
             "uuid": uuid,
-            "timestamp": timestamp
+            "timestamp": timestamp,
+            "post_id": post_id
         }
 
     response = __post_table.query(**query_params)
@@ -222,15 +228,18 @@ def fetch_timeline_list_by_user(uuid: str, timestamp: Optional[int] = None):
     last_evaluated_key = response.get("LastEvaluatedKey", None)
     timestamp = last_evaluated_key.get(
         "timestamp", None) if last_evaluated_key else None
+    post_id = last_evaluated_key.get(
+        "post_id", None) if last_evaluated_key else None
 
     return FetchListResponseBody[PostItem](
         items=active_posts,
         last_evaluated_timestamp=timestamp,
+        last_evaluated_id=post_id,
         count=response.get("Count", -1)
     ).dict()
 
 
-def fetch_comment_list(post_id: str, timestamp: Optional[int] = None):
+def fetch_comment_list(post_id: str, timestamp: Optional[int] = None, comment_id: Optional[str] = None):
     print(f"post_id: {post_id}, timestamp: {timestamp}")
 
     query_params = {
@@ -246,10 +255,11 @@ def fetch_comment_list(post_id: str, timestamp: Optional[int] = None):
         "ScanIndexForward": False,
     }
 
-    if timestamp:
+    if timestamp and comment_id:
         query_params["ExclusiveStartKey"] = {
             "post_id": post_id,
-            "timestamp": timestamp
+            "timestamp": timestamp,
+            "comment_id": comment_id
         }
 
     response = __comment_table.query(**query_params)
@@ -257,10 +267,13 @@ def fetch_comment_list(post_id: str, timestamp: Optional[int] = None):
     last_evaluated_key = response.get("LastEvaluatedKey", None)
     timestamp = last_evaluated_key.get(
         "timestamp", None) if last_evaluated_key else None
+    comment_id = last_evaluated_key.get(
+        "comment_id", None) if last_evaluated_key else None
 
     return FetchListResponseBody[CommentItem](
         items=response.get("Items", []),
         last_evaluated_timestamp=timestamp,
+        last_evaluated_id=comment_id,
         count=response.get("Count", -1)
     ).dict()
 

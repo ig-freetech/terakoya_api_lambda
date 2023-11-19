@@ -2,7 +2,6 @@ import os
 import sys
 from typing import Any, Dict, Optional
 from dataclasses import dataclass
-import boto3
 from jose import jwt, jwk, JWTError
 import requests
 from fastapi import Request, Response, HTTPException, status

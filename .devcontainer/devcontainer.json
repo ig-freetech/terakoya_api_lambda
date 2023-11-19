@@ -26,7 +26,7 @@
           // https://code.visualstudio.com/docs/python/formatting
           // autopep8 extension is available by installing itself without doing the library via pip.
           // https://zenn.dev/bellstone/articles/ff5aac74455cbf
-          "editor.defaultFormatter": "ms-python.autopep8",
+          "editor.defaultFormatter": "ms-python.autopep8", // Switch to the pre-release version if bugs occur
           "editor.formatOnSave": true,
           "autopep8.args": ["--max-line-length", "120", "--ignore", "E402"]
         },
