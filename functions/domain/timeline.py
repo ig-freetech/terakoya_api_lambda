@@ -311,7 +311,10 @@ def update_user_profile_img(uuid: str, user_profile_img_url: str, timestamp: Opt
     posts = []
     post_query_params = {
         "IndexName": f"terakoya-{STAGE}-timeline-post-by-user",
-        "KeyConditionExpression": 'uuid = :value',
+        "KeyConditionExpression": '#uuid = :value',
+        "ExpressionAttributeNames": {
+            '#uuid': 'uuid'
+        },
         "ExpressionAttributeValues": {
             ':value': uuid
         },
@@ -362,7 +365,10 @@ def update_user_profile_img(uuid: str, user_profile_img_url: str, timestamp: Opt
 
     comment_query_params = {
         "IndexName": f"terakoya-{STAGE}-timeline-comment-by-user",
-        "KeyConditionExpression": 'uuid = :value',
+        "KeyConditionExpression": '#uuid = :value',
+        "ExpressionAttributeNames": {
+            '#uuid': 'uuid'
+        },
         "ExpressionAttributeValues": {
             ':value': uuid
         },
@@ -417,7 +423,10 @@ def update_user_name(uuid: str, user_name: str, timestamp: Optional[int] = None)
     posts = []
     post_query_params = {
         "IndexName": f"terakoya-{STAGE}-timeline-post-by-user",
-        "KeyConditionExpression": 'uuid = :value',
+        "KeyConditionExpression": '#uuid = :value',
+        "ExpressionAttributeNames": {
+            '#uuid': 'uuid'
+        },
         "ExpressionAttributeValues": {
             ':value': uuid
         },
@@ -468,7 +477,10 @@ def update_user_name(uuid: str, user_name: str, timestamp: Optional[int] = None)
 
     comment_query_params = {
         "IndexName": f"terakoya-{STAGE}-timeline-comment-by-user",
-        "KeyConditionExpression": 'uuid = :value',
+        "KeyConditionExpression": '#uuid = :value',
+        "ExpressionAttributeNames": {
+            '#uuid': 'uuid'
+        },
         "ExpressionAttributeValues": {
             ':value': uuid
         },
