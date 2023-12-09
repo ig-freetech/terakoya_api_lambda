@@ -6,7 +6,7 @@ from fastapi import UploadFile, HTTPException
 ROOT_DIR_PATH = os.path.dirname(os.path.dirname(__file__))
 sys.path.append(ROOT_DIR_PATH)
 
-from conf.env import STAGE, S3_TERAKOYA_BUCKET_NAME
+from conf.env import STAGE, S3_TERAKOYA_PUBLIC_BUCKET_NAME
 from models.user import UserItem, EMPTY_SK
 from utils.aws import dynamodb_resource, s3_client
 from utils.dt import DT
@@ -108,13 +108,13 @@ def update_profile_img(uuid: str, file: UploadFile):
     if fname is None:
         raise HTTPException(status_code=400, detail="Profile image file name is not specified.")
     
-    if S3_TERAKOYA_BUCKET_NAME is None:
+    if S3_TERAKOYA_PUBLIC_BUCKET_NAME is None:
         raise HTTPException(status_code=500, detail="S3_TERAKOYA_BUCKET_NAME is not set.")
 
     key = f"users/{uuid}/{fname}"
-    s3_img_url = f"https://{S3_TERAKOYA_BUCKET_NAME}.s3.amazonaws.com/{key}"
+    s3_img_url = f"https://{S3_TERAKOYA_PUBLIC_BUCKET_NAME}.s3.amazonaws.com/{key}"
     # https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/s3/client/upload_fileobj.html
-    s3_client.upload_fileobj(file.file, S3_TERAKOYA_BUCKET_NAME, key)
+    s3_client.upload_fileobj(file.file, S3_TERAKOYA_PUBLIC_BUCKET_NAME, key)
     __table.update_item(
         Key={
             "uuid": uuid,

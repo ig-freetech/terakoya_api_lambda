@@ -248,6 +248,7 @@ functions:
     handler: functions/hub.lambda_handler
     environment:
       S3_TERAKOYA_BUCKET_NAME: ${env:S3_TERAKOYA_BUCKET_NAME}
+      S3_TERAKOYA_PUBLIC_BUCKET_NAME: terakoya-bucket-public-${self:provider.stage}
       COGNITO_USER_POOL_ID: ${env:COGNITO_USER_POOL_ID}
       COGNITO_USER_POOL_CLIENT_ID: ${env:COGNITO_USER_POOL_CLIENT_ID}
     events:
