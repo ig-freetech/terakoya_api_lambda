@@ -84,6 +84,7 @@ class UserProfile(BaseModel):
     course_choice: COURSE_CHOICE = COURSE_CHOICE.NULL
     # future_path: str = ""
     like_thing: str = ""
+    user_profile_img_url: str = ""
 
     # __init__ method is required to convert DynamoDB item to Pydantic model.
     def __init__(self, **kwargs: Any) -> None:

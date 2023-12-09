@@ -79,7 +79,9 @@
         "github.copilot",
         "eamodio.gitlens",
         // https://qiita.com/take_me/items/ae0772646dd59630a8b5
-        "aaron-bond.better-comments"
+        "aaron-bond.better-comments",
+        // https://marketplace.visualstudio.com/items?itemName=HashiCorp.terraform
+        "hashicorp.terraform"
       ]
     }
   }
