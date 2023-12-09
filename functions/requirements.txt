@@ -45,6 +45,9 @@ email-validator
 # Downgrade to 0.99.1 because of the following issue (No module named 'pydantic_core._pydantic_core' using AWS Lambdas)
 # https://github.com/pydantic/pydantic/issues/6557#issuecomment-1724559815
 fastapi==0.99.1
+# python-multipart is required for FastAPI to handle file upload instead of JSON
+# https://fastapi.tiangolo.com/ja/tutorial/request-forms/
+python-multipart
 # Mangum converts a request and response of FastAPI into event and context of AWS Lambda
 # https://mangum.io/
 mangum
