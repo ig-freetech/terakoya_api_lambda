@@ -41,6 +41,8 @@ def fetch_item(uuid: str, sk: str):
 
 
 def update_item(item: UserItem):
+    current_user_info = UserItem(**fetch_item(item.uuid, item.sk))
+
     # https://docs.aws.amazon.com/ja_jp/amazondynamodb/latest/developerguide/GettingStarted.Python.03.html
     __table.update_item(
         Key={
@@ -97,6 +99,10 @@ def update_item(item: UserItem):
             ":updated_at_iso": DT.CURRENT_JST_ISO_8601_DATETIME,
         }
     )
+
+    # https://note.nkmk.me/python-str-compare/#_1
+    if item.name != current_user_info.name:
+        timeline.update_user_name(item.uuid, item.name)
 
 
 def fetch_profile(uuid: str, sk: str):
