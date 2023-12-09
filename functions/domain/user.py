@@ -7,6 +7,7 @@ ROOT_DIR_PATH = os.path.dirname(os.path.dirname(__file__))
 sys.path.append(ROOT_DIR_PATH)
 
 from conf.env import STAGE, S3_TERAKOYA_PUBLIC_BUCKET_NAME
+from domain import timeline
 from models.user import UserItem, EMPTY_SK
 from utils.aws import dynamodb_resource, s3_client
 from utils.dt import DT
@@ -134,3 +135,4 @@ def update_profile_img(uuid: str, file: UploadFile):
             ":updated_at_iso": DT.CURRENT_JST_ISO_8601_DATETIME,
         }
     )
+    timeline.update_user_profile_img(uuid, s3_img_url)
