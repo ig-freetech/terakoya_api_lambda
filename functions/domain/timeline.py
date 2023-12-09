@@ -351,7 +351,10 @@ def update_user_profile_img(uuid: str, user_profile_img_url: str, timestamp: Opt
             Key={
                 "post_id": p.get("post_id")
             },
-            UpdateExpression="SET user_profile_img_url = :user_profile_img_url",
+            UpdateExpression="SET #user_profile_img_url = :user_profile_img_url",
+            ExpressionAttributeNames={
+                "#user_profile_img_url": "user_profile_img_url"
+            },
             ExpressionAttributeValues={
                 ":user_profile_img_url": user_profile_img_url
             }
@@ -399,7 +402,10 @@ def update_user_profile_img(uuid: str, user_profile_img_url: str, timestamp: Opt
             Key={
                 "comment_id": c.get("comment_id")
             },
-            UpdateExpression="SET user_profile_img_url = :user_profile_img_url",
+            UpdateExpression="SET #user_profile_img_url = :user_profile_img_url",
+            ExpressionAttributeNames={
+                "#user_profile_img_url": "user_profile_img_url"
+            },
             ExpressionAttributeValues={
                 ":user_profile_img_url": user_profile_img_url
             }
@@ -451,7 +457,10 @@ def update_user_name(uuid: str, user_name: str, timestamp: Optional[int] = None)
             Key={
                 "post_id": p.get("post_id")
             },
-            UpdateExpression="SET user_name = :user_name",
+            UpdateExpression="SET #user_name = :user_name",
+            ExpressionAttributeNames={
+                "#user_name": "user_name"
+            },
             ExpressionAttributeValues={
                 ":user_name": user_name,
             }
@@ -499,7 +508,10 @@ def update_user_name(uuid: str, user_name: str, timestamp: Optional[int] = None)
             Key={
                 "comment_id": c.get("comment_id")
             },
-            UpdateExpression="SET user_name = :user_name",
+            UpdateExpression="SET #user_name = :user_name",
+            ExpressionAttributeNames={
+                "#user_name": "user_name"
+            },
             ExpressionAttributeValues={
                 ":user_name": user_name,
             }
