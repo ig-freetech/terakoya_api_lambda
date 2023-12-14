@@ -117,12 +117,13 @@ class UserItem(UserProfile):
     # Authority fields
     is_admin: AUTHORITY = AUTHORITY.NOT_ADMIN
     # Timestamp fields
-    created_at_iso: str = DT.CURRENT_JST_ISO_8601_DATETIME
+    created_at_iso: str
     updated_at_iso: str = ""
 
     # __init__ method is required to convert DynamoDB item to Pydantic model.
     def __init__(self, **kwargs: Any) -> None:
         super().__init__(**kwargs)
+        self.created_at_iso = DT.CURRENT_JST_DATETIME.isoformat()
 
     def to_dynamodb_item(self):
         # Convert Enum to its value
