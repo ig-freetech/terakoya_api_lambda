@@ -1,7 +1,7 @@
 import os
 import sys
 from typing import Any, Dict
-from fastapi import APIRouter, Request, Response, Depends
+from fastapi import APIRouter, Request, Response, Depends, UploadFile, File
 
 FUNCTIONS_DIR_PATH = os.path.dirname(os.path.dirname(__file__))
 sys.path.append(FUNCTIONS_DIR_PATH)
@@ -38,3 +38,13 @@ def get_user_profile(uuid: str, request: Request, response: Response):
         user_profile = user.fetch_profile(uuid, EMPTY_SK)
         return user_profile
     return hub_lambda_handler_wrapper_with_rtn_value(__get_user_profile, request)
+
+@user_router.put("/{uuid}/profile-img")
+def put_profile_img(
+    uuid: str, 
+    request: Request, 
+    response: Response, 
+    # https://fastapi.tiangolo.com/tutorial/request-files/#file-parameters-with-uploadfile
+    file: UploadFile = File(...), 
+    claims: Dict[str, Any] = Depends(authenticate_user)):
+    return hub_lambda_handler_wrapper(lambda: user.update_profile_img(uuid, file), request, {"uuid": uuid, "file": file.__dict__})

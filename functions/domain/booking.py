@@ -1,14 +1,14 @@
 import os
 import sys
-import boto3
 from boto3.dynamodb.conditions import Key, Attr
 
 ROOT_DIR_PATH = os.path.dirname(os.path.dirname(__file__))
 sys.path.append(ROOT_DIR_PATH)
 
-from utils.dt import DT
+from conf.env import STAGE
 from models.booking import REMIND_STATUS, BookingItem, TERAKOYA_TYPE, PLACE
-from conf.env import AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, AWS_DEFAULT_REGION, STAGE
+from utils.aws import dynamodb_resource
+from utils.dt import DT
 
 
 def generate_sk(email: str, terakoya_type: TERAKOYA_TYPE) -> str:
@@ -16,12 +16,7 @@ def generate_sk(email: str, terakoya_type: TERAKOYA_TYPE) -> str:
 
 
 class BookingTable:
-    __table = boto3.resource(
-        "dynamodb",
-        aws_access_key_id=AWS_ACCESS_KEY_ID,
-        aws_secret_access_key=AWS_SECRET_ACCESS_KEY,
-        region_name=AWS_DEFAULT_REGION
-    ).Table(f"terakoya-{STAGE}-booking")
+    __table = dynamodb_resource.Table(f"terakoya-{STAGE}-booking")
 
     @classmethod
     def insert_item(cls, item: BookingItem):

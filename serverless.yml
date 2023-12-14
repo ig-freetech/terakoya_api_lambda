@@ -4,7 +4,7 @@
 # Set the arbitary service name
 service: terakoya
 # frameworkVersion is the version of the Serverless framework that you want to use
-frameworkVersion: '3'
+frameworkVersion: "3"
 # Enable dotenv plugin to load environment variables from .env file
 # https://mseeeen.msen.jp/how-to-set-environment-variables-of-lambda-with-serverless-framework/
 # https://www.serverless.com/plugins/serverless-dotenv-plugin
@@ -28,7 +28,7 @@ custom:
       - http://localhost:3001
       - http://localhost:3002
       - http://localhost:3003
-    prod: 
+    prod:
       - ${env:WEB_CLIENT_ORIGIN}
 
 # General AWS settings
@@ -102,13 +102,13 @@ provider:
     # CORS settings
     # https://www.serverless.com/framework/docs/providers/aws/events/http-api#cors-setup
     cors:
-      # Access-Control-Allow-Credentials header (withCredentials) is not allowed when Access-Control-Allow-Origin is wildcard (*). 
+      # Access-Control-Allow-Credentials header (withCredentials) is not allowed when Access-Control-Allow-Origin is wildcard (*).
       # https://developer.mozilla.org/ja/docs/Web/HTTP/CORS/Errors/CORSNotSupportingCredentials
       # ${self:custom.<property_path>} is used to refer to the property of custom object in serverless.yml
       # https://qiita.com/ktamido/items/24ccfbdaf287bc7855a6#serverlessyml%E5%86%85%E3%81%AE%E3%83%97%E3%83%AD%E3%83%91%E3%83%86%E3%82%A3%E3%81%AE%E5%8F%82%E7%85%A7
       # Only the domains in allowedOrigins can access API Gateway.
       # Add an origin to allowedOrigins when you want to allow a new domain to access API Gateway.
-      allowedOrigins: ${self:custom.allowedLocalhostOrigins.${self:provider.stage}} 
+      allowedOrigins: ${self:custom.allowedLocalhostOrigins.${self:provider.stage}}
       allowedHeaders:
         # Content-Type is required to indicate the media type of the request body sent to API Gateway.
         # https://e-words.jp/w/Content-Type.html
@@ -180,16 +180,16 @@ package:
   # By default, .gitignore is excluded
   # https://www.serverless.com/framework/docs/providers/aws/guide/packaging#patterns
   patterns:
-    - 'functions/**'
-    - '!functions/layer/python/**'
-    - '!functions/tmp/**'
-    - '!functions/requirements.txt'
-    - '!.devcontainer/**'
-    - '!.github/**'
-    - '!docs/**'
-    - '!tests/**'
-    - '!tools/**'
-    - '!README.md'
+    - "functions/**"
+    - "!functions/layer/python/**"
+    - "!functions/tmp/**"
+    - "!functions/requirements.txt"
+    - "!.devcontainer/**"
+    - "!.github/**"
+    - "!docs/**"
+    - "!tests/**"
+    - "!tools/**"
+    - "!README.md"
 
 # Lambda function settings
 # https://www.serverless.com/framework/docs/providers/aws/guide/serverless.yml#general-function-settings
@@ -248,13 +248,14 @@ functions:
     handler: functions/hub.lambda_handler
     environment:
       S3_TERAKOYA_BUCKET_NAME: ${env:S3_TERAKOYA_BUCKET_NAME}
+      S3_TERAKOYA_PUBLIC_BUCKET_NAME: terakoya-bucket-public-${self:provider.stage}
       COGNITO_USER_POOL_ID: ${env:COGNITO_USER_POOL_ID}
       COGNITO_USER_POOL_CLIENT_ID: ${env:COGNITO_USER_POOL_CLIENT_ID}
     events:
       - httpApi:
           # ANY method is used to catch all HTTP methods
           method: any
-          # /{proxy+} route works as a catch-all route that catches all requests that don't match any other route like /book defined above 
+          # /{proxy+} route works as a catch-all route that catches all requests that don't match any other route like /book defined above
           # https://dev.classmethod.jp/articles/api-gateway-adds-three-features/
           # FastAPI returns status code in the range of 400-499 when client sends a request to a route that doesn't exist in FastAPI
           # https://fastapi.tiangolo.com/tutorial/handling-errors/
@@ -277,7 +278,7 @@ resources:
         # Define target service (Principal) to be allowed to assume this Role and actions (Action) of the IAM Role.
         # https://dev.classmethod.jp/articles/iam-role-and-assumerole/
         AssumeRolePolicyDocument:
-          Version: '2012-10-17'
+          Version: "2012-10-17"
           Statement:
             - Effect: Allow
               Principal:
@@ -329,6 +330,82 @@ resources:
             KeyType: HASH
           - AttributeName: sk
             KeyType: RANGE
+        BillingMode: PAY_PER_REQUEST
+    timelinePostTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: ${self:service}-${self:provider.stage}-timeline-post
+        AttributeDefinitions:
+          - AttributeName: post_id
+            AttributeType: S
+          # Add an attribute to be used as a partition key of GSI
+          - AttributeName: pk_for_all_post_gsi
+            AttributeType: S
+          - AttributeName: timestamp
+            AttributeType: N
+          - AttributeName: uuid
+            AttributeType: S
+        KeySchema:
+          - AttributeName: post_id
+            KeyType: HASH
+        # Rename the table name to handle the deploy error "Table already exists" when creating GSI for the existing table
+        # Define GSI
+        # https://docs.aws.amazon.com/ja_jp/AWSCloudFormation/latest/UserGuide/aws-properties-dynamodb-table-globalsecondaryindex.html
+        GlobalSecondaryIndexes:
+          - IndexName: ${self:service}-${self:provider.stage}-timeline-post-all
+            KeySchema:
+              - AttributeName: pk_for_all_post_gsi
+                KeyType: HASH
+              - AttributeName: timestamp
+                KeyType: RANGE
+            Projection:
+              # "ALL" is to project(copy) all attributes of the table into the index
+              # ALL attributes are synced between the table and the index
+              # https://docs.aws.amazon.com/ja_jp/amazondynamodb/latest/developerguide/GSI.html#GSI.Projections
+              ProjectionType: "ALL"
+          - IndexName: ${self:service}-${self:provider.stage}-timeline-post-by-user
+            KeySchema:
+              - AttributeName: uuid
+                KeyType: HASH
+              - AttributeName: timestamp
+                KeyType: RANGE
+            Projection:
+              ProjectionType: "ALL"
+        BillingMode: PAY_PER_REQUEST
+    timelineCommentTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: ${self:service}-${self:provider.stage}-timeline-comment
+        AttributeDefinitions:
+          - AttributeName: comment_id
+            AttributeType: S
+          # Add an attribute to be used as a partition key of GSI
+          - AttributeName: post_id
+            AttributeType: S
+          - AttributeName: timestamp
+            AttributeType: N
+          - AttributeName: uuid
+            AttributeType: S
+        KeySchema:
+          - AttributeName: comment_id
+            KeyType: HASH
+        GlobalSecondaryIndexes:
+          - IndexName: ${self:service}-${self:provider.stage}-timeline-comment-for-post
+            KeySchema:
+              - AttributeName: post_id
+                KeyType: HASH
+              - AttributeName: timestamp
+                KeyType: RANGE
+            Projection:
+              ProjectionType: "ALL"
+          - IndexName: ${self:service}-${self:provider.stage}-timeline-comment-by-user
+            KeySchema:
+              - AttributeName: uuid
+                KeyType: HASH
+              - AttributeName: timestamp
+                KeyType: RANGE
+            Projection:
+              ProjectionType: "ALL"
         BillingMode: PAY_PER_REQUEST
     # Cognito User Pool is like a database that stores user authentication information
     # https://zenn.dev/naok_1207/articles/d66a4a1d914000#userpool-%E3%81%AE%E3%82%AA%E3%83%97%E3%82%B7%E3%83%A7%E3%83%B3%E3%81%AB%E3%81%A4%E3%81%84%E3%81%A6
@@ -408,9 +485,9 @@ resources:
           # TODO: Run the following command to assume resource-based policy to PostConfirmation lambda function in order to allow Cognito User Pool to invoke Lambda function.
           # ? aws lambda add-permission --function-name arn:aws:lambda:<region>:<account_id>:function:<function_name> --statement-id <sid> --action lambda:InvokeFunction --principal cognito-idp.amazonaws.com --source-arn arn:aws:cognito-idp:<region>:<account_id>:userpool:<user_pool_id> --region <region>
           # ! It's impossible to assume resource-based policy to Lambda function via Serverless Framework. So, you need to do on AWS console or via AWS CLI.
-          # https://dev.classmethod.jp/articles/cognito-lambda-trigger-version-alias/ 
+          # https://dev.classmethod.jp/articles/cognito-lambda-trigger-version-alias/
           # https://docs.aws.amazon.com/cognito/latest/developerguide/cognito-user-identity-pools-working-with-aws-lambda-triggers.html#important-lambda-considerations
-          PostConfirmation: 
+          PostConfirmation:
             # Fn::GetAtt: [logicalNameOfResource, attributeName] is to get an attribute value of a resource
             # https://docs.aws.amazon.com/ja_jp/AWSCloudFormation/latest/UserGuide/intrinsic-function-reference-getatt.html
             # Define a lambda function in the shape of <funcName in PascalCase>LambdaFunction.
@@ -428,13 +505,13 @@ resources:
         # Allow authentification flows to be used
         # https://qiita.com/KWS_0901/items/083c6e903616b3c5e838#cognito-identity-provider-api%E5%88%A9%E7%94%A8
         # https://docs.aws.amazon.com/cognito-user-identity-pools/latest/APIReference/API_UserPoolClientType.html#CognitoUserPools-Type-UserPoolClientType-ExplicitAuthFlows
-        ExplicitAuthFlows: 
-          # Once authentication is successful, Cognito issues three JWTs (JSON Web Tokens): an ID token, an access token, and a refresh token. 
+        ExplicitAuthFlows:
+          # Once authentication is successful, Cognito issues three JWTs (JSON Web Tokens): an ID token, an access token, and a refresh token.
           # The access token and ID token have an expiration date (1 hour by default), and when they expire, the user is asked to authenticate again.
           # However, with a refresh token, the user can obtain a new ID token and access token without having to authenticate again.
           # Refresh tokens are valid for 30 days by default.
           # https://zenn.dev/takamin55/articles/8442a7583fe5fa
-          
+
           # ID token: Contains user profile attributes (such as username, email, and phone number) in the form of claims and represents who the user is.
           # Access token: indicates what the user can do, i.e., what operations can be performed on which resources.
 
@@ -467,3 +544,16 @@ resources:
         # If a client secret is not generated, parts of OAuth 2.0 flows will not work.
         # https://docs.aws.amazon.com/ja_jp/cognito/latest/developerguide/user-pool-settings-client-apps.html
         GenerateSecret: false
+        # The expiration of Access Token is 1 hour by default.
+        # https://docs.aws.amazon.com/cognito/latest/developerguide/cognito-user-pools-app-integration.html#cognito-user-pools-create-an-app-integration
+        # Set the expiration of Access Token to 24 hours.
+        # https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-resource-cognito-userpoolclient.html#aws-resource-cognito-userpoolclient-properties
+        AccessTokenValidity: 24
+        # Set the expiration of Refresh Token to 30 days.
+        RefreshTokenValidity: 30
+        # Specify the time units for each token validity
+        # https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-resource-cognito-userpoolclient.html#cfn-cognito-userpoolclient-tokenvalidityunits
+        TokenValidityUnits:
+          # https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-cognito-userpoolclient-tokenvalidityunits.html
+          AccessToken: hours
+          RefreshToken: days

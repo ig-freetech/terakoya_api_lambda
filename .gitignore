@@ -13,6 +13,12 @@ python
 # Serverless framework
 .serverless
 
+# Terraform
+.terraform
+.terraform.lock.hcl
+terraform.tfstate
+terraform.tfstate.backup
+
 # AWS
 .aws
 
