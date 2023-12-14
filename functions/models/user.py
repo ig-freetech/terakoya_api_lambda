@@ -117,7 +117,7 @@ class UserItem(UserProfile):
     # Authority fields
     is_admin: AUTHORITY = AUTHORITY.NOT_ADMIN
     # Timestamp fields
-    created_at_iso: str
+    created_at_iso: str = ""
     updated_at_iso: str = ""
 
     # __init__ method is required to convert DynamoDB item to Pydantic model.

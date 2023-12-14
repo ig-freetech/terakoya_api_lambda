@@ -27,7 +27,7 @@ class Reaction(BaseModel):
 class BaseTimelineItem(BaseModel):
     uuid: str
     """UID of user who posted/commented"""
-    timestamp: int
+    timestamp: int = -1
     """Timestamp of post/comment"""
     user_name: str = ""
     """Nick name of user who posted/commented"""
@@ -44,7 +44,7 @@ class BaseTimelineItem(BaseModel):
 class CommentItem(BaseTimelineItem):
     post_id: str
     """Parent post id"""
-    comment_id: str
+    comment_id: str = ""
     """UID of comment"""
 
     def __init__(self, **kwargs: Any) -> None:
@@ -56,7 +56,7 @@ class CommentItem(BaseTimelineItem):
 class PostItem(BaseTimelineItem):
     comment_count: int = 0
     """List of comment_id"""
-    post_id: str
+    post_id: str = ""
     """UID of post (used for URL)"""
     pk_for_all_post_gsi: str = PK_FOR_ALL_POST_GSI
     """Partition key for GSI"""
