@@ -2,7 +2,6 @@ import os
 import sys
 from typing import Any, Dict, Optional
 from dataclasses import dataclass
-import boto3
 from jose import jwt, jwk, JWTError
 import requests
 from fastapi import Request, Response, HTTPException, status
@@ -10,11 +9,8 @@ from fastapi import Request, Response, HTTPException, status
 ROOT_DIR_PATH = os.path.dirname(os.path.dirname(__file__))
 sys.path.append(ROOT_DIR_PATH)
 
-from conf.env import AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, AWS_DEFAULT_REGION, COGNITO_USER_POOL_ID, COGNITO_USER_POOL_CLIENT_ID
-
-cognito = boto3.client('cognito-idp', aws_access_key_id=AWS_ACCESS_KEY_ID,
-                       aws_secret_access_key=AWS_SECRET_ACCESS_KEY,
-                       region_name=AWS_DEFAULT_REGION)
+from conf.env import AWS_DEFAULT_REGION, COGNITO_USER_POOL_ID, COGNITO_USER_POOL_CLIENT_ID
+from utils.aws import cognito_client
 
 if COGNITO_USER_POOL_CLIENT_ID == None or COGNITO_USER_POOL_ID == None:
     print("COGNITO_USER_POOL_CLIENT_ID or COGNITO_USER_POOL_ID is None")
@@ -65,7 +61,7 @@ def set_cookie_secured(fastApiResponse: Response, key: str, value: str):
 def issue_new_access_token(refresh_token: str, fastApiResponse: Response):
     try:
         # Get new access token by using refresh token.
-        response = cognito.initiate_auth(
+        response = cognito_client.initiate_auth(
             ClientId=COGNITO_USER_POOL_CLIENT_ID,
             AuthFlow="REFRESH_TOKEN_AUTH",
             AuthParameters={
@@ -75,7 +71,7 @@ def issue_new_access_token(refresh_token: str, fastApiResponse: Response):
         auth_result = response['AuthenticationResult']
         set_cookie_secured(fastApiResponse, 'access_token', auth_result['AccessToken'])
         set_cookie_secured(fastApiResponse, 'refresh_token', auth_result['RefreshToken'])
-    except cognito.exceptions.NotAuthorizedException:
+    except cognito_client.exceptions.NotAuthorizedException:
         # Delete credentials from cookie if refresh token is expired.
         print("Invalid refresh token")
         delete_tokens_from_cookie(fastApiResponse)
@@ -187,7 +183,7 @@ def authenticate_user(fastApiResponse: Response, request: Request, access_token:
 def signup(email: str, password: str):
     try:
         # https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/cognito-idp/client/sign_up.html
-        response = cognito.sign_up(
+        response = cognito_client.sign_up(
             ClientId=COGNITO_USER_POOL_CLIENT_ID,
             Username=email,
             Password=password,
@@ -210,9 +206,9 @@ def signup(email: str, password: str):
         return {"uuid": response['UserSub']}  # Return the UUID for testing.
     # If the specified email is already exists, UsernameExistsException is raised.
     # https://docs.aws.amazon.com/ja_jp/cognito/latest/developerguide/cognito-user-pool-managing-errors.html
-    except cognito.exceptions.UsernameExistsException:
+    except cognito_client.exceptions.UsernameExistsException:
         # https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/cognito-idp/client/admin_get_user.html
-        response = cognito.admin_get_user(
+        response = cognito_client.admin_get_user(
             UserPoolId=COGNITO_USER_POOL_ID,
             Username=email
         )
@@ -228,7 +224,7 @@ def signup(email: str, password: str):
                 )
             elif attr['Name'] == 'email_verified' and attr.get('Value') == 'false':
                 # If email is not yet verified
-                cognito.resend_confirmation_code(
+                cognito_client.resend_confirmation_code(
                     ClientId=COGNITO_USER_POOL_CLIENT_ID,
                     Username=email
                 )
@@ -239,7 +235,7 @@ def signup(email: str, password: str):
                 )
         # response['Username'] is the UUID of the authenticated user.
         return {"uuid": response['Username']}  # Return the UUID for testing.
-    except cognito.exceptions.InvalidPasswordException:
+    except cognito_client.exceptions.InvalidPasswordException:
         print("Password did not conform with policy: Password must have numeric characters")
         raise HTTPException(
             status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
@@ -260,7 +256,7 @@ def signin(email: str, password: str):
     try:
         # Get tokens by using email and password.
         # https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/cognito-idp/client/initiate_auth.html
-        response = cognito.initiate_auth(
+        response = cognito_client.initiate_auth(
             ClientId=COGNITO_USER_POOL_CLIENT_ID,
             AuthFlow='USER_PASSWORD_AUTH',
             AuthParameters={
@@ -273,13 +269,13 @@ def signin(email: str, password: str):
         access_token = auth_result['AccessToken']
         refresh_token = auth_result['RefreshToken']
         return SigninResponse(access_token, refresh_token)  # To fetch item from User table in DynamoDB
-    except cognito.exceptions.NotAuthorizedException:
+    except cognito_client.exceptions.NotAuthorizedException:
         print("Invalid email or password")
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="メールアドレスまたはパスワードが間違っています。"
         )
-    except cognito.exceptions.UserNotConfirmedException:
+    except cognito_client.exceptions.UserNotConfirmedException:
         print("User is not confirmed. Please confirm your email.")
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
@@ -290,10 +286,10 @@ def signin(email: str, password: str):
 def delete_user(access_token: str, fastApiResponse: Response):
     try:
         # https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/cognito-idp/client/delete_user.html
-        cognito.delete_user(
+        cognito_client.delete_user(
             AccessToken=access_token
         )
-    except cognito.exceptions.NotAuthorizedException:
+    except cognito_client.exceptions.NotAuthorizedException:
         print("Invalid access token. User deletion failed.")
         delete_tokens_from_cookie(fastApiResponse)
         raise HTTPException(

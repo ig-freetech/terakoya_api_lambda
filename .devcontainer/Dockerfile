@@ -19,6 +19,21 @@ RUN curl "https://awscli.amazonaws.com/awscli-exe-linux-aarch64.zip" -o "awscliv
     unzip awscliv2.zip && \
     ./aws/install
 
+# Install terraform
+# https://developer.hashicorp.com/terraform/install
+# terraform can be executed if AWS credentials are set in ~/.aws/credentials
+# https://registry.terraform.io/providers/hashicorp/aws/latest/docs#shared-configuration-and-credentials-files
+RUN yum install -y yum-utils shadow-utils && \
+    yum-config-manager --add-repo https://rpm.releases.hashicorp.com/AmazonLinux/hashicorp.repo && \
+    yum -y install terraform && \
+    # Check if terraform is installed successfully
+    terraform version
+
+
+# Enable debug log for terraform
+# https://developer.hashicorp.com/terraform/internals/debugging
+# ENV TF_LOG DEBUG
+
 # Current working directory is / (root) by default when Dockerfile is built and each commands (ex: RUN, COPY) are executed.
 # https://christina04.hatenablog.com/entry/2014/10/31/101510
 WORKDIR /workspaces/terakoya_backend
@@ -44,7 +59,7 @@ RUN pip install --no-cache-dir -r ./tests/requirements.txt
 # Install packages for development that are not needed in production
 # uvicorn works as a ASGI server to run FastAPI on local
 # https://www.uvicorn.org/
-RUN pip install autopep8 uvicorn
+RUN pip install uvicorn
 
 # Copy aws credentials to use AWS toolkit extension
 # https://docs.aws.amazon.com/ja_jp/cli/latest/userguide/cli-configure-files.html

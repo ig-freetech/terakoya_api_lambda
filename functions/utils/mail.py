@@ -6,14 +6,14 @@ from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from email.mime.image import MIMEImage
 from email.policy import SMTPUTF8
-import boto3
 from botocore.exceptions import ClientError
 
 FUNCTIONS_DIR_PATH = os.path.dirname(os.path.dirname(__file__))
 sys.path.append(FUNCTIONS_DIR_PATH)
 
-from conf.env import AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, AWS_DEFAULT_REGION, TERAKOYA_GMAIL_ADDRESS
+from conf.env import TERAKOYA_GMAIL_ADDRESS
 from conf.util import IS_PROD
+from utils.aws import ses_client
 
 
 class IMail(metaclass=ABCMeta):
@@ -57,13 +57,6 @@ GMAIL_ACCOUNT = "" if TERAKOYA_GMAIL_ADDRESS is None else TERAKOYA_GMAIL_ADDRESS
 
 
 class SesMail(IMail):
-    __client = boto3.client(
-        "ses",
-        aws_access_key_id=AWS_ACCESS_KEY_ID,
-        aws_secret_access_key=AWS_SECRET_ACCESS_KEY,
-        region_name=AWS_DEFAULT_REGION
-    )
-
     def __init__(self, mail_from: str) -> None:
         super().__init__(mail_from)
 
@@ -71,7 +64,7 @@ class SesMail(IMail):
         self.write_to_mime(mail_to, subject, body, mail_cc, img_fpath)
         try:
             # https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/ses.html#SES.Client.send_raw_email
-            response = self.__client.send_raw_email(
+            response = ses_client.send_raw_email(
                 RawMessage={
                     "Data": self.msg.as_string(),
                 },

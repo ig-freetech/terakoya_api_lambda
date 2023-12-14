@@ -4,3 +4,4 @@
 from .booking import booking_router
 from .authentication import authentication_router
 from .user import user_router
+from .timeline import timeline_router
