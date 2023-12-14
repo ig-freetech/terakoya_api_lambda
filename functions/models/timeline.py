@@ -49,8 +49,10 @@ class CommentItem(BaseTimelineItem):
 
     def __init__(self, **kwargs: Any) -> None:
         super().__init__(**kwargs)
-        self.comment_id = uuid.uuid4().hex
-        self.timestamp = int(DT.CURRENT_JST_DATETIME.timestamp())
+        if self.comment_id == "":
+            self.comment_id = uuid.uuid4().hex
+        if self.timestamp == -1:
+            self.timestamp = int(DT.CURRENT_JST_DATETIME.timestamp())
 
 
 class PostItem(BaseTimelineItem):
@@ -67,9 +69,11 @@ class PostItem(BaseTimelineItem):
 
         # The same value is used by all instances of PostItem during the same process if uuid.uuid4().hex is set in class level.
         # Lambda process for production runs longer than development environment.
-        # uuid.uuid4() generates random UUID.
-        # https://yumarublog.com/python/uuid/
-        # .hex returns UUID string without hyphens.
-        # https://www.python.ambitious-engineer.com/archives/1436
-        self.post_id = uuid.uuid4().hex
-        self.timestamp = int(DT.CURRENT_JST_DATETIME.timestamp())
+        if self.post_id == "":
+            # uuid.uuid4() generates random UUID.
+            # https://yumarublog.com/python/uuid/
+            # .hex returns UUID string without hyphens.
+            # https://www.python.ambitious-engineer.com/archives/1436
+            self.post_id = uuid.uuid4().hex
+        if self.timestamp == -1:
+            self.timestamp = int(DT.CURRENT_JST_DATETIME.timestamp())

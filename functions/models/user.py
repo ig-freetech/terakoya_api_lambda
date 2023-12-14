@@ -123,7 +123,8 @@ class UserItem(UserProfile):
     # __init__ method is required to convert DynamoDB item to Pydantic model.
     def __init__(self, **kwargs: Any) -> None:
         super().__init__(**kwargs)
-        self.created_at_iso = DT.CURRENT_JST_DATETIME.isoformat()
+        if self.created_at_iso == "":
+            self.created_at_iso = DT.CURRENT_JST_DATETIME.isoformat()
 
     def to_dynamodb_item(self):
         # Convert Enum to its value
