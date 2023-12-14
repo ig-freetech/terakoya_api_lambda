@@ -4,6 +4,7 @@ from decimal import Decimal
 from typing import List
 import requests
 import json
+import pytest
 
 ROOT_DIR_PATH = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
 sys.path.append(ROOT_DIR_PATH)
@@ -14,6 +15,12 @@ from tests.utils.const import base_url, headers
 from functions.utils.dt import DT
 from functions.models.timeline import CommentItem, PostItem, Reaction
 from functions.domain import timeline
+from functions.conf.util import IS_PROD
+
+if IS_PROD:
+    # allow_module_level=True is required to skip the test on the module(file) level
+    # https://docs.pytest.org/en/7.1.x/how-to/skipping.html
+    pytest.skip("Skip the test for production environment", allow_module_level=True)
 
 class TestFunc:
     def test_post_timeline_item(self):
