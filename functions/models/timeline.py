@@ -27,7 +27,7 @@ class Reaction(BaseModel):
 class BaseTimelineItem(BaseModel):
     uuid: str
     """UID of user who posted/commented"""
-    timestamp: int = int(DT.CURRENT_JST_DATETIME.timestamp())
+    timestamp: int
     """Timestamp of post/comment"""
     user_name: str = ""
     """Nick name of user who posted/commented"""
@@ -44,21 +44,19 @@ class BaseTimelineItem(BaseModel):
 class CommentItem(BaseTimelineItem):
     post_id: str
     """Parent post id"""
-    comment_id: str = uuid.uuid4().hex
+    comment_id: str
     """UID of comment"""
 
     def __init__(self, **kwargs: Any) -> None:
         super().__init__(**kwargs)
+        self.comment_id = uuid.uuid4().hex
+        self.timestamp = int(DT.CURRENT_JST_DATETIME.timestamp())
 
 
 class PostItem(BaseTimelineItem):
     comment_count: int = 0
     """List of comment_id"""
-    # uuid.uuid4() generates random UUID.
-    # https://yumarublog.com/python/uuid/
-    # .hex returns UUID string without hyphens.
-    # https://www.python.ambitious-engineer.com/archives/1436
-    post_id: str = uuid.uuid4().hex
+    post_id: str
     """UID of post (used for URL)"""
     pk_for_all_post_gsi: str = PK_FOR_ALL_POST_GSI
     """Partition key for GSI"""
@@ -66,3 +64,12 @@ class PostItem(BaseTimelineItem):
     # __init__ method is required to convert DynamoDB item to Pydantic model.
     def __init__(self, **kwargs: Any) -> None:
         super().__init__(**kwargs)
+
+        # The same value is used by all instances of PostItem during the same process if uuid.uuid4().hex is set in class level.
+        # Lambda process for production runs longer than development environment.
+        # uuid.uuid4() generates random UUID.
+        # https://yumarublog.com/python/uuid/
+        # .hex returns UUID string without hyphens.
+        # https://www.python.ambitious-engineer.com/archives/1436
+        self.post_id = uuid.uuid4().hex
+        self.timestamp = int(DT.CURRENT_JST_DATETIME.timestamp())
