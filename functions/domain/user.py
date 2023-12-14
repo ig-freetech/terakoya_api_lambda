@@ -1,13 +1,15 @@
-from decimal import Decimal
 import os
 import sys
+from decimal import Decimal
+from fastapi import UploadFile, HTTPException
 
 ROOT_DIR_PATH = os.path.dirname(os.path.dirname(__file__))
 sys.path.append(ROOT_DIR_PATH)
 
-from conf.env import STAGE
-from models.user import UserItem
-from utils.aws import dynamodb_resource
+from conf.env import STAGE, S3_TERAKOYA_PUBLIC_BUCKET_NAME
+from domain import timeline
+from models.user import UserItem, EMPTY_SK
+from utils.aws import dynamodb_resource, s3_client
 from utils.dt import DT
 
 __table = dynamodb_resource.Table(f"terakoya-{STAGE}-user")
@@ -39,6 +41,8 @@ def fetch_item(uuid: str, sk: str):
 
 
 def update_item(item: UserItem):
+    current_user_info = UserItem(**fetch_item(item.uuid, item.sk))
+
     # https://docs.aws.amazon.com/ja_jp/amazondynamodb/latest/developerguide/GettingStarted.Python.03.html
     __table.update_item(
         Key={
@@ -96,8 +100,45 @@ def update_item(item: UserItem):
         }
     )
 
+    # https://note.nkmk.me/python-str-compare/#_1
+    if item.name != current_user_info.name:
+        timeline.update_user_name(item.uuid, item.name)
+
 
 def fetch_profile(uuid: str, sk: str):
     user_item = UserItem(**fetch_item(uuid, sk))
     profile = user_item.to_profile()
     return profile.dict()
+
+def update_profile_img(uuid: str, file: UploadFile):
+    fname = file.filename
+    if fname is None:
+        raise HTTPException(status_code=400, detail="Profile image file name is not specified.")
+    
+    if S3_TERAKOYA_PUBLIC_BUCKET_NAME is None:
+        raise HTTPException(status_code=500, detail="S3_TERAKOYA_BUCKET_NAME is not set.")
+
+    key = f"users/{uuid}/{fname}"
+    s3_img_url = f"https://{S3_TERAKOYA_PUBLIC_BUCKET_NAME}.s3.amazonaws.com/{key}"
+    # https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/s3/client/upload_fileobj.html
+    s3_client.upload_fileobj(file.file, S3_TERAKOYA_PUBLIC_BUCKET_NAME, key)
+    __table.update_item(
+        Key={
+            "uuid": uuid,
+            "sk": EMPTY_SK
+        },
+        UpdateExpression="""
+            set
+            #user_profile_img_url = :user_profile_img_url,
+            #updated_at_iso = :updated_at_iso
+        """,
+        ExpressionAttributeNames={
+            "#user_profile_img_url": "user_profile_img_url",
+            "#updated_at_iso": "updated_at_iso"
+        },
+        ExpressionAttributeValues={
+            ":user_profile_img_url": s3_img_url,
+            ":updated_at_iso": DT.CURRENT_JST_ISO_8601_DATETIME,
+        }
+    )
+    timeline.update_user_profile_img(uuid, s3_img_url)

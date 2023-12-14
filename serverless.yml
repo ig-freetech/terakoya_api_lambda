@@ -248,6 +248,7 @@ functions:
     handler: functions/hub.lambda_handler
     environment:
       S3_TERAKOYA_BUCKET_NAME: ${env:S3_TERAKOYA_BUCKET_NAME}
+      S3_TERAKOYA_PUBLIC_BUCKET_NAME: terakoya-bucket-public-${self:provider.stage}
       COGNITO_USER_POOL_ID: ${env:COGNITO_USER_POOL_ID}
       COGNITO_USER_POOL_CLIENT_ID: ${env:COGNITO_USER_POOL_CLIENT_ID}
     events:
@@ -395,7 +396,7 @@ resources:
                 KeyType: HASH
               - AttributeName: timestamp
                 KeyType: RANGE
-            Projection: 
+            Projection:
               ProjectionType: "ALL"
           - IndexName: ${self:service}-${self:provider.stage}-timeline-comment-by-user
             KeySchema:
@@ -403,7 +404,7 @@ resources:
                 KeyType: HASH
               - AttributeName: timestamp
                 KeyType: RANGE
-            Projection: 
+            Projection:
               ProjectionType: "ALL"
         BillingMode: PAY_PER_REQUEST
     # Cognito User Pool is like a database that stores user authentication information
@@ -543,3 +544,16 @@ resources:
         # If a client secret is not generated, parts of OAuth 2.0 flows will not work.
         # https://docs.aws.amazon.com/ja_jp/cognito/latest/developerguide/user-pool-settings-client-apps.html
         GenerateSecret: false
+        # The expiration of Access Token is 1 hour by default.
+        # https://docs.aws.amazon.com/cognito/latest/developerguide/cognito-user-pools-app-integration.html#cognito-user-pools-create-an-app-integration
+        # Set the expiration of Access Token to 24 hours.
+        # https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-resource-cognito-userpoolclient.html#aws-resource-cognito-userpoolclient-properties
+        AccessTokenValidity: 24
+        # Set the expiration of Refresh Token to 30 days.
+        RefreshTokenValidity: 30
+        # Specify the time units for each token validity
+        # https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-resource-cognito-userpoolclient.html#cfn-cognito-userpoolclient-tokenvalidityunits
+        TokenValidityUnits:
+          # https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-cognito-userpoolclient-tokenvalidityunits.html
+          AccessToken: hours
+          RefreshToken: days

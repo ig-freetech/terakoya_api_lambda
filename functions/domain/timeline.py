@@ -305,13 +305,16 @@ def fetch_comment_item(comment_id: str):
     return dict(comment_item)
 
 
-def update_user_info(uuid: str, user_name: str, user_profile_img_url: str, timestamp: Optional[int] = None):
-    print(f"uuid: {uuid}, user_name: {user_name}, user_profile_img_url: {user_profile_img_url}, timestamp: {timestamp}")
+def update_user_profile_img(uuid: str, user_profile_img_url: str, timestamp: Optional[int] = None):
+    print(f"uuid: {uuid}, user_profile_img_url: {user_profile_img_url}, timestamp: {timestamp}")
 
     posts = []
     post_query_params = {
         "IndexName": f"terakoya-{STAGE}-timeline-post-by-user",
-        "KeyConditionExpression": 'uuid = :value',
+        "KeyConditionExpression": '#uuid = :value',
+        "ExpressionAttributeNames": {
+            '#uuid': 'uuid'
+        },
         "ExpressionAttributeValues": {
             ':value': uuid
         },
@@ -351,16 +354,21 @@ def update_user_info(uuid: str, user_name: str, user_profile_img_url: str, times
             Key={
                 "post_id": p.get("post_id")
             },
-            UpdateExpression="SET user_name = :user_name, user_profile_img_url = :user_profile_img_url",
+            UpdateExpression="SET #user_profile_img_url = :user_profile_img_url",
+            ExpressionAttributeNames={
+                "#user_profile_img_url": "user_profile_img_url"
+            },
             ExpressionAttributeValues={
-                ":user_name": user_name,
                 ":user_profile_img_url": user_profile_img_url
             }
         )
 
     comment_query_params = {
         "IndexName": f"terakoya-{STAGE}-timeline-comment-by-user",
-        "KeyConditionExpression": 'uuid = :value',
+        "KeyConditionExpression": '#uuid = :value',
+        "ExpressionAttributeNames": {
+            '#uuid': 'uuid'
+        },
         "ExpressionAttributeValues": {
             ':value': uuid
         },
@@ -400,10 +408,124 @@ def update_user_info(uuid: str, user_name: str, user_profile_img_url: str, times
             Key={
                 "comment_id": c.get("comment_id")
             },
-            UpdateExpression="SET user_name = :user_name, user_profile_img_url = :user_profile_img_url",
+            UpdateExpression="SET #user_profile_img_url = :user_profile_img_url",
+            ExpressionAttributeNames={
+                "#user_profile_img_url": "user_profile_img_url"
+            },
+            ExpressionAttributeValues={
+                ":user_profile_img_url": user_profile_img_url
+            }
+        )
+
+def update_user_name(uuid: str, user_name: str, timestamp: Optional[int] = None):
+    print(f"uuid: {uuid}, user_name: {user_name}, timestamp: {timestamp}")
+
+    posts = []
+    post_query_params = {
+        "IndexName": f"terakoya-{STAGE}-timeline-post-by-user",
+        "KeyConditionExpression": '#uuid = :value',
+        "ExpressionAttributeNames": {
+            '#uuid': 'uuid'
+        },
+        "ExpressionAttributeValues": {
+            ':value': uuid
+        },
+        "Limit": 100,
+    }
+
+    if timestamp:
+        post_query_params["ExclusiveStartKey"] = {
+            "uuid": uuid,
+            "timestamp": timestamp
+        }
+
+    response = __post_table.query(**post_query_params)
+
+    posts = response.get("Items", [])
+
+    last_evaluated_key = response.get("LastEvaluatedKey", None)
+    timestamp = last_evaluated_key.get(
+        "timestamp", None) if last_evaluated_key else None
+
+    while timestamp is not None:
+        post_query_params["ExclusiveStartKey"] = {
+            "uuid": uuid,
+            "timestamp": timestamp
+        }
+
+        response = __post_table.query(**post_query_params)
+
+        posts += response.get("Items", [])
+
+        last_evaluated_key = response.get("LastEvaluatedKey", None)
+        timestamp = last_evaluated_key.get(
+            "timestamp", None) if last_evaluated_key else None
+
+    for p in posts:
+        __post_table.update_item(
+            Key={
+                "post_id": p.get("post_id")
+            },
+            UpdateExpression="SET #user_name = :user_name",
+            ExpressionAttributeNames={
+                "#user_name": "user_name"
+            },
             ExpressionAttributeValues={
                 ":user_name": user_name,
-                ":user_profile_img_url": user_profile_img_url
+            }
+        )
+
+    comment_query_params = {
+        "IndexName": f"terakoya-{STAGE}-timeline-comment-by-user",
+        "KeyConditionExpression": '#uuid = :value',
+        "ExpressionAttributeNames": {
+            '#uuid': 'uuid'
+        },
+        "ExpressionAttributeValues": {
+            ':value': uuid
+        },
+        "Limit": 100,
+    }
+
+    if timestamp:
+        comment_query_params["ExclusiveStartKey"] = {
+            "uuid": uuid,
+            "timestamp": timestamp
+        }
+
+    response = __comment_table.query(**comment_query_params)
+
+    comments = response.get("Items", [])
+
+    last_evaluated_key = response.get("LastEvaluatedKey", None)
+    timestamp = last_evaluated_key.get(
+        "timestamp", None) if last_evaluated_key else None
+
+    while timestamp is not None:
+        comment_query_params["ExclusiveStartKey"] = {
+            "uuid": uuid,
+            "timestamp": timestamp
+        }
+
+        response = __comment_table.query(**comment_query_params)
+
+        comments += response.get("Items", [])
+
+        last_evaluated_key = response.get("LastEvaluatedKey", None)
+        timestamp = last_evaluated_key.get(
+            "timestamp", None) if last_evaluated_key else None
+
+    for c in comments:
+        __comment_table.update_item(
+            Key={
+                "comment_id": c.get("comment_id")
+            },
+            UpdateExpression="SET #user_name = :user_name",
+            ExpressionAttributeNames={
+                "#user_name": "user_name"
+            },
+            ExpressionAttributeValues={
+                ":user_name": user_name,
             }
         )
 
