@@ -316,3 +316,52 @@ def delete_tokens_from_cookie(fastApiResponse: Response):
     # finally:
     #     fastApiResponse.delete_cookie('access_token')
     #     fastApiResponse.delete_cookie('refresh_token')
+
+def send_verification_code_for_forgot_password(email: str):
+    try:
+        # Confirmation code is expired in 24 hours.
+        # https://docs.aws.amazon.com/cognito/latest/developerguide/how-to-recover-a-user-account.html
+        # https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/cognito-idp/client/forgot_password.html
+        cognito_client.forgot_password(
+            ClientId=COGNITO_USER_POOL_CLIENT_ID,
+            Username=email
+        )
+    except cognito_client.exceptions.UserNotFoundException:
+        print("User doesn't exist whose email is specified.")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="指定されたメールアドレスで登録されたユーザーは存在しません。"
+        )
+    
+def reset_password(email: str, confirmation_code: str, new_password: str):
+    try:
+        cognito_client.confirm_forgot_password(
+            ClientId=COGNITO_USER_POOL_CLIENT_ID,
+            Username=email,
+            ConfirmationCode=confirmation_code,
+            Password=new_password
+        )
+    except cognito_client.exceptions.UserNotFoundException:
+        print("User doesn't exist whose email is specified.")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="指定されたメールアドレスで登録されたユーザーは存在しません。"
+        )
+    except cognito_client.exceptions.CodeMismatchException:
+        print("Invalid confirmation code.")
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="認証コードが間違っています。"
+        )
+    except cognito_client.exceptions.ExpiredCodeException:
+        print("Confirmation code is expired.")
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="認証コードの有効期限が切れています。"
+        )
+    except cognito_client.exceptions.InvalidPasswordException:
+        print("Password did not conform with policy: Password must have numeric characters")
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail="パスワードは半角英数字8文字以上で、アルファベットと数字をそれぞれ1文字以上含む必要があります。"
+        )

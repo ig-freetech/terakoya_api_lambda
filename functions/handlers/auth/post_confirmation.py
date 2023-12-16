@@ -15,6 +15,10 @@ slack_error_notifier = SlackErrorNotification()
 def lambda_handler(event, context):
     print(f"event: {event}")
     try:
+        if event["triggerSource"] != "PostConfirmation_ConfirmSignUp":
+            print("Trigger is not from user sign-up. So, finish this lambda function without doing anything.")
+            return event
+        
         user_name = event['userName']
         user_email = event['request']['userAttributes']['email']
         user_item = UserItem(uuid=user_name, email=user_email)

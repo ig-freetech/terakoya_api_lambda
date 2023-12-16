@@ -89,3 +89,25 @@ def refresh_token(response: Response, request: Request, refresh_token: Annotated
         )
     print(f"refresh_token: ${refresh_token}")
     return hub_lambda_handler_wrapper(lambda: auth.issue_new_access_token(refresh_token, response), request)
+
+class ForgotPasswordRequestBody(BaseModel):
+    email: str
+
+@authentication_router.post("/forgot-password")
+def forgot_password(request: Request, response: Response, request_body: ForgotPasswordRequestBody):
+    return hub_lambda_handler_wrapper(lambda: auth.send_verification_code_for_forgot_password(
+        request_body.email
+    ), request, request_data=request_body.dict())
+
+class ResetPasswordRequestBody(BaseModel):
+    email: str
+    confirmation_code: str
+    new_password: str
+
+@authentication_router.post("/reset-password")
+def reset_password(request: Request, response: Response, request_body: ResetPasswordRequestBody):
+    return hub_lambda_handler_wrapper(lambda: auth.reset_password(
+        email=request_body.email, 
+        confirmation_code=request_body.confirmation_code, 
+        new_password=request_body.new_password
+    ), request, request_data=request_body.dict())
