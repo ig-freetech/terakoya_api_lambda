@@ -28,6 +28,8 @@ class TERAKOYA_TYPE(Enum):
     """テラコヤ中等部(池袋)"""
     MID_SHIBU = 4
     """テラコヤ中等部(渋谷)"""
+    HIBARI = 5
+    """ひばりヶ丘校"""
 
 
 class ARRIVAL_TIME(Enum):
@@ -139,6 +141,8 @@ class PLACE(Enum):
     CAREER_MOM = 4
     """キャリア・マム"""
     KIKAGAKU = 5
+    """ひばりヶ丘校"""
+    HIBARI = 6
     """キカガク"""
     NULL = -1
     """NULL"""
@@ -149,6 +153,7 @@ TERAKOYA_TYPE_TO_PLACE_MAP: Dict[TERAKOYA_TYPE, PLACE] = {
     TERAKOYA_TYPE.ONLINE_TAMA: PLACE.CAREER_MOM,  # オンラインテラコヤ(多摩) -> キャリア・マム
     TERAKOYA_TYPE.MID_IKE: PLACE.SUNSHINE,  # テラコヤ中等部(池袋) -> サンシャインシティ
     TERAKOYA_TYPE.MID_SHIBU: PLACE.KIKAGAKU,  # テラコヤ中等部(渋谷) -> キカガク
+    TERAKOYA_TYPE.HIBARI: PLACE.HIBARI,  # ひばりヶ丘校 -> ひばりヶ丘校
 }
 
 

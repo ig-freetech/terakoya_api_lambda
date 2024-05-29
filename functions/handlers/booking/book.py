@@ -40,6 +40,7 @@ class BookingRequest:
             TERAKOYA_TYPE.ONLINE_TAMA: 'オンラインテラコヤ(多摩)',
             TERAKOYA_TYPE.MID_IKE: 'テラコヤ中等部(池袋)',
             TERAKOYA_TYPE.MID_SHIBU: 'テラコヤ中等部(渋谷)',
+            TERAKOYA_TYPE.HIBARI: 'ひばりヶ丘校',
         }
         ARRIVAL_TIME_MAP: Dict[ARRIVAL_TIME, str] = {
             ARRIVAL_TIME.BEFORE_1700: '17:00前',
