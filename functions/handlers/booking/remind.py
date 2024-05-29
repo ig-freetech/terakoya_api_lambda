@@ -67,6 +67,11 @@ PLACE_DICT = {
         <p>〒206-0033</p>
         <p>東京都多摩市落合1-46-1 ココリア多摩センター5階</p>
         <p>http://www.c-mam.co.jp/oshigoto_cafe/</p>
+    """,
+    "ひばりヶ丘校": """
+        <p>■ひばりヶ丘校住所</p>
+        <p>〒202-0001</p>
+        <p>東京都西東京市ひばりヶ丘1-4-27</p>
     """
 }
 
@@ -113,7 +118,8 @@ def remind() -> None:
         PLACE.RYOHIN: "良品計画本社",
         PLACE.BASE_CAMP: "テラコヤ事務所（ベースキャンプ）",
         PLACE.CAREER_MOM: "キャリア・マム",
-        PLACE.KIKAGAKU: "キカガク"
+        PLACE.KIKAGAKU: "キカガク",
+        PLACE.HIBARI: "ひばりヶ丘校",
     }
 
     bk_item_list = BookingTable.get_item_list_for_remind()
