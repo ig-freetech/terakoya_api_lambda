@@ -42,16 +42,16 @@ components:
         terakoya_type:
           description: |
             テラコヤ種別
-            (1: カフェ塾テラコヤ(池袋), 2: オンラインテラコヤ(多摩), 3: テラコヤ中等部(池袋), 4: テラコヤ中等部(渋谷))
+            (1: カフェ塾テラコヤ(池袋), 2: オンラインテラコヤ(多摩), 3: テラコヤ中等部(池袋), 4: テラコヤ中等部(渋谷), 5: ひばりヶ丘校)
           type: integer
           example: 1
         place:
           description: |
             拠点
-            (0: 未設定, 1: サンシャインシティ, 2: 良品計画本社, 3: テラコヤ事務所（ベースキャンプ）, 4: キャリア・マム, 5: キカガク)
+            (0: 未設定, 1: サンシャインシティ, 2: 良品計画本社, 3: テラコヤ事務所（ベースキャンプ）, 4: キャリア・マム, 5: キカガク, 6: ひばりヶ丘)
           type: integer
           example: 1
-        name:      
+        name:
           type: string
           example: "I.G"
         grade:
@@ -148,31 +148,31 @@ components:
           example: "b5109adbd4d344d751cdb820f874601b"
   responses:
     success:
-        description: Success
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                message:
-                  type: string
-                  example: "Success"
-                status_code:
-                  type: integer
-                  example: 200
+      description: Success
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+                example: "Success"
+              status_code:
+                type: integer
+                example: 200
     internalServerError:
-        description: Internal Server Error
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                message:
-                  type: string
-                  example: "Internal Server Error"
+      description: Internal Server Error
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+                example: "Internal Server Error"
 
 # https://spec.openapis.org/oas/v3.0.3#path-item-object
-paths: 
+paths:
   "/book":
     # https://spec.openapis.org/oas/v3.0.3#operationObject
     post:
@@ -199,7 +199,7 @@ paths:
                 terakoya_type:
                   description: |
                     テラコヤ種別
-                    (1: カフェ塾テラコヤ(池袋), 2: オンラインテラコヤ(多摩), 3: テラコヤ中等部(池袋), 4: テラコヤ中等部(渋谷))
+                    (1: カフェ塾テラコヤ(池袋), 2: オンラインテラコヤ(多摩), 3: テラコヤ中等部(池袋), 4: テラコヤ中等部(渋谷), 5: ひばりヶ丘校)
                   # number is any number, float or double
                   # integer is integer number, int32, or int64
                   # https://swagger.io/docs/specification/data-models/data-types/#numbers
@@ -279,10 +279,10 @@ paths:
                   type: string
                   example: "I want to study English.\nBecause I want to study abroad."
       responses:
-        '200':
-          $ref: '#/components/responses/success'
-        '500':
-          $ref: '#/components/responses/internalServerError'
+        "200":
+          $ref: "#/components/responses/success"
+        "500":
+          $ref: "#/components/responses/internalServerError"
   "/booking/list":
     get:
       summary: Get booking items of the specified date from DynamoDB table.
@@ -296,7 +296,7 @@ paths:
             type: string
             example: "2045-05-08"
       responses:
-        '200':
+        "200":
           description: Success
           content:
             application/json:
@@ -308,10 +308,10 @@ paths:
                     example: "Success"
                   item_list:
                     type: array
-                    items: 
-                      $ref: '#/components/schemas/BookingItem'
-        '500':
-          $ref: '#/components/responses/internalServerError'
+                    items:
+                      $ref: "#/components/schemas/BookingItem"
+        "500":
+          $ref: "#/components/responses/internalServerError"
   "/booking/edit/place":
     put:
       summary: Edit place of the specified booking item.
@@ -321,9 +321,9 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/BookingItem'
+              $ref: "#/components/schemas/BookingItem"
       responses:
-        '200':
-          $ref: '#/components/responses/success'
-        '500':
-          $ref: '#/components/responses/internalServerError'
+        "200":
+          $ref: "#/components/responses/success"
+        "500":
+          $ref: "#/components/responses/internalServerError"
