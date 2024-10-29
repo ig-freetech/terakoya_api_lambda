@@ -42,6 +42,8 @@ class BookingRequest:
             TERAKOYA_TYPE.MID_SHIBU: 'テラコヤ中等部(渋谷)',
             TERAKOYA_TYPE.HIBARI: 'ひばりヶ丘校',
             TERAKOYA_TYPE.KANDA: '神田校',
+            TERAKOYA_TYPE.NAGASAWA: '長沢校',
+            
         }
         ARRIVAL_TIME_MAP: Dict[ARRIVAL_TIME, str] = {
             ARRIVAL_TIME.BEFORE_1700: '17:00前',

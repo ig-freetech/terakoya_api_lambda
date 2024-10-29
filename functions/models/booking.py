@@ -32,6 +32,8 @@ class TERAKOYA_TYPE(Enum):
     """ひばりヶ丘校"""
     KANDA = 6
     """神田校"""
+    NAGASAWA = 7
+    """長沢校"""
 
 
 class ARRIVAL_TIME(Enum):
@@ -148,6 +150,8 @@ class PLACE(Enum):
     """ひばりヶ丘校"""
     KANDA = 7
     """神田校"""
+    NAGASAWA = 8
+    """長沢校"""
     NULL = -1
     """NULL"""
 
@@ -159,6 +163,7 @@ TERAKOYA_TYPE_TO_PLACE_MAP: Dict[TERAKOYA_TYPE, PLACE] = {
     TERAKOYA_TYPE.MID_SHIBU: PLACE.KIKAGAKU,  # テラコヤ中等部(渋谷) -> キカガク
     TERAKOYA_TYPE.HIBARI: PLACE.HIBARI,  # ひばりヶ丘校 -> ひばりヶ丘校
     TERAKOYA_TYPE.KANDA: PLACE.KANDA,  # 神田校 -> 神田校
+    TERAKOYA_TYPE.NAGASAWA: PLACE.NAGASAWA, #長沢校 -> 長沢校
 }
 
 
