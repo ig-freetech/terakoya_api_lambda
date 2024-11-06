@@ -34,6 +34,49 @@ class TERAKOYA_TYPE(Enum):
     """神田校"""
     NAGASAWA = 7
     """長沢校"""
+    CHONAN = 8
+    """長南校"""
+    TANIGUCHI = 9
+    """谷口校"""
+    ASHIDA = 10
+    """芦田校"""
+    TADANOUMI= 11
+    """忠海校"""
+    TOI = 12
+    """土肥校"""
+    TOMARIKAWA = 13
+    """泊川校"""
+    SUGATA = 14
+    """菅田校"""
+    YAMAMORI = 15
+    """山守校"""
+    KATATA = 16
+    """片田校"""
+    NAKAMATSU = 17
+    """中松校"""
+    NAKATSUBARU = 18
+    """中津原校"""
+    NAGAWAKA = 19
+    """長若校"""
+    TOMARU = 20
+    """外丸校"""
+    KAMINOKAE = 21
+    """上ノ加江校"""
+    SHIMOICHI = 22
+    """下市校"""
+    SYUSEI = 23
+    """修正校"""
+    NISYOISHI = 24
+    """二升石校"""
+    MANAITA = 25
+    """生坂校"""
+    MANZAWA = 26
+    """万沢校"""
+    TOKKO = 27
+    """徳光校"""
+    UMINOURA = 28
+    """海浦校"""
+
 
 
 class ARRIVAL_TIME(Enum):
@@ -152,6 +195,48 @@ class PLACE(Enum):
     """神田校"""
     NAGASAWA = 8
     """長沢校"""
+    CHONAN = 9
+    """長南校"""
+    TANIGUCHI = 10
+    """谷口校"""
+    ASHIDA = 11
+    """芦田校"""
+    TADANOUMI= 12
+    """忠海校"""
+    TOI = 13
+    """土肥校"""
+    TOMARIKAWA = 14
+    """泊川校"""
+    SUGATA = 15
+    """菅田校"""
+    YAMAMORI = 16
+    """山守校"""
+    KATATA = 17
+    """片田校"""
+    NAKAMATSU = 18
+    """中松校"""
+    NAKATSUBARU = 19
+    """中津原校"""
+    NAGAWAKA = 20
+    """長若校"""
+    TOMARU = 21
+    """外丸校"""
+    KAMINOKAE = 22
+    """上ノ加江校"""
+    SHIMOICHI = 23
+    """下市校"""
+    SYUSEI = 24
+    """修正校"""
+    NISYOISHI = 25
+    """二升石校"""
+    MANAITA = 26
+    """生坂校"""
+    MANZAWA = 27
+    """万沢校"""
+    TOKKO = 28
+    """徳光校"""
+    UMINOURA = 29
+    """海浦校"""
     NULL = -1
     """NULL"""
 
@@ -164,6 +249,27 @@ TERAKOYA_TYPE_TO_PLACE_MAP: Dict[TERAKOYA_TYPE, PLACE] = {
     TERAKOYA_TYPE.HIBARI: PLACE.HIBARI,  # ひばりヶ丘校 -> ひばりヶ丘校
     TERAKOYA_TYPE.KANDA: PLACE.KANDA,  # 神田校 -> 神田校
     TERAKOYA_TYPE.NAGASAWA: PLACE.NAGASAWA, #長沢校 -> 長沢校
+    TERAKOYA_TYPE.CHONAN: PLACE.CHONAN, #長南校　-> 長南校
+    TERAKOYA_TYPE.TANIGUCHI: PLACE.TANIGUCHI, #谷口校 -> 谷口校
+    TERAKOYA_TYPE.ASHIDA: PLACE.ASHIDA, #芦田校 -> 芦田校
+    TERAKOYA_TYPE.TADANOUMI: PLACE.TADANOUMI, #忠海校 -> 忠海校
+    TERAKOYA_TYPE.TOI: PLACE.TOI, #土肥校 -> 土肥校
+    TERAKOYA_TYPE.TOMARIKAWA: PLACE.TOMARIKAWA, #泊川校 -> 泊川校
+    TERAKOYA_TYPE.SUGATA: PLACE.SUGATA, #菅田校 -> 菅田校
+    TERAKOYA_TYPE.YAMAMORI: PLACE.YAMAMORI, #山守校 -> 山守校
+    TERAKOYA_TYPE.KATATA: PLACE.KATATA, #片田校 -> 片田校
+    TERAKOYA_TYPE.NAKAMATSU: PLACE.NAKAMATSU, #中松校 -> 中松校
+    TERAKOYA_TYPE.NAKATSUBARU: PLACE.NAKATSUBARU, #中津原校 -> 中津原校
+    TERAKOYA_TYPE.NAGAWAKA: PLACE.NAGAWAKA, #長若校 -> 長若校
+    TERAKOYA_TYPE.TOMARU: PLACE.TOMARU, #外丸校 -> 外丸校
+    TERAKOYA_TYPE.KAMINOKAE: PLACE.KAMINOKAE, #上ノ加江校 -> 上ノ加江校
+    TERAKOYA_TYPE.SHIMOICHI: PLACE.SHIMOICHI, #下市校 -> 下市校
+    TERAKOYA_TYPE.SYUSEI: PLACE.SYUSEI, #修正校 -> 修正校
+    TERAKOYA_TYPE.NISYOISHI: PLACE.NISYOISHI, #二升石校 -> 二升石校
+    TERAKOYA_TYPE.MANAITA: PLACE.MANAITA, #生板校 -> 生板校
+    TERAKOYA_TYPE.MANZAWA: PLACE.MANZAWA, #万沢校 -> 万沢校
+    TERAKOYA_TYPE.TOKKO: PLACE.TOKKO, #徳光校 -> 徳光校
+    TERAKOYA_TYPE.UMINOURA: PLACE.UMINOURA, #海浦校 -> 海浦校
 }
 
 
